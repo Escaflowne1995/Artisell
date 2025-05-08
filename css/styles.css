@@ -1,0 +1,30 @@
+.profile-dropdown {
+    position: relative;
+  }
+  
+  .dropdown-content {
+    display: none; /* Hidden by default */
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+  
+  .profile-dropdown:hover .dropdown-content {
+    display: block; /* Show the dropdown on hover */
+  }
+  
+  .dropdown-item {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #f1f1f1; /* Change color on hover */
+  }
+
+
+  
