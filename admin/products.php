@@ -1,6 +1,5 @@
 <?php
 session_start();
-// Check if user is logged in and is an admin
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION["role"] !== 'admin') {
     header("location: ../login.php"); // Redirect to login page if not logged in or not an admin
     exit;
@@ -9,56 +8,30 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
 // Include database connection
 require_once "../db_connection.php";
 
-// Initialize filter variables
-$status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
-$search_query = isset($_GET['search']) ? $_GET['search'] : '';
-
-// Prepare base SQL query
-$sql = "SELECT o.id, o.order_date, o.status, u.username, o.total_amount 
-        FROM orders o 
-        JOIN users u ON o.user_id = u.id";
-
-// Add status filter if needed
-if ($status_filter != 'all') {
-    $sql .= " WHERE o.status = '" . mysqli_real_escape_string($conn, $status_filter) . "'";
+// Delete product if requested
+if(isset($_GET['delete']) && !empty($_GET['delete'])) {
+    $id = intval($_GET['delete']);
+    $delete_sql = "DELETE FROM products WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $delete_sql);
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    
+    // Redirect to avoid resubmission on refresh
+    header("Location: products.php");
+    exit;
 }
 
-// Add search functionality
-if (!empty($search_query)) {
-    $search_term = mysqli_real_escape_string($conn, $search_query);
-    if ($status_filter != 'all') {
-        $sql .= " AND (o.id LIKE '%$search_term%' OR u.username LIKE '%$search_term%')";
-    } else {
-        $sql .= " WHERE (o.id LIKE '%$search_term%' OR u.username LIKE '%$search_term%')";
-    }
-}
-
-// Add sorting
-$sql .= " ORDER BY o.order_date DESC";
-
-// Execute query
+// Get all products with vendor info
+$sql = "SELECT p.*, u.username as vendor_name 
+      FROM products p 
+      LEFT JOIN users u ON p.vendor_id = u.id 
+      ORDER BY p.id DESC";
 $result = mysqli_query($conn, $sql);
-$orders = [];
+$products = [];
 while($row = mysqli_fetch_assoc($result)) {
-    $orders[] = $row;
+    $products[] = $row;
 }
-
-// Get order counts by status
-$sql_pending = "SELECT COUNT(*) as count FROM orders WHERE status = 'pending'";
-$result_pending = mysqli_query($conn, $sql_pending);
-$pending_count = mysqli_fetch_assoc($result_pending)['count'];
-
-$sql_completed = "SELECT COUNT(*) as count FROM orders WHERE status = 'completed'";
-$result_completed = mysqli_query($conn, $sql_completed);
-$completed_count = mysqli_fetch_assoc($result_completed)['count'];
-
-$sql_cancelled = "SELECT COUNT(*) as count FROM orders WHERE status = 'cancelled'";
-$result_cancelled = mysqli_query($conn, $sql_cancelled);
-$cancelled_count = mysqli_fetch_assoc($result_cancelled)['count'];
-
-$sql_total = "SELECT COUNT(*) as count FROM orders";
-$result_total = mysqli_query($conn, $sql_total);
-$total_count = mysqli_fetch_assoc($result_total)['count'];
 ?>
 
 <!DOCTYPE html>
@@ -66,11 +39,95 @@ $total_count = mysqli_fetch_assoc($result_total)['count'];
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orders - Artisell Admin Dashboard</title>
+  <title>Manage Products - Artisell Admin</title>
   <link rel="stylesheet" href="../css/admin.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    .product-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-sm {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background-color: #4361ee;
+      color: white;
+    }
+    .btn-danger {
+      background-color: #ef476f;
+      color: white;
+    }
+    .product-image {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+    .add-product-btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .add-product-btn:hover {
+      background-color: #45a049;
+    }
+    .product-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .product-table th, .product-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .product-table th {
+      background-color: #f8f9fa;
+      text-align: left;
+      font-weight: 600;
+    }
+    .search-form {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .search-form input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      flex-grow: 1;
+    }
+    .search-form button {
+      padding: 8px 15px;
+      background-color: #4361ee;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .deleted-message {
+      padding: 10px;
+      background-color: #d4edda;
+      color: #155724;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .truncate {
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
 </head>
 <body>
+
   <div class="dashboard">
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -105,7 +162,7 @@ $total_count = mysqli_fetch_assoc($result_total)['count'];
           </div>
           <span class="nav-text">Users</span>
         </a>
-        <a href="order.php" class="nav-link active">
+        <a href="order_new.php" class="nav-link">
           <div class="nav-icon">
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6.6665 33.3333V11.8333L3.4165 4.75001L6.4165 3.33334L10.3332 11.75H29.6665L33.5832 3.33334L36.5832 4.75001L33.3332 11.8333V33.3333H6.6665ZM16.6665 21.6667H23.3332C23.8054 21.6667 24.2015 21.5067 24.5215 21.1867C24.8415 20.8667 25.0009 20.4711 24.9998 20C24.9987 19.5289 24.8387 19.1333 24.5198 18.8133C24.2009 18.4933 23.8054 18.3333 23.3332 18.3333H16.6665C16.1943 18.3333 15.7987 18.4933 15.4798 18.8133C15.1609 19.1333 15.0009 19.5289 14.9998 20C14.9987 20.4711 15.1587 20.8672 15.4798 21.1883C15.8009 21.5095 16.1965 21.6689 16.6665 21.6667Z" fill="currentColor"/>
@@ -113,7 +170,7 @@ $total_count = mysqli_fetch_assoc($result_total)['count'];
           </div>
           <span class="nav-text">Orders</span>
         </a>
-        <a href="products.php" class="nav-link">
+        <a href="products.php" class="nav-link active">
           <div class="nav-icon">
             <svg width="37" height="37" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M33.9168 10.7916L18.5002 3.08331L3.0835 10.7916V26.2083L18.5002 33.9166L33.9168 26.2083V10.7916Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
@@ -146,104 +203,101 @@ $total_count = mysqli_fetch_assoc($result_total)['count'];
     </aside>
 
     <main class="main-content">
-      <div class="orders-page">
-        <header class="page-header">
-          <h1 class="page-title">Orders</h1>
-          <div class="header-actions">
-            <form method="get" action="order.php" class="search-form">
-              <input type="text" name="search" placeholder="Search orders..." value="<?php echo htmlspecialchars($search_query); ?>">
-              <button type="submit" class="search-button">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15.5 14H14.71L14.43 13.73C15.63 12.33 16.25 10.42 15.91 8.39C15.44 5.61 13.12 3.39 10.32 3.05C6.09 2.53 2.53 6.09 3.05 10.32C3.39 13.12 5.61 15.44 8.39 15.91C10.42 16.25 12.33 15.63 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" fill="currentColor"/>
-                </svg>
-              </button>
-            </form>
-            <a href="order_new.php" class="btn btn-primary">Advanced View</a>
-          </div>
+      <div class="products-page">
+        <header>
+          <h1>Manage Products</h1>
+          <p>View, edit and delete products from your catalog</p>
         </header>
-
-        <div class="order-stats">
-          <div class="stat-card">
-            <div class="stat-title">Total Orders</div>
-            <div class="stat-value"><?php echo $total_count; ?></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-title">Pending</div>
-            <div class="stat-value"><?php echo $pending_count; ?></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-title">Completed</div>
-            <div class="stat-value"><?php echo $completed_count; ?></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-title">Cancelled</div>
-            <div class="stat-value"><?php echo $cancelled_count; ?></div>
-          </div>
+        
+        <?php if(isset($_GET['deleted'])): ?>
+        <div class="deleted-message">
+          Product has been deleted successfully.
         </div>
-
-        <div class="filter-container">
-          <a href="order.php" class="filter-link <?php echo $status_filter == 'all' ? 'active' : ''; ?>">All</a>
-          <a href="order.php?status=pending" class="filter-link <?php echo $status_filter == 'pending' ? 'active' : ''; ?>">Pending</a>
-          <a href="order.php?status=completed" class="filter-link <?php echo $status_filter == 'completed' ? 'active' : ''; ?>">Completed</a>
-          <a href="order.php?status=cancelled" class="filter-link <?php echo $status_filter == 'cancelled' ? 'active' : ''; ?>">Cancelled</a>
+        <?php endif; ?>
+        
+        <div class="products-controls">
+          <form class="search-form" method="GET">
+            <input type="text" name="search" placeholder="Search products..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+            <button type="submit">Search</button>
+          </form>
+          
+          <a href="add_product_admin.php" class="add-product-btn">
+            Add New Product
+          </a>
         </div>
-
-        <div class="orders-table-container">
-          <table class="orders-table">
-            <thead>
+        
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Category</th>
+              <th>City</th>
+              <th>Stock</th>
+              <th>Vendor</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if(empty($products)): ?>
               <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Action</th>
+                <td colspan="9" style="text-align: center;">No products found</td>
               </tr>
-            </thead>
-            <tbody>
-              <?php if (empty($orders)): ?>
+            <?php else: ?>
+              <?php foreach($products as $product): ?>
                 <tr>
-                  <td colspan="6" class="no-orders">No orders found</td>
+                  <td><?php echo $product['id']; ?></td>
+                  <td>
+                    <img src="<?php echo '../' . $product['image']; ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-image">
+                  </td>
+                  <td class="truncate"><?php echo htmlspecialchars($product['name']); ?></td>
+                  <td>$<?php echo number_format($product['price'], 2); ?></td>
+                  <td><?php echo htmlspecialchars($product['category']); ?></td>
+                  <td><?php echo htmlspecialchars($product['city']); ?></td>
+                  <td><?php echo $product['stock']; ?></td>
+                  <td><?php echo htmlspecialchars($product['vendor_name']); ?></td>
+                  <td class="product-actions">
+                    <a href="edit_product_admin.php?id=<?php echo $product['id']; ?>" class="btn-sm btn-primary">Edit</a>
+                    <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $product['id']; ?>)" class="btn-sm btn-danger">Delete</a>
+                  </td>
                 </tr>
-              <?php else: ?>
-                <?php foreach ($orders as $order): ?>
-                  <tr>
-                    <td>#<?php echo $order['id']; ?></td>
-                    <td><?php echo htmlspecialchars($order['username']); ?></td>
-                    <td><?php echo date('M d, Y', strtotime($order['order_date'])); ?></td>
-                    <td>$<?php echo number_format($order['total_amount'], 2); ?></td>
-                    <td>
-                      <span class="status-badge <?php echo strtolower($order['status']); ?>">
-                        <?php echo ucfirst($order['status']); ?>
-                      </span>
-                    </td>
-                    <td>
-                      <div class="action-buttons">
-                        <a href="order_details.php?id=<?php echo $order['id']; ?>" class="btn btn-sm btn-primary">View</a>
-                        <button class="btn btn-sm btn-secondary dropdown-toggle" id="orderActions<?php echo $order['id']; ?>" onclick="toggleDropdown(<?php echo $order['id']; ?>)">
-                          Actions
-                        </button>
-                        <div class="dropdown-menu" id="dropdown<?php echo $order['id']; ?>">
-                          <?php if ($order['status'] == 'pending'): ?>
-                            <a href="update_order_status.php?id=<?php echo $order['id']; ?>&status=completed" class="dropdown-item">Mark as Completed</a>
-                            <a href="update_order_status.php?id=<?php echo $order['id']; ?>&status=cancelled" class="dropdown-item">Cancel Order</a>
-                          <?php elseif ($order['status'] == 'completed'): ?>
-                            <a href="update_order_status.php?id=<?php echo $order['id']; ?>&status=pending" class="dropdown-item">Mark as Pending</a>
-                          <?php elseif ($order['status'] == 'cancelled'): ?>
-                            <a href="update_order_status.php?id=<?php echo $order['id']; ?>&status=pending" class="dropdown-item">Restore Order</a>
-                          <?php endif; ?>
-                          <a href="print_invoice.php?id=<?php echo $order['id']; ?>" class="dropdown-item">Print Invoice</a>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              <?php endif; ?>
-            </tbody>
-          </table>
-        </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
       </div>
     </main>
   </div>
+
+  <script>
+    // Confirm delete
+    function confirmDelete(id) {
+      if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+        window.location.href = 'products.php?delete=' + id;
+      }
+    }
+    
+    // Toggle sidebar on mobile
+    const menuIcon = document.querySelector('.menu-icon');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (menuIcon && sidebar) {
+      menuIcon.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+      });
+    }
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (sidebar && 
+          sidebar.classList.contains('active') && 
+          !sidebar.contains(e.target) && 
+          e.target !== menuIcon) {
+        sidebar.classList.remove('active');
+      }
+    });
+  </script>
 </body>
-</html>
+</html> 

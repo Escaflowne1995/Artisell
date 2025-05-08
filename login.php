@@ -51,6 +51,12 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                     $_SESSION["profile_picture"] = $profile_picture;
                     $_SESSION["role"] = $role; // Store the role in the session
                     
+                    // Check if user is admin, redirect to admin dashboard
+                    if ($role === 'admin') {
+                        header("location: admin/index.php");
+                        exit;
+                    }
+                    
                     // Check if there's a redirect after login
                     $redirect = 'index.php';
                     

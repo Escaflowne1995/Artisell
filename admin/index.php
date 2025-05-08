@@ -1,9 +1,39 @@
-
 <?php
 session_start();
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION["role"] !== 'admin') {
     header("location: ../login.php"); // Redirect to login page if not logged in or not an admin
     exit;
+}
+
+// Include database connection
+require_once "../db_connection.php";
+
+// Get some statistics for the dashboard
+// Count products
+$sql = "SELECT COUNT(*) as product_count FROM products";
+$result = mysqli_query($conn, $sql);
+$product_count = mysqli_fetch_assoc($result)['product_count'];
+
+// Count users
+$sql = "SELECT COUNT(*) as user_count FROM users";
+$result = mysqli_query($conn, $sql);
+$user_count = mysqli_fetch_assoc($result)['user_count'];
+
+// Count orders
+$sql = "SELECT COUNT(*) as order_count FROM orders";
+$result = mysqli_query($conn, $sql);
+$order_count = mysqli_fetch_assoc($result)['order_count'];
+
+// Get recent orders
+$sql = "SELECT o.id, o.order_date, o.status, u.username, o.total_amount 
+      FROM orders o 
+      JOIN users u ON o.user_id = u.id 
+      ORDER BY o.order_date DESC 
+      LIMIT 5";
+$result = mysqli_query($conn, $sql);
+$recent_orders = [];
+while($row = mysqli_fetch_assoc($result)) {
+    $recent_orders[] = $row;
 }
 ?>
 
@@ -12,8 +42,9 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Artisell Dashboard</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <title>Artisell Admin Dashboard</title>
+  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 </head>
 <body>
 
@@ -31,11 +62,11 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
       <div class="profile">
         <div class="profile-image"></div>
         <div class="profile-role">Admin Profile</div>
-        <div class="profile-name"><?php echo htmlspecialchars($_SESSION["username"]); ?></div> <!-- Display Admin Name -->
+        <div class="profile-name"><?php echo htmlspecialchars($_SESSION["username"]); ?></div>
       </div>
 
       <nav class="navigation">
-        <a href="index.html" class="nav-link active">
+        <a href="index.php" class="nav-link active">
           <div class="nav-icon">
             <svg width="26" height="30" viewBox="0 0 26 30" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0 28.05V11.1011C0 10.6019 0.106476 10.1293 0.319428 9.68346C0.532381 9.23757 0.825809 8.87033 1.19971 8.58174L11.2004 0.629835C11.7241 0.209946 12.3221 0 12.9944 0C13.6667 0 14.2684 0.209946 14.7996 0.629835L24.8003 8.57979C25.1754 8.86838 25.4689 9.23627 25.6806 9.68346C25.8935 10.1293 26 10.6019 26 11.1011V28.05C26 28.5726 25.8149 29.0283 25.4447 29.417C25.0745 29.8057 24.6406 30 24.1429 30H17.8583C17.4324 30 17.0758 29.8492 16.7886 29.5476C16.5013 29.2447 16.3577 28.8703 16.3577 28.4244V19.1251C16.3577 18.6792 16.2141 18.3055 15.9269 18.0039C15.6384 17.701 15.2818 17.5496 14.8571 17.5496H11.1429C10.7182 17.5496 10.3622 17.701 10.075 18.0039C9.78652 18.3055 9.64229 18.6792 9.64229 19.1251V28.4264C9.64229 28.8723 9.49867 29.246 9.21143 29.5476C8.92419 29.8492 8.56824 30 8.14357 30H1.85714C1.35943 30 0.925476 29.8057 0.555285 29.417C0.185095 29.0283 0 28.5726 0 28.05Z" fill="currentColor"/>
@@ -43,7 +74,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
           </div>
           <span class="nav-text">Home</span>
         </a>
-        <a href="users.html" class="nav-link">
+        <a href="user_new.php" class="nav-link">
           <div class="nav-icon">
             <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.9998 7.66666C25.0332 7.66666 26.9832 8.47439 28.421 9.91217C29.8588 11.3499 30.6665 13.3 30.6665 15.3333C30.6665 17.3666 29.8588 19.3167 28.421 20.7545C26.9832 22.1923 25.0332 23 22.9998 23C20.9665 23 19.0165 22.1923 17.5787 20.7545C16.1409 19.3167 15.3332 17.3666 15.3332 15.3333C15.3332 13.3 16.1409 11.3499 17.5787 9.91217C19.0165 8.47439 20.9665 7.66666 22.9998 7.66666ZM22.9998 26.8333C31.4715 26.8333 38.3332 30.2642 38.3332 34.5V38.3333H7.6665V34.5C7.6665 30.2642 14.5282 26.8333 22.9998 26.8333Z" fill="currentColor"/>
@@ -51,7 +82,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
           </div>
           <span class="nav-text">Users</span>
         </a>
-        <a href="orders.html" class="nav-link">
+        <a href="order_new.php" class="nav-link">
           <div class="nav-icon">
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6.6665 33.3333V11.8333L3.4165 4.75001L6.4165 3.33334L10.3332 11.75H29.6665L33.5832 3.33334L36.5832 4.75001L33.3332 11.8333V33.3333H6.6665ZM16.6665 21.6667H23.3332C23.8054 21.6667 24.2015 21.5067 24.5215 21.1867C24.8415 20.8667 25.0009 20.4711 24.9998 20C24.9987 19.5289 24.8387 19.1333 24.5198 18.8133C24.2009 18.4933 23.8054 18.3333 23.3332 18.3333H16.6665C16.1943 18.3333 15.7987 18.4933 15.4798 18.8133C15.1609 19.1333 15.0009 19.5289 14.9998 20C14.9987 20.4711 15.1587 20.8672 15.4798 21.1883C15.8009 21.5095 16.1965 21.6689 16.6665 21.6667Z" fill="currentColor"/>
@@ -59,7 +90,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
           </div>
           <span class="nav-text">Orders</span>
         </a>
-        <a href="products.html" class="nav-link">
+        <a href="products.php" class="nav-link">
           <div class="nav-icon">
             <svg width="37" height="37" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M33.9168 10.7916L18.5002 3.08331L3.0835 10.7916V26.2083L18.5002 33.9166L33.9168 26.2083V10.7916Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
@@ -71,25 +102,32 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
           </div>
           <span class="nav-text">Products</span>
         </a>
-        <a href="accounts.html" class="nav-link">
+        <a href="settings.php" class="nav-link">
           <div class="nav-icon">
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M15 6C13.4087 6 11.8826 6.63214 10.7574 7.75736C9.63214 8.88258 9 10.4087 9 12C9 13.5913 9.63214 15.1174 10.7574 16.2426C11.8826 17.3679 13.4087 18 15 18C16.5913 18 18.1174 17.3679 19.2426 16.2426C20.3679 15.1174 21 13.5913 21 12C21 10.4087 20.3679 8.88258 19.2426 7.75736C18.1174 6.63214 16.5913 6 15 6ZM15 9C15.7956 9 16.5587 9.31607 17.1213 9.87868C17.6839 10.4413 18 11.2044 18 12C18 12.7956 17.6839 13.5587 17.1213 14.1213C16.5587 14.6839 15.7956 15 15 15C14.2044 15 13.4413 14.6839 12.8787 14.1213C12.3161 13.5587 12 12.7956 12 12C12 11.2044 12.3161 10.4413 12.8787 9.87868C13.4413 9.31607 14.2044 9 15 9ZM25.5 18C25.26 18 25.14 18.12 25.14 18.36L24.75 20.25C24.42 20.52 23.94 20.76 23.58 21L21.66 20.25C21.54 20.25 21.3 20.25 21.18 20.4L19.74 23.04C19.62 23.16 19.62 23.4 19.86 23.52L21.42 24.75V26.25L19.86 27.48C19.74 27.6 19.62 27.84 19.74 27.96L21.18 30.6C21.3 30.75 21.54 30.75 21.66 30.75L23.58 30C23.94 30.24 24.42 30.48 24.75 30.75L25.14 32.64C25.14 32.88 25.26 33 25.5 33H28.5C28.62 33 28.86 32.88 28.86 32.64L29.1 30.75C29.58 30.48 30.06 30.24 30.42 30L32.25 30.75C32.46 30.75 32.7 30.75 32.7 30.6L34.26 27.96C34.38 27.84 34.26 27.6 34.14 27.48L32.58 26.25V24.75L34.14 23.52C34.26 23.4 34.38 23.16 34.26 23.04L32.7 20.4C32.7 20.25 32.46 20.25 32.25 20.25L30.42 21C30.06 20.76 29.58 20.52 29.1 20.25L28.86 18.36C28.86 18.12 28.62 18 28.5 18H25.5ZM15 19.5C10.995 19.5 3 21.495 3 25.5V30H17.505C17.085 29.115 16.785 28.155 16.635 27.15H5.85V25.5C5.85 24.54 10.545 22.35 15 22.35C15.645 22.35 16.305 22.41 16.95 22.5C17.25 21.54 17.655 20.64 18.18 19.815C17.01 19.62 15.9 19.5 15 19.5ZM27.06 23.25C28.26 23.25 29.25 24.24 29.25 25.56C29.25 26.76 28.26 27.75 27.06 27.75C25.74 27.75 24.75 26.76 24.75 25.56C24.75 24.24 25.74 23.25 27.06 23.25Z" fill="currentColor"/>
             </svg>
           </div>
-          <span class="nav-text">Accounts</span>
+          <span class="nav-text">Settings</span>
         </a>
-        <a href="logout.php" class="nav-link">Logout</a> <!-- Logout Link -->
+        <a href="logout.php" class="nav-link">
+          <div class="nav-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H11C11.55 21 12 20.55 12 20C12 19.45 11.55 19 11 19H5V5Z" fill="currentColor"/>
+              <path d="M20.65 11.65L17.86 8.86C17.54 8.54 17 8.76 17 9.21V11H10C9.45 11 9 11.45 9 12C9 12.55 9.45 13 10 13H17V14.79C17 15.24 17.54 15.46 17.85 15.14L20.64 12.35C20.84 12.16 20.84 11.84 20.65 11.65Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="nav-text">Logout</span>
+        </a>
       </nav>
     </aside>
 
     <main class="main-content">
       <div id="page-content">
-        <!-- Content will be dynamically loaded here -->
         <div class="home-page">
           <header>
-            <h1 class="welcome-heading">Welcome back, <?php echo htmlspecialchars($_SESSION["username"]); ?></h1> <!-- Display Admin Name -->
-            <p class="current-time">12:00:00 PM</p>
+            <h1 class="welcome-heading">Welcome back, <?php echo htmlspecialchars($_SESSION["username"]); ?></h1>
+            <p class="current-time" id="current-time"></p>
           </header>
           
           <div class="stats-grid">
@@ -97,7 +135,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
               <h2 class="stat-title">Products</h2>
               <div class="stat-content">
                 <div class="stat-icon">
-                  <svg width="76" height="76" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width="37" height="37" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M33.9168 10.7916L18.5002 3.08331L3.0835 10.7916V26.2083L18.5002 33.9166L33.9168 26.2083V10.7916Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                     <path d="M3.0835 10.7916L18.5002 18.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M18.5 33.9167V18.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -105,7 +143,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
                     <path d="M26.2087 6.9375L10.792 14.6458" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                 </div>
-                <div class="stat-value">100</div>
+                <div class="stat-value"><?php echo $product_count; ?></div>
               </div>
             </div>
             
@@ -113,11 +151,11 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
               <h2 class="stat-title">Users</h2>
               <div class="stat-content">
                 <div class="stat-icon">
-                  <svg width="64" height="64" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.9998 7.66666C25.0332 7.66666 26.9832 8.47439 28.421 9.91217C29.8588 11.3499 30.6665 13.3 30.6665 15.3333C30.6665 17.3666 29.8588 19.3167 28.421 20.7545C26.9832 22.1923 25.0332 23 22.9998 23C20.9665 23 19.0165 22.1923 17.5787 20.7545C16.1409 19.3167 15.3332 17.3666 15.3332 15.3333C15.3332 13.3 16.1409 11.3499 17.5787 9.91217C19.0165 8.47439 20.9665 7.66666 22.9998 7.66666ZM22.9998 26.8333C31.4715 26.8333 38.3332 30.2642 38.3332 34.5V38.3333H7.6665V34.5C7.6665 30.2642 14.5282 26.8333 22.9998 26.8333Z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div class="stat-value">58</div>
+                <div class="stat-value"><?php echo $user_count; ?></div>
               </div>
             </div>
             
@@ -125,13 +163,58 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
               <h2 class="stat-title">Orders</h2>
               <div class="stat-content">
                 <div class="stat-icon">
-                  <svg width="58" height="58" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M6.6665 33.3333V11.8333L3.4165 4.75001L6.4165 3.33334L10.3332 11.75H29.6665L33.5832 3.33334L36.5832 4.75001L33.3332 11.8333V33.3333H6.6665ZM16.6665 21.6667H23.3332C23.8054 21.6667 24.2015 21.5067 24.5215 21.1867C24.8415 20.8667 25.0009 20.4711 24.9998 20C24.9987 19.5289 24.8387 19.1333 24.5198 18.8133C24.2009 18.4933 23.8054 18.3333 23.3332 18.3333H16.6665C16.1943 18.3333 15.7987 18.4933 15.4798 18.8133C15.1609 19.1333 15.0009 19.5289 14.9998 20C14.9987 20.4711 15.1587 20.8672 15.4798 21.1883C15.8009 21.5095 16.1965 21.6689 16.6665 21.6667Z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div class="stat-value">29</div>
+                <div class="stat-value"><?php echo $order_count; ?></div>
               </div>
             </div>
+          </div>
+          
+          <!-- Recent Orders Section -->
+          <div class="recent-orders">
+            <div class="section-header">
+              <h2 class="section-title">Recent Orders</h2>
+              <a href="order.php" class="view-all">View All</a>
+            </div>
+            
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($recent_orders as $order): ?>
+                <tr>
+                  <td>#<?php echo $order['id']; ?></td>
+                  <td><?php echo htmlspecialchars($order['username']); ?></td>
+                  <td><?php echo date('M d, Y', strtotime($order['order_date'])); ?></td>
+                  <td>$<?php echo number_format($order['total_amount'], 2); ?></td>
+                  <td>
+                    <span class="status <?php echo strtolower($order['status']); ?>">
+                      <?php echo ucfirst($order['status']); ?>
+                    </span>
+                  </td>
+                  <td>
+                    <a href="order_details.php?id=<?php echo $order['id']; ?>" class="btn btn-primary btn-sm">View</a>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+                
+                <?php if (empty($recent_orders)): ?>
+                <tr>
+                  <td colspan="6" style="text-align: center;">No orders found</td>
+                </tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -139,13 +222,42 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
   </div>
 
   <script>
-    // Simple script to update the current time
+    // Update the current time
     function updateTime() {
-      const timeElement = document.querySelector('.current-time');
+      const timeElement = document.getElementById('current-time');
       if (timeElement) {
-        timeElement.textContent = new Date().toLocaleTimeString();
+        const now = new Date();
+        const options = { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit', 
+          minute: '2-digit'
+        };
+        timeElement.textContent = now.toLocaleString('en-US', options);
       }
     }
+    
+    // Toggle sidebar on mobile
+    const menuIcon = document.querySelector('.menu-icon');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (menuIcon && sidebar) {
+      menuIcon.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+      });
+    }
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (sidebar && 
+          sidebar.classList.contains('active') && 
+          !sidebar.contains(e.target) && 
+          e.target !== menuIcon) {
+        sidebar.classList.remove('active');
+      }
+    });
     
     // Update time every second
     setInterval(updateTime, 1000);
