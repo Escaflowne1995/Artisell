@@ -20,6 +20,30 @@ $nameError = $addressError = $cityError = $zipError = $paymentError = $csrfError
 $name = $address = $city = $zip = $payment_method = "";
 $formValid = true;
 
+// Fetch user's information from profile or most recent order
+$user_id = $_SESSION['id'];
+$username = $_SESSION['username'];
+
+// First try to get information from the most recent order
+$sql = "SELECT shipping_name, shipping_address, shipping_city, shipping_zip, payment_method FROM orders 
+        WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+$stmt = mysqli_prepare($conn, $sql);
+mysqli_stmt_bind_param($stmt, "i", $user_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+
+if (mysqli_num_rows($result) > 0) {
+    $shipping_info = mysqli_fetch_assoc($result);
+    $name = $shipping_info['shipping_name'];
+    $address = $shipping_info['shipping_address'];
+    $city = $shipping_info['shipping_city'];
+    $zip = $shipping_info['shipping_zip'];
+    $payment_method = $shipping_info['payment_method'];
+} else {
+    // If no previous order, use profile information
+    $name = $username; // Use username as default name
+}
+
 // Calculate total from cart
 $total = 0;
 foreach ($_SESSION['cart'] as $item) {
@@ -227,6 +251,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
             margin-top: 5px;
             display: block;
         }
+        .info-message {
+            background-color: #e6f7ff; 
+            color: #0066cc; 
+            padding: 12px 15px; 
+            border-radius: 4px; 
+            margin-bottom: 20px;
+            border-left: 4px solid #0066cc;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -265,6 +298,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
             <?php if(!empty($csrfError)): ?>
                 <div class="error" style="margin-bottom: 15px;"><?php echo $csrfError; ?></div>
             <?php endif; ?>
+            
+            <?php if(!empty($name) || !empty($address) || !empty($city) || !empty($zip)): ?>
+                <div class="info-message">
+                    Your shipping information has been pre-filled from your previous order. Please review and update if necessary.
+                </div>
+            <?php endif; ?>
+            
             <form method="POST">
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <div class="form-group">

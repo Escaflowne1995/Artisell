@@ -100,7 +100,7 @@ if (!empty($selected_category)) {
     <!-- Hero Banner -->
     <section class="hero-banner">
         <div class="container">
-            <h1>DISCOVER THE<br>CEBU CITY<br>UNIQUE CRAFTS</h1>
+            <h1>THE ISLAND OF <br>CEBU PROVINCE</h1>
             <p>Discover authentic crafts and delicacies from talented artisans across Cebu</p>
         </div>
     </section>
@@ -132,9 +132,7 @@ if (!empty($selected_category)) {
                 </div>
                 <div class="search-box">
                     <h3>Search</h3>
-                    <form action="shop.php" method="GET">
-                        <input type="text" name="search" placeholder="Search categories...">
-                    </form>
+                    <input type="text" id="citySearchInput" placeholder="Search cities...">
                 </div>
             </aside>
 
@@ -196,14 +194,15 @@ if (!empty($selected_category)) {
         });
 
         // Filter product cards by city
-        function filterByCity(city) {
+        function filterByCity(cityValueFromParam) {
+            const cityToFilter = cityValueFromParam.toLowerCase(); // Ensure lowercase for comparison
             const cards = document.querySelectorAll('.product-card');
             const countElement = document.getElementById('productsCount');
             let visibleCount = 0;
 
             cards.forEach(card => {
-                const cardCity = card.getAttribute('data-city');
-                if (city === '' || cardCity === city) {
+                const cardCategoryName = card.getAttribute('data-city').toLowerCase(); // data-city is category, convert to lower
+                if (cityToFilter === '' || cardCategoryName === cityToFilter) {
                     card.style.display = 'block';
                     visibleCount++;
                 } else {
@@ -212,15 +211,61 @@ if (!empty($selected_category)) {
             });
 
             countElement.textContent = `Showing ${visibleCount} of ${cards.length} categories`;
-            window.history.pushState({}, document.title, city ? `?city=${city}` : window.location.pathname);
+            
+            const cityFilterDropdown = document.getElementById('cityFilter');
+            const currentDropdownValue = cityFilterDropdown.value; // Use the actual current value of the dropdown for URL
+            window.history.pushState({}, document.title, currentDropdownValue ? `?city=${encodeURIComponent(currentDropdownValue)}` : window.location.pathname);
         }
 
-        // Set initial filter based on URL parameter
+        // Set initial filter based on URL parameter & setup city search input
         document.addEventListener('DOMContentLoaded', () => {
-            const urlCity = '<?php echo $selected_city; ?>';
-            if (urlCity) {
-                document.getElementById('cityFilter').value = urlCity;
-                filterByCity(urlCity);
+            const urlCityLower = '<?php echo $selected_city; ?>'; // this is already lowercased by PHP
+            const cityFilterDropdown = document.getElementById('cityFilter');
+            
+            if (urlCityLower) {
+                let foundOption = false;
+                for (let i = 0; i < cityFilterDropdown.options.length; i++) {
+                    if (cityFilterDropdown.options[i].value.toLowerCase() === urlCityLower) {
+                        cityFilterDropdown.selectedIndex = i; // Set dropdown to the matched city
+                        foundOption = true;
+                        break;
+                    }
+                }
+                filterByCity(urlCityLower); // Apply filter
+            }
+
+            const citySearchInput = document.getElementById('citySearchInput');
+            if (citySearchInput) {
+                citySearchInput.addEventListener('input', function() {
+                    const searchText = this.value.trim().toLowerCase();
+                    const options = Array.from(cityFilterDropdown.options);
+
+                    if (searchText === '') {
+                        if (cityFilterDropdown.value !== '') {
+                           cityFilterDropdown.value = ''; // Select "All Cities"
+                           filterByCity(''); // Call with empty string
+                        }
+                        return;
+                    }
+
+                    let foundCity = false;
+                    for (const option of options) {
+                        if (option.value && option.value.toLowerCase().startsWith(searchText)) {
+                            if (cityFilterDropdown.value !== option.value) {
+                                cityFilterDropdown.value = option.value; // Set dropdown to this city
+                                filterByCity(option.value.toLowerCase()); // Call filterByCity with the lowercase city value
+                            }
+                            foundCity = true;
+                            break; // Found first match
+                        }
+                    }
+
+                    // If no city prefix matches (e.g. typed "delicacies") and search text is not empty,
+                    // we don't change the filter. It remains as per the dropdown's last valid state.
+                    // If search text was a prefix but now isn't (e.g. "cebu" -> "cebux"), 
+                    // and `foundCity` is false, the filter won't update to an invalid state.
+                    // It will stick to the last valid city found or "All Cities" if input becomes empty.
+                });
             }
         });
     </script>

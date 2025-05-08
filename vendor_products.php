@@ -192,6 +192,22 @@ mysqli_close($conn);
             background: #ff0000; 
             color: white; 
         }
+        .stock-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .stock-btn:hover {
+            background: #218838;
+        }
         .edit-btn:hover { 
             background: #2a4373; 
         }
@@ -225,7 +241,8 @@ mysqli_close($conn);
                     <li><a href="shop.php">Shop</a></li>
                     <li><a href="add_product.php">Add Product</a></li>
                     <li><a href="vendor_products.php">My Products</a></li>
-                    <li><a href="vendor_inventory.php">Inventory</a></li>
+                    <li><a href="update_all_stocks.php">Bulk Update Stocks</a></li>
+                    <li><a href="manage_orders.php">Manage Orders</a></li>
                     <li><a href="logout.php">Logout</a></li>
                 </ul>
             </nav>
@@ -251,16 +268,23 @@ mysqli_close($conn);
                             <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                         </div>
                         <div class="product-details">
-                            <h3 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h3>
-                            <p class="product-price">₱<?php echo number_format($product['price'], 2); ?></p>
-                            <p class="product-stock">Stock: <span class="<?php echo isset($product['stock']) && $product['stock'] > 0 ? 'in-stock' : 'out-of-stock'; ?>">
-                                <?php echo isset($product['stock']) ? htmlspecialchars($product['stock']) : '0'; ?> units
-                            </span></p>
+                            <div class="product-name"><?php echo htmlspecialchars($product['name']); ?></div>
+                            <div class="product-price">₱<?php echo number_format($product['price'], 2); ?></div>
+                            <div class="product-stock <?php echo isset($product['stock']) && $product['stock'] > 0 ? 'in-stock' : 'out-of-stock'; ?>">
+                                <?php 
+                                if (isset($product['stock'])) {
+                                    echo $product['stock'] > 0 ? "In Stock: " . $product['stock'] : "Out of Stock";
+                                } else {
+                                    echo "Stock status unknown";
+                                }
+                                ?>
+                            </div>
                             <div class="button-container">
                                 <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="edit-btn">Edit</a>
+                                <a href="update_stock.php?id=<?php echo $product['id']; ?>" class="stock-btn">Update Stock</a>
                                 <form method="POST" onsubmit="return confirm('Are you sure you want to delete this product?');">
-                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                                     <button type="submit" name="delete_product" class="delete-btn">Delete</button>
                                 </form>
                             </div>

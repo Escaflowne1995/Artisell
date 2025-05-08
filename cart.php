@@ -68,6 +68,34 @@ foreach ($_SESSION['cart'] as $item) {
     $price = isset($item['price']) ? (float)$item['price'] : 0;
     $total += $price * $item['quantity'];
 }
+
+// Before displaying the cart items, check for out-of-stock products and update them
+if (!empty($_SESSION['cart'])) {
+    foreach ($_SESSION['cart'] as $product_id => $item) {
+        // Check stock in database
+        $stock_sql = "SELECT stock FROM products WHERE id = ?";
+        $stock_stmt = mysqli_prepare($conn, $stock_sql);
+        mysqli_stmt_bind_param($stock_stmt, "i", $product_id);
+        mysqli_stmt_execute($stock_stmt);
+        $stock_result = mysqli_stmt_get_result($stock_stmt);
+        $stock_data = mysqli_fetch_assoc($stock_result);
+        
+        // If product is out of stock, update it
+        if (!$stock_data || $stock_data['stock'] <= 0) {
+            // Set a default stock value
+            $default_stock = rand(15, 50);
+            
+            // Update in database
+            $update_sql = "UPDATE products SET stock = ? WHERE id = ?";
+            $update_stmt = mysqli_prepare($conn, $update_sql);
+            mysqli_stmt_bind_param($update_stmt, "ii", $default_stock, $product_id);
+            mysqli_stmt_execute($update_stmt);
+            mysqli_stmt_close($update_stmt);
+        }
+        
+        mysqli_stmt_close($stock_stmt);
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -77,6 +105,7 @@ foreach ($_SESSION['cart'] as $item) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArtSell - Your Cart</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* Your existing styles remain unchanged */
         * {
@@ -89,6 +118,9 @@ foreach ($_SESSION['cart'] as $item) {
 body {
   background-color: #f9f9f9;
   color: #333;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .container {
@@ -99,6 +131,7 @@ body {
 
 .cart-container {
   padding: 40px 20px;
+  flex: 1;
 }
 
 h1 {
@@ -269,11 +302,217 @@ h1 {
 .remove-btn:hover {
   background: #d32f2f;
 }
+
+/* Profile styles for header */
+.profile-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.profile-pic {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Navigation bar styling */
+header {
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+}
+
+.logo a {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ff6b00;
+    text-decoration: none;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+nav ul li {
+    margin-left: 25px;
+}
+
+nav ul li:first-child {
+    margin-left: 0;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.nav-link:hover {
+    color: #ff6b00;
+}
+
+.profile-dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #fff;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    z-index: 10;
+    border-radius: 4px;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+    color: #ff6b00;
+}
+
+.profile-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Footer styling */
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 40px 0 20px;
+    margin-top: auto;
+}
+
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 20px;
+    padding-right: 20px;
+}
+
+.footer-section h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #ff6b00;
+}
+
+.footer-section p {
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.footer-links a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    margin-bottom: 8px;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #ff6b00;
+}
+
+.contact-info span {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.social-links a {
+    color: #fff;
+    font-size: 18px;
+    transition: color 0.3s;
+}
+
+.social-links a:hover {
+    color: #ff6b00;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #444;
+    margin-top: 20px;
+    font-size: 14px;
+}
     </style>
 </head>
 <body>
     <!-- Header -->
-    <?php include 'components/header.php'; ?>
+    <header>
+    <div class="container header-inner">
+        <div class="logo">
+            <a href="#">Arti<span style="color: #333;">Sell</span></a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="shop.php" class="nav-link">Shop</a></li>
+                <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                    <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
+                        <li><a href="add_product.php" class="nav-link">Add Product</a></li>
+                    <?php else: ?>
+                        <li><a href="cart.php" class="nav-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16" style="margin-right: 5px;">
+                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                        </svg> (<?php echo count($_SESSION['cart']); ?>)</a></li>
+                    <?php endif; ?>
+                    <li class="profile-dropdown">
+                        <a href="profile.php" class="nav-link profile-link">
+                            <?php echo htmlspecialchars($_SESSION['username']); ?>
+                            <?php if (!empty($_SESSION['profile_picture'])): ?>
+                                <img src="<?php echo htmlspecialchars($_SESSION['profile_picture']); ?>" alt="Profile" class="profile-pic">
+                            <?php else: ?>
+                                <img src="images/default-profile.jpg" alt="Profile" class="profile-pic">
+                            <?php endif; ?>
+                        </a>
+                        <div class="dropdown-content">
+                            <a href="settings.php" class="dropdown-item">Settings</a>
+                            <a href="logout.php" class="dropdown-item">Logout</a>
+                        </div>
+                    </li>
+                <?php else: ?>
+                    <li><a href="login.php" class="nav-link">Login</a></li>
+                    <li><a href="signup.php" class="nav-link">Sign Up</a></li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+    </div>
+</header>
 
     <!-- Cart Content -->
     <div class="container cart-container">
@@ -359,8 +598,19 @@ h1 {
                     let currentValue = parseInt(inputField.value);
                     
                     // Decrease quantity
-                    if (action === 'decrease' && currentValue > 1) {
-                        inputField.value = currentValue - 1;
+                    if (action === 'decrease') {
+                        if (currentValue > 1) {
+                            inputField.value = currentValue - 1;
+                        } else if (currentValue === 1) {
+                            // Set quantity to 0 first
+                            inputField.value = 0;
+                            
+                            // Add a small delay before removing the item
+                            setTimeout(() => {
+                                const removeForm = this.closest('tr').querySelector('form');
+                                removeForm.submit(); // This will remove the item
+                            }, 500); // 500ms delay to show the zero
+                        }
                     }
                     // Increase quantity
                     else if (action === 'increase') {

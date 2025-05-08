@@ -135,6 +135,15 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) ||
                     mysqli_stmt_bind_param($stmt, "iii", $_SESSION['id'], $product_id, $quantity);
                     mysqli_stmt_execute($stmt);
                 }
+                
+                // Update product stock in the database
+                if (isset($product['stock'])) {
+                    $new_stock = $product['stock'] - $quantity;
+                    $sql = "UPDATE products SET stock = ? WHERE id = ?";
+                    $stmt = mysqli_prepare($conn, $sql);
+                    mysqli_stmt_bind_param($stmt, "ii", $new_stock, $product_id);
+                    mysqli_stmt_execute($stmt);
+                }
             } catch (Exception $e) {
                 // Database error
                 error_log("Database error in add_to_cart.php: " . $e->getMessage());

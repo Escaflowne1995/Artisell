@@ -81,7 +81,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/signup.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+    <style>
+        .navigation {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .nav-right {
+            margin-left: auto;
+        }
+    </style>
 </head>
 <body>
     <div class="page-container">
@@ -89,10 +98,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <header class="header">
             <div class="logo">Art<span>iSell</span></div>
             <nav class="navigation">
-                <a href="index.php" class="nav-link">Home</a>
-                <a href="categories.php" class="nav-link">Categories</a>
-                <a href="about.php" class="nav-link">About</a>
-                <a href="login.php" class="nav-link">Login</a>
+                <div class="nav-right">
+                    <a href="login.php" class="nav-link">Login</a>
+                </div>
             </nav>
         </header>
 

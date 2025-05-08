@@ -16,6 +16,7 @@ session_start(); // Start the session to access session variables
         display: flex;
         align-items: center;
         gap: 8px;
+        font-weight: 700;
     }
     .profile-pic {
         width: 30px;
@@ -46,6 +47,22 @@ session_start(); // Start the session to access session variables
 .social-links a:hover {
   background-color: #ff6b00;
 }
+
+    .header-right a {
+        font-weight: 700;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .nav-link {
+        font-weight: 700;
+    }
+    
+    .cart-icon {
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+    }
         </style>
   </head>
   <body>
@@ -56,19 +73,13 @@ session_start(); // Start the session to access session variables
       <header class="header">
     <div class="container header-inner">
         <a href="" class="logo">Art<span>iSell</span></a>
-        <nav>
-            <div class="nav-links">
-                <a href="categories.php" class="nav-link">Products</a>
-                <a href="cities.php" class="nav-link">Cities</a>
-                <a href="about.php" class="nav-link">About</a>
-            </div>
-        </nav>
+        
         <div class="header-right">
             <a href="#"><i class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
             </svg></i></a>
             <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
-                <a href="cart.php"><i class="cart-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                <a href="cart.php" class="nav-link"><i class="cart-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
                     <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
                 </svg></i><?php echo isset($_SESSION['cart']) ? " (" . count($_SESSION['cart']) . ")" : ""; ?></a>
                 <div class="profile-dropdown">
@@ -87,7 +98,7 @@ session_start(); // Start the session to access session variables
                 </div>
             <?php else: ?>
                 <a href="login.php" class="nav-link">Login</a>
-                <a href="signup.php" class="nav-link">Sign Up</a>
+                
             <?php endif; ?>
         </div>
     </div>
@@ -99,7 +110,7 @@ session_start(); // Start the session to access session variables
             <div class="hero-content">
                 <h1>Discover Cebu's Native Crafts & Delicacies</h1>
                 <p>Connecting you with authentic local treasures, handcrafted by Filipino artisans. Support local businesses and find the best of Cebu's culture.</p>
-                <a href="#" class="btn btn-primary">Shop Now</a>
+                <a href="categories.php" class="btn btn-primary">Shop Now</a>
                 <a href="#" class="btn btn-secondary">Learn More</a>
             </div>
         </div>
@@ -118,7 +129,29 @@ session_start(); // Start the session to access session variables
                     </div>
                     <div class="product-details">
                         <div class="product-category">Featured</div>
-                        <h3 class="product-title">Coconut Bowl</h3>
+                        <h3 class="product-title"><a href="products.php">Coconut Bowl</a></h3>
+                        <p class="product-price">₱ 450.00</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="image/coconut-bowl-palm.jpg" alt="Coconut Bowl Duplicate 1">
+                    </div>
+                    <div class="product-details">
+                        <div class="product-category">Featured</div>
+                        <h3 class="product-title"><a href="products.php">Coconut Bowl Duplicate 1</a></h3>
+                        <p class="product-price">₱ 450.00</p>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="image/coconut-bowl-palm.jpg" alt="Coconut Bowl Duplicate 2">
+                    </div>
+                    <div class="product-details">
+                        <div class="product-category">Featured</div>
+                        <h3 class="product-title"><a href="products.php">Coconut Bowl Duplicate 2</a></h3>
                         <p class="product-price">₱ 450.00</p>
                         <button class="add-to-cart">Add to Cart</button>
                     </div>
@@ -126,7 +159,7 @@ session_start(); // Start the session to access session variables
                 <!-- More product cards would go here -->
             </div>
             
-            <a href="#" class="view-all-btn">View All Products</a>
+            <a href="products.php" class="view-all-btn">View All Products</a>
         </div>
     </section>
 
@@ -190,7 +223,7 @@ session_start(); // Start the session to access session variables
             <h2>Ready to Discover Cebu's Treasures?</h2>
             <p>Join ArtSell today and start your journey through Cebu's rich culture of native crafts and delicacies.</p>
             <div class="cta-buttons">
-                <a href="shop.php" class="btn btn-primary">Shop Now</a>
+                <a href="categories.php" class="btn btn-primary">Shop Now</a>
                 <a href="#" class="btn btn-secondary">Become a Vendor</a>
             </div>
         </div>

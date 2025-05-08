@@ -55,6 +55,27 @@ $total_pages = ceil($total_items / $items_per_page);
 $page = isset($_GET['page']) ? max(1, min($total_pages, (int)$_GET['page'])) : 1;
 $offset = ($page - 1) * $items_per_page;
 $paginated_products = array_slice($products, $offset, $items_per_page);
+
+// Automatically add stock to products that are out of stock
+foreach ($paginated_products as $key => $product) {
+    if (!isset($product['stock']) || $product['stock'] <= 0) {
+        // Set a default stock value between 15-50 for featured products
+        $default_stock = rand(15, 50);
+        
+        // Update in the database
+        $update_sql = "UPDATE products SET stock = ? WHERE id = ?";
+        $update_stmt = mysqli_prepare($conn, $update_sql);
+        mysqli_stmt_bind_param($update_stmt, "ii", $default_stock, $product['id']);
+        
+        if (mysqli_stmt_execute($update_stmt)) {
+            // Update in the current array
+            $paginated_products[$key]['stock'] = $default_stock;
+        }
+        
+        mysqli_stmt_close($update_stmt);
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -70,9 +91,9 @@ $paginated_products = array_slice($products, $offset, $items_per_page);
         header { background: #fff; padding: 15px 0; border-bottom: 1px solid #eee; }
         .header-inner { display: flex; justify-content: space-between; align-items: center; }
         .logo a { color: #ff6b00; text-decoration: none; font-size: 20px; font-weight: bold; }
-        nav ul { display: flex; list-style: none; }
+        nav ul { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; justify-content: flex-end; }
         nav ul li { margin-left: 25px; }
-        nav ul li a { color: #333; text-decoration: none; font-weight: 500; }
+        nav ul li a { color: #333; text-decoration: none; font-weight: 700; }
         .profile-dropdown { position: relative; }
         .profile-dropdown:hover .dropdown-content { display: block; }
         .dropdown-content { position: absolute; right: 0; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 4px; min-width: 120px; }
@@ -125,12 +146,19 @@ $paginated_products = array_slice($products, $offset, $items_per_page);
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 700;
         }
         .profile-pic {
             width: 30px;
             height: 30px;
             border-radius: 50%;
             object-fit: cover;
+        }
+        /* Cart styling */
+        .cart-link {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
         }
     </style>
 </head>
@@ -148,7 +176,7 @@ $paginated_products = array_slice($products, $offset, $items_per_page);
                             <li><a href="add_product.php">Add Product</a></li>
                             <li><a href="vendor_products.php">My Products</a></li>
                         <?php else: ?>
-                            <li><a href="cart.php">Cart (<?php echo count($_SESSION['cart']); ?>)</a></li>
+                            <li><a href="cart.php" class="cart-link">Cart (<?php echo count($_SESSION['cart']); ?>)</a></li>
                         <?php endif; ?>
                         <li class="profile-dropdown">
                             <a href="profile.php" class="profile-link">
@@ -188,7 +216,7 @@ $paginated_products = array_slice($products, $offset, $items_per_page);
                 <select onchange="location = this.value;">
                     <option value="?">All Cities</option>
                     <?php
-                    $cities = ['aloquinsan', 'catmon', 'dumanjug', 'santander', 'alcoy', 'minglanilla', 'alcantara', 'moalboal', 'borbon'];
+                    $cities = ['aloguinsan', 'catmon', 'dumanjug', 'santander', 'alcoy', 'minglanilla', 'alcantara', 'moalboal', 'borbon'];
                     foreach ($cities as $c) {
                         echo "<option value='?city=$c'" . ($city === $c ? ' selected' : '') . ">" . ucfirst($c) . "</option>";
                     }
