@@ -13,47 +13,8 @@ body {
     flex-direction: column;
 }
 
-/* Header styling aligned with login.css aesthetic */
-.header {
-    width: 100%;
-    background-color: #fff;
-    padding: 15px 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    text-decoration: none;
-    color: #FF6B17;
-    font-family: Arial, sans-serif;
-}
-
-.logo span {
-    color: #333;
-}
-
-.navigation {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.nav-link {
-    text-decoration: none;
-    color: #333;
-    font-size: 16px;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    color: #FF6B17;
-}
+/* Remove duplicate header styling that would override shared.css */
+/* Navbar styling is now handled entirely by shared.css */
 
 /* Main content styling */
 .main-content {

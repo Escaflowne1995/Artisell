@@ -141,9 +141,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="main-container">
+        <?php include 'components/navbar.php'; ?>
+        
         <main class="main-content">
-            <?php include 'components/navbar.php'; ?>
-            
             <!-- Signup Form -->
             <section class="signup-section">
                 <div class="container">

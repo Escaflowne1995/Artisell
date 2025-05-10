@@ -79,9 +79,9 @@ if (!isset($_SESSION['csrf_token'])) {
 </head>
 <body>
     <div class="main-container">
+        <?php include 'components/navbar.php'; ?>
+        
         <main class="main-content">
-            <?php include 'components/navbar.php'; ?>
-            
             <!-- Login Form -->
             <section class="login-section">
                 <div class="container">
