@@ -35,67 +35,67 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($emailError) && empty($passwordError)) {
         // Prepare a select statement (added profile_picture)
         $sql = "SELECT id, username, password, profile_picture, role FROM users WHERE email = ?";
-if ($stmt = mysqli_prepare($conn, $sql)) {
-    mysqli_stmt_bind_param($stmt, "s", $email);
-    if (mysqli_stmt_execute($stmt)) {
-        mysqli_stmt_store_result($stmt);
-        if (mysqli_stmt_num_rows($stmt) == 1) {
-            // Bind results
-            mysqli_stmt_bind_result($stmt, $id, $username, $hashedPassword, $profile_picture, $role);
-            if (mysqli_stmt_fetch($stmt)) {
-                if (password_verify($password, $hashedPassword)) {
-                    // Password is correct, update session
-                    $_SESSION["loggedin"] = true;
-                    $_SESSION["id"] = $id;
-                    $_SESSION["username"] = $username;
-                    $_SESSION["profile_picture"] = $profile_picture;
-                    $_SESSION["role"] = $role; // Store the role in the session
-                    
-                    // Check if user is admin, redirect to admin dashboard
-                    if ($role === 'admin') {
-                        header("location: admin/index.php");
-                        exit;
+        if ($stmt = mysqli_prepare($conn, $sql)) {
+            mysqli_stmt_bind_param($stmt, "s", $email);
+            if (mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_store_result($stmt);
+                if (mysqli_stmt_num_rows($stmt) == 1) {
+                    // Bind results
+                    mysqli_stmt_bind_result($stmt, $id, $username, $hashedPassword, $profile_picture, $role);
+                    if (mysqli_stmt_fetch($stmt)) {
+                        if (password_verify($password, $hashedPassword)) {
+                            // Password is correct, update session
+                            $_SESSION["loggedin"] = true;
+                            $_SESSION["id"] = $id;
+                            $_SESSION["username"] = $username;
+                            $_SESSION["profile_picture"] = $profile_picture;
+                            $_SESSION["role"] = $role; // Store the role in the session
+                            
+                            // Check if user is admin, redirect to admin dashboard
+                            if ($role === 'admin') {
+                                header("location: admin/index.php");
+                                exit;
+                            }
+                            
+                            // Check if there's a redirect after login
+                            $redirect = 'index.php';
+                            
+                            // Handle the redirect_after_login if set in session
+                            if (isset($_SESSION['redirect_after_login'])) {
+                                $redirect = $_SESSION['redirect_after_login'];
+                                unset($_SESSION['redirect_after_login']);
+                            }
+                            
+                            // Handle pending cart addition
+                            if (isset($_SESSION['pending_cart_add'])) {
+                                $pendingAdd = $_SESSION['pending_cart_add'];
+                                unset($_SESSION['pending_cart_add']);
+                                
+                                // Redirect to add_to_cart.php with the pending product
+                                header("location: add_to_cart.php?product_id=" . $pendingAdd['product_id'] . "&redirect=" . urlencode($pendingAdd['redirect']));
+                                exit;
+                            }
+                            
+                            // Handle direct redirect from query parameter
+                            if (isset($_GET['redirect'])) {
+                                $redirect = $_GET['redirect'];
+                            }
+                            
+                            // Redirect to the appropriate page
+                            header("location: " . $redirect);
+                            exit;
+                        } else {
+                            $passwordError = "The password you entered was not valid.";
+                        }
                     }
-                    
-                    // Check if there's a redirect after login
-                    $redirect = 'index.php';
-                    
-                    // Handle the redirect_after_login if set in session
-                    if (isset($_SESSION['redirect_after_login'])) {
-                        $redirect = $_SESSION['redirect_after_login'];
-                        unset($_SESSION['redirect_after_login']);
-                    }
-                    
-                    // Handle pending cart addition
-                    if (isset($_SESSION['pending_cart_add'])) {
-                        $pendingAdd = $_SESSION['pending_cart_add'];
-                        unset($_SESSION['pending_cart_add']);
-                        
-                        // Redirect to add_to_cart.php with the pending product
-                        header("location: add_to_cart.php?product_id=" . $pendingAdd['product_id'] . "&redirect=" . urlencode($pendingAdd['redirect']));
-                        exit;
-                    }
-                    
-                    // Handle direct redirect from query parameter
-                    if (isset($_GET['redirect'])) {
-                        $redirect = $_GET['redirect'];
-                    }
-                    
-                    // Redirect to the appropriate page
-                    header("location: " . $redirect);
-                    exit;
                 } else {
-                    $passwordError = "The password you entered was not valid.";
+                    $emailError = "No account found with that email.";
                 }
+            } else {
+                echo "Oops! Something went wrong. Please try again later.";
             }
-        } else {
-            $emailError = "No account found with that email.";
+            mysqli_stmt_close($stmt);
         }
-    } else {
-        echo "Oops! Something went wrong. Please try again later.";
-    }
-    mysqli_stmt_close($stmt);
-}
     }
 }
 
@@ -126,19 +126,6 @@ if (!isset($_SESSION['csrf_token'])) {
       <header class="header">
     <div class="container header-inner">
         <a href="index.php" class="logo">Art<span>iSell</span></a>
-        <nav>
-            <div class="nav-links">
-                <a href="index.php" class="nav-link">Home</a>
-                <a href="categories.php" class="nav-link">Products</a>
-                <a href="cities.php" class="nav-link">Cities</a>
-                <a href="about.php" class="nav-link">About</a>
-            </div>
-        </nav>
-        <div class="hamburger" id="hamburger-menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
         <div class="header-right">
             <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
                 <div class="profile-dropdown">
@@ -237,13 +224,6 @@ if (!isset($_SESSION['csrf_token'])) {
             } else {
                 eyeIcon.innerHTML = '<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"/><path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/>';
             }
-        });
-
-        // Hamburger menu toggle
-        const hamburger = document.getElementById('hamburger-menu');
-        const navLinks = document.querySelector('.nav-links');
-        hamburger.addEventListener('click', function() {
-            navLinks.classList.toggle('open');
         });
     </script>
 </body>

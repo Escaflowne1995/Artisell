@@ -1,6 +1,6 @@
 <header>
     <div class="container header-inner">
-        <div class="logo"><a href="#">Art<span style="color: #333;">Sell</span></a></div>
+        <div class="logo"><a href="#">Arti<span style="color: #333;">Sell</span></a></div>
         <nav>
             <ul>
                 <li><a href="index.php">Home</a></li>
@@ -61,7 +61,7 @@ nav ul li {
 nav ul li a { 
     color: #333; 
     text-decoration: none; 
-    font-weight: 500; 
+    font-weight: bold; 
 }
 .profile-dropdown { 
     position: relative; 
