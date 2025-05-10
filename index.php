@@ -63,6 +63,18 @@ session_start(); // Start the session to access session variables
         display: flex;
         align-items: center;
     }
+
+    .about-image {
+    width: 100%; /* Adjust as needed */
+    max-width: 100%;
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover; /* Ensures the image fills the space while maintaining aspect ratio */
+}
         </style>
   </head>
   <body>
@@ -368,18 +380,18 @@ session_start(); // Start the session to access session variables
 
     <!-- About Section -->
     <section class="about">
-        <div class="container" style="display: flex;">
-            <div class="about-image">
-                <div class="image-placeholder">
+        <div class="container">
+            <div class="about-wrapper" style="display: flex; gap: 2rem; align-items: center;">
+                <div class="about-image" style="flex: 1;">
+                    <img src="image/about.jpg" alt="About ArtiSell" style="width: 100%; height: auto; border-radius: 8px; object-fit: cover;">
                 </div>
-            </div>
-            
-            <div class="about-content">
-                <h2>About ArtiSell</h2>
-                <p>ArtiSell is a marketplace dedicated to promoting authentic local arts and connecting artisans with customers who care about heritage through craft and culture.</p>
-                <p>Our mission is to empower local artisans and preserve Filipino craft traditions while providing quality products to customers around the globe.</p>
-                <p>By supporting ArtSell, you're not just buying products - you're helping preserve traditional craftsmanship and supporting local communities.</p>
-                <a href="#" class="btn btn-primary">Learn More About Us</a>
+                <div class="about-content" style="flex: 1;">
+                    <h2>About ArtiSell</h2>
+                    <p>ArtiSell is a marketplace dedicated to promoting authentic local arts and connecting artisans with customers who care about heritage through craft and culture.</p>
+                    <p>Our mission is to empower local artisans and preserve Filipino craft traditions while providing quality products to customers around the globe.</p>
+                    <p>By supporting ArtSell, you're not just buying products - you're helping preserve traditional craftsmanship and supporting local communities.</p>
+                    <a href="#" class="btn btn-primary">Learn More About Us</a>
+                </div>
             </div>
         </div>
     </section>
