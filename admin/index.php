@@ -176,7 +176,7 @@ while($row = mysqli_fetch_assoc($result)) {
           <div class="recent-orders">
             <div class="section-header">
               <h2 class="section-title">Recent Orders</h2>
-              <a href="order.php" class="view-all">View All</a>
+              <a href="order_new.php" class="view-all">View All</a>
             </div>
             
             <table>
