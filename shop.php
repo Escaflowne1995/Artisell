@@ -86,20 +86,53 @@ foreach ($paginated_products as $key => $product) {
     <title>ArtSell - Cebu Cultural Marketplace</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        body { background-color: #f9f9f9; color: #333; font-family: 'Open Sans', sans-serif; }
+        body { 
+            background-color: #f9f9f9; 
+            color: #333; 
+            font-family: 'Open Sans', sans-serif; 
+            margin: 80px 0 0 0; 
+            padding: 0; 
+            overflow-x: hidden; 
+        }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        header { background: #fff; padding: 15px 0; border-bottom: 1px solid #eee; }
+        header { 
+            background: #fff; 
+            padding: 15px 0; 
+            border-bottom: 1px solid #eee; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 100%;
+        }
         .header-inner { display: flex; justify-content: space-between; align-items: center; }
         .logo a { color: #ff6b00; text-decoration: none; font-size: 20px; font-weight: bold; }
         nav ul { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; justify-content: flex-end; }
         nav ul li { margin-left: 25px; }
-        nav ul li a { color: #333; text-decoration: none; font-weight: 700; }
+        nav ul li a { color: #333; text-decoration: none; font-weight: 700; transition: color 0.3s ease; }
+        nav ul li a:hover { color: #FF6B17; }
+        .login-link { 
+            background-color: #f5f5f5;
+            padding: 5px 15px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        .login-link:hover { 
+            color: #FF6B17 !important;
+            background-color: #e0e0e0;
+        }
         .profile-dropdown { position: relative; }
         .profile-dropdown:hover .dropdown-content { display: block; }
         .dropdown-content { position: absolute; right: 0; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 4px; min-width: 120px; }
         .dropdown-content a { display: block; padding: 10px 15px; color: #333; text-decoration: none; }
         .dropdown-content a:hover { background: #f5f5f5; }
-        .main-content { display: flex; padding: 30px 0; }
+        .main-content { 
+            display: flex; 
+            padding: 30px 0; 
+            min-height: calc(100vh - 240px); /* Ensures minimum height for content area */
+        }
         .filters { width: 240px; padding-right: 30px; }
         .filters h3 { font-size: 14px; margin-bottom: 10px; color: #555; }
         .filters select, .filters input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 15px; }
@@ -130,8 +163,15 @@ foreach ($paginated_products as $key => $product) {
         .pagination { margin: 20px 0; text-align: center; }
         .pagination a { padding: 8px 12px; margin: 0 5px; text-decoration: none; color: #333; border: 1px solid #ddd; border-radius: 4px; }
         .pagination a.active { background: #3b5998; color: white; }
-        footer { background: #2c3e50; color: white; padding: 40px 0 20px; }
-        .footer-content { display: flex; justify-content: space-between; }
+        footer { 
+            background: #1a3d55; 
+            color: white; 
+            padding: 40px 0 20px; 
+            width: 100%; 
+            box-sizing: border-box;
+            margin: 0;
+        }
+        .footer-content { display: flex; justify-content: space-between; width: 100%; }
         .footer-column { flex: 1; padding: 0 15px; }
         .footer-logo { color: #ff6b00; font-size: 20px; font-weight: bold; }
         .newsletter input { padding: 8px; width: 70%; border: none; border-radius: 4px 0 0 4px; }
@@ -160,23 +200,46 @@ foreach ($paginated_products as $key => $product) {
             display: flex;
             align-items: center;
         }
+        .cart-link svg {
+            margin-right: 3px;
+        }
+
+        /* Back to Cities Button */
+        .back-to-cities {
+            display: inline-flex;
+            align-items: center;
+            background-color: #3b5998;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-to-cities:hover {
+            background-color: #2a4373;
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header>
         <div class="container header-inner">
-            <div class="logo"><a href="#">Art<span style="color: #333;">Sell</span></a></div>
+            <div class="logo"><a href="index.php">Art<span style="color: #333;">Sell</span></a></div>
             <nav>
                 <ul>
-                    <li><a href="index.php">Home</a></li>
                     <li><a href="shop.php">Shop</a></li>
                     <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
                         <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
                             <li><a href="add_product.php">Add Product</a></li>
                             <li><a href="vendor_products.php">My Products</a></li>
                         <?php else: ?>
-                            <li><a href="cart.php" class="cart-link">Cart (<?php echo count($_SESSION['cart']); ?>)</a></li>
+                            <li><a href="cart.php" class="cart-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                                  <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                </svg> (<?php echo count($_SESSION['cart']); ?>)
+                            </a></li>
                         <?php endif; ?>
                         <li class="profile-dropdown">
                             <a href="profile.php" class="profile-link">
@@ -193,8 +256,8 @@ foreach ($paginated_products as $key => $product) {
                             </div>
                         </li>
                     <?php else: ?>
-                        <li><a href="login.php">Login</a></li>
-                        <li><a href="signup.php">Sign Up</a></li>
+                        <li><a href="login.php" class="login-link">Login</a></li>
+                        <li><a href="signup.php" class="login-link">Sign Up</a></li>
                     <?php endif; ?>
                 </ul>
             </nav>
@@ -208,25 +271,71 @@ foreach ($paginated_products as $key => $product) {
             <aside class="filters">
                 <h3>Category</h3>
                 <select onchange="location = this.value;">
-                    <option value="?">All Categories</option>
-                    <option value="?category=crafts" <?php echo $category === 'crafts' ? 'selected' : ''; ?>>Crafts</option>
-                    <option value="?category=delicacies" <?php echo $category === 'delicacies' ? 'selected' : ''; ?>>Delicacies</option>
+                    <?php 
+                    // Build the base URL for all categories option
+                    $all_categories_url = "?";
+                    if (!empty($city)) {
+                        $all_categories_url .= "city=" . urlencode($city) . "&";
+                    }
+                    if (!empty($search)) {
+                        $all_categories_url .= "search=" . urlencode($search) . "&";
+                    }
+                    // Remove trailing & if exists
+                    $all_categories_url = rtrim($all_categories_url, "&");
+                    ?>
+                    <option value="<?php echo $all_categories_url; ?>">All Categories</option>
+                    <?php
+                    $categories = ['crafts', 'delicacies'];
+                    foreach ($categories as $cat) {
+                        $cat_url = "?category=" . urlencode($cat);
+                        if (!empty($city)) {
+                            $cat_url .= "&city=" . urlencode($city);
+                        }
+                        if (!empty($search)) {
+                            $cat_url .= "&search=" . urlencode($search);
+                        }
+                        echo "<option value='$cat_url'" . ($category === $cat ? ' selected' : '') . ">" . ucfirst($cat) . "</option>";
+                    }
+                    ?>
                 </select>
                 <h3>City</h3>
                 <select onchange="location = this.value;">
-                    <option value="?">All Cities</option>
+                    <option value="?<?php echo !empty($category) ? 'category=' . urlencode($category) . '&' : ''; ?><?php echo !empty($search) ? 'search=' . urlencode($search) . '&' : ''; ?>">All Cities</option>
                     <?php
                     $cities = ['aloguinsan', 'catmon', 'dumanjug', 'santander', 'alcoy', 'minglanilla', 'alcantara', 'moalboal', 'borbon'];
                     foreach ($cities as $c) {
-                        echo "<option value='?city=$c'" . ($city === $c ? ' selected' : '') . ">" . ucfirst($c) . "</option>";
+                        $city_url = "?city=" . urlencode($c);
+                        if (!empty($category)) {
+                            $city_url .= "&category=" . urlencode($category);
+                        }
+                        if (!empty($search)) {
+                            $city_url .= "&search=" . urlencode($search);
+                        }
+                        echo "<option value='$city_url'" . ($city === $c ? ' selected' : '') . ">" . ucfirst($c) . "</option>";
                     }
                     ?>
                 </select>
                 <h3>Search</h3>
                 <form method="GET">
                     <input type="text" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search); ?>">
+                    <?php if (!empty($city)): ?>
+                        <input type="hidden" name="city" value="<?php echo htmlspecialchars($city); ?>">
+                    <?php endif; ?>
+                    <?php if (!empty($category)): ?>
+                        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category); ?>">
+                    <?php endif; ?>
                     <input type="submit" value="Search" style="display: none;">
                 </form>
+                
+                <!-- Back to Cities Button -->
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="cities.php" class="back-to-cities">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 5px;">
+                            <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                        </svg>
+                        Back to Cities
+                    </a>
+                </div>
             </aside>
 
             <!-- Products Grid -->
@@ -268,11 +377,26 @@ foreach ($paginated_products as $key => $product) {
                                 <div class="button-container">
                                     <form method="POST" action="add_to_cart.php">
                                         <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                                        <input type="hidden" name="quantity" value="1">
                                         <input type="hidden" name="redirect" value="shop.php">
+                                        <?php
+                                        // Build current URL with all parameters for "Add to Cart" form
+                                        $current_url = "shop.php";
+                                        $params = [];
+                                        if (!empty($category)) $params[] = "category=" . urlencode($category);
+                                        if (!empty($city)) $params[] = "city=" . urlencode($city);
+                                        if (!empty($search)) $params[] = "search=" . urlencode($search);
+                                        if (!empty($page)) $params[] = "page=" . urlencode($page);
+                                        if (!empty($params)) {
+                                            $current_url .= "?" . implode("&", $params);
+                                        }
+                                        ?>
+                                        <input type="hidden" name="current_url" value="<?php echo $current_url; ?>">
                                         <button type="submit" name="add_to_cart" class="add-to-cart" <?php echo !$is_in_stock ? 'disabled' : ''; ?>>Add to Cart</button>
                                     </form>
                                     <form method="POST" action="add_to_cart.php">
                                         <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                                        <input type="hidden" name="quantity" value="1">
                                         <input type="hidden" name="redirect" value="cart.php">
                                         <button type="submit" name="buy_now" class="buy-now" <?php echo !$is_in_stock ? 'disabled' : ''; ?>>Buy Now</button>
                                     </form>
@@ -290,7 +414,20 @@ foreach ($paginated_products as $key => $product) {
         <?php if ($total_pages > 1): ?>
             <div class="pagination">
                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="?category=<?php echo $category; ?>&city=<?php echo $city; ?>&search=<?php echo $search; ?>&page=<?php echo $i; ?>" class="<?php echo $i === $page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                    <?php
+                    // Build pagination URL
+                    $pagination_url = "?page=" . $i;
+                    if (!empty($category)) {
+                        $pagination_url .= "&category=" . urlencode($category);
+                    }
+                    if (!empty($city)) {
+                        $pagination_url .= "&city=" . urlencode($city);
+                    }
+                    if (!empty($search)) {
+                        $pagination_url .= "&search=" . urlencode($search);
+                    }
+                    ?>
+                    <a href="<?php echo $pagination_url; ?>" class="<?php echo $i === $page ? 'active' : ''; ?>"><?php echo $i; ?></a>
                 <?php endfor; ?>
             </div>
         <?php endif; ?>

@@ -471,6 +471,73 @@ footer {
     margin-top: 20px;
     font-size: 14px;
 }
+
+/* Confirmation dialog styles */
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.confirmation-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.confirmation-content h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #333;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.btn-yes {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-no {
+    background-color: #9e9e9e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-yes:hover {
+    background-color: #d32f2f;
+}
+
+.btn-no:hover {
+    background-color: #757575;
+}
     </style>
 </head>
 <body>
@@ -478,7 +545,7 @@ footer {
     <header>
     <div class="container header-inner">
         <div class="logo">
-            <a href="#">Arti<span style="color: #333;">Sell</span></a>
+            <a href="index.php">Arti<span style="color: #333;">Sell</span></a>
         </div>
         <nav>
             <ul>
@@ -542,11 +609,11 @@ footer {
                                 <td>
                                     <div class="quantity-control">
                                         <button type="button" class="quantity-btn" data-product-id="<?php echo $product_id; ?>" data-action="decrease">-</button>
-                                        <input type="text" name="quantity[<?php echo $product_id; ?>]" value="<?php echo $item['quantity']; ?>" class="quantity-input">
+                                        <input type="text" name="quantity[<?php echo $product_id; ?>]" value="<?php echo $item['quantity']; ?>" class="quantity-input" data-product-id="<?php echo $product_id; ?>" data-price="<?php echo $item['price']; ?>">
                                         <button type="button" class="quantity-btn" data-product-id="<?php echo $product_id; ?>" data-action="increase">+</button>
                                     </div>
                                 </td>
-                                <td>₱<?php echo number_format($item['price'] * $item['quantity'], 2); ?></td>
+                                <td class="item-total">₱<?php echo number_format($item['price'] * $item['quantity'], 2); ?></td>
                                 <td>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
@@ -558,7 +625,6 @@ footer {
                     </tbody>
                 </table>
                 <div style="margin-top: 20px;">
-                    <button type="submit" name="update_cart" class="update-btn">Update Cart</button>
                     <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
                         <a href="checkout.php" class="checkout-btn" style="display: inline-block;">Proceed to Checkout</a>
                     <?php else: ?>
@@ -581,6 +647,17 @@ footer {
         <?php endif; ?>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div class="confirmation-modal" id="removeConfirmation">
+        <div class="confirmation-content">
+            <h3>Do you want to remove this product?</h3>
+            <div class="confirmation-buttons">
+                <button class="btn-yes" id="confirmRemove">Yes</button>
+                <button class="btn-no" id="cancelRemove">No</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <?php include 'components/footer.php'; ?>
 
@@ -588,6 +665,125 @@ footer {
         document.addEventListener('DOMContentLoaded', function() {
             // Get all quantity buttons
             const quantityBtns = document.querySelectorAll('.quantity-btn');
+            const confirmationModal = document.getElementById('removeConfirmation');
+            const confirmButton = document.getElementById('confirmRemove');
+            const cancelButton = document.getElementById('cancelRemove');
+            
+            // Store the current product to be removed
+            let currentProductToRemove = null;
+            
+            // Function to update cart via AJAX
+            function updateCart(productId, quantity) {
+                fetch('update_cart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `product_id=${productId}&quantity=${quantity}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update cart count in header
+                        const cartCountElement = document.querySelector('.nav-link svg + text');
+                        if (cartCountElement) {
+                            cartCountElement.textContent = `(${data.cartCount})`;
+                        } else {
+                            // Find cart link by checking all nav links
+                            const navLinks = document.querySelectorAll('.nav-link');
+                            navLinks.forEach(link => {
+                                if (link.textContent.includes('Cart')) {
+                                    // Update cart count
+                                    link.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16" style="margin-right: 5px;">
+                                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                                    </svg> (${data.cartCount})`;
+                                }
+                            });
+                        }
+                        
+                        // Update cart total
+                        document.querySelector('.cart-total').textContent = `₱${data.total}`;
+                        
+                        // If quantity is 0, remove the row
+                        if (quantity === 0) {
+                            const row = document.querySelector(`[data-product-id="${productId}"]`).closest('tr');
+                            row.remove();
+                            
+                            // If cart is now empty, refresh the page to show empty cart message
+                            if (data.cartCount === 0) {
+                                window.location.reload();
+                            }
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+            
+            // Function to show confirmation modal
+            function showRemoveConfirmation(productId) {
+                currentProductToRemove = productId;
+                confirmationModal.style.display = 'flex';
+            }
+            
+            // Function to hide confirmation modal
+            function hideRemoveConfirmation() {
+                confirmationModal.style.display = 'none';
+                currentProductToRemove = null;
+            }
+            
+            // Handle confirmation button click
+            confirmButton.addEventListener('click', function() {
+                if (currentProductToRemove) {
+                    // Get the input field for this product
+                    const inputField = document.querySelector(`.quantity-input[data-product-id="${currentProductToRemove}"]`);
+                    inputField.value = 0;
+                    updateCart(currentProductToRemove, 0); // Remove the item
+                    hideRemoveConfirmation();
+                }
+            });
+            
+            // Handle cancel button click
+            cancelButton.addEventListener('click', function() {
+                hideRemoveConfirmation();
+                // Ensure the quantity stays at 1
+                if (currentProductToRemove) {
+                    const inputField = document.querySelector(`.quantity-input[data-product-id="${currentProductToRemove}"]`);
+                    inputField.value = 1;
+                    updateItemTotal(inputField);
+                }
+            });
+            
+            // Function to update item total
+            function updateItemTotal(input) {
+                const productId = input.getAttribute('data-product-id');
+                const price = parseFloat(input.getAttribute('data-price'));
+                const quantity = parseInt(input.value);
+                const totalElement = input.closest('tr').querySelector('.item-total');
+                
+                const total = price * quantity;
+                totalElement.textContent = `₱${total.toFixed(2)}`;
+                
+                // Update overall cart total
+                updateCartTotal();
+            }
+            
+            // Function to update overall cart total
+            function updateCartTotal() {
+                let total = 0;
+                document.querySelectorAll('.quantity-input').forEach(input => {
+                    const price = parseFloat(input.getAttribute('data-price'));
+                    const quantity = parseInt(input.value);
+                    total += price * quantity;
+                });
+                
+                // Format the total with commas for thousands
+                const formattedTotal = new Intl.NumberFormat('en-PH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(total);
+                
+                document.querySelector('.cart-total').textContent = `₱${formattedTotal}`;
+            }
             
             // Add event listeners to each button
             quantityBtns.forEach(btn => {
@@ -601,36 +797,59 @@ footer {
                     if (action === 'decrease') {
                         if (currentValue > 1) {
                             inputField.value = currentValue - 1;
+                            updateItemTotal(inputField);
+                            updateCart(productId, currentValue - 1);
                         } else if (currentValue === 1) {
-                            // Set quantity to 0 first
-                            inputField.value = 0;
-                            
-                            // Add a small delay before removing the item
-                            setTimeout(() => {
-                                const removeForm = this.closest('tr').querySelector('form');
-                                removeForm.submit(); // This will remove the item
-                            }, 500); // 500ms delay to show the zero
+                            // Show confirmation modal instead of immediately removing
+                            showRemoveConfirmation(productId);
                         }
                     }
                     // Increase quantity
                     else if (action === 'increase') {
                         inputField.value = currentValue + 1;
+                        updateItemTotal(inputField);
+                        updateCart(productId, currentValue + 1);
                     }
                 });
             });
             
-            // Ensure manual input is a valid number
+            // Also show confirmation when the remove button is clicked
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault(); // Prevent form submission
+                    const productId = this.closest('form').querySelector('input[name="product_id"]').value;
+                    showRemoveConfirmation(productId);
+                });
+            });
+            
+            // Ensure manual input is a valid number and update cart
             const quantityInputs = document.querySelectorAll('.quantity-input');
             quantityInputs.forEach(input => {
                 input.addEventListener('change', function() {
-                    // Make sure it's a number and at least 1
+                    // Make sure it's a number
                     const value = parseInt(this.value);
-                    if (isNaN(value) || value < 1) {
+                    const productId = this.getAttribute('data-product-id');
+                    
+                    if (isNaN(value)) {
                         this.value = 1;
+                        updateItemTotal(this);
+                        updateCart(productId, 1);
+                    } else if (value <= 0) {
+                        // If trying to set to 0 or negative, show confirmation
+                        showRemoveConfirmation(productId);
                     } else {
                         this.value = value;
+                        updateItemTotal(this);
+                        updateCart(productId, value);
                     }
                 });
+            });
+            
+            // Close modal if clicking outside the content
+            confirmationModal.addEventListener('click', function(e) {
+                if (e.target === confirmationModal) {
+                    hideRemoveConfirmation();
+                }
             });
         });
     </script>

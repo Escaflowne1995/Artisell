@@ -48,6 +48,70 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
                             $_SESSION["profile_picture"] = $profile_picture;
                             $_SESSION["role"] = $role; // Store the role in the session
                             
+                            // Track if we need to sync the cart
+                            $syncCart = false;
+                            
+                            // Save guest cart items to database if items exist
+                            if (!empty($_SESSION['cart'])) {
+                                // Check if this is a fresh login or a login after logout
+                                // We'll fetch the user's cart from database first
+                                $check_existing_cart = "SELECT COUNT(*) as count FROM cart WHERE user_id = ?";
+                                $check_cart_stmt = mysqli_prepare($conn, $check_existing_cart);
+                                mysqli_stmt_bind_param($check_cart_stmt, "i", $id);
+                                mysqli_stmt_execute($check_cart_stmt);
+                                $cart_count_result = mysqli_stmt_get_result($check_cart_stmt);
+                                $cart_count = mysqli_fetch_assoc($cart_count_result)['count'];
+                                mysqli_stmt_close($check_cart_stmt);
+                                
+                                // Only merge carts if the user's database cart is empty
+                                // This prevents duplication when logging back in after logout
+                                if ($cart_count == 0) {
+                                    // User has no items in database cart, add session items
+                                    foreach ($_SESSION['cart'] as $product_id => $item) {
+                                        $insert_sql = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
+                                        $insert_stmt = mysqli_prepare($conn, $insert_sql);
+                                        mysqli_stmt_bind_param($insert_stmt, "iii", $id, $product_id, $item['quantity']);
+                                        mysqli_stmt_execute($insert_stmt);
+                                        mysqli_stmt_close($insert_stmt);
+                                    }
+                                    $syncCart = true;
+                                } else {
+                                    // User already has items in database, just sync
+                                    $syncCart = true;
+                                }
+                            } else {
+                                // User has no session cart items, just fetch from database
+                                $syncCart = true;
+                            }
+                            
+                            // Sync cart from database to session
+                            if ($syncCart) {
+                                $cart_sql = "SELECT c.product_id, c.quantity, p.name, p.description, p.price, p.image 
+                                             FROM cart c 
+                                             JOIN products p ON c.product_id = p.id 
+                                             WHERE c.user_id = ?";
+                                $cart_stmt = mysqli_prepare($conn, $cart_sql);
+                                mysqli_stmt_bind_param($cart_stmt, "i", $id);
+                                mysqli_stmt_execute($cart_stmt);
+                                $cart_result = mysqli_stmt_get_result($cart_stmt);
+                                
+                                // Reset session cart
+                                $_SESSION['cart'] = [];
+                                
+                                // Populate session cart with database values
+                                while ($row = mysqli_fetch_assoc($cart_result)) {
+                                    $_SESSION['cart'][$row['product_id']] = [
+                                        'name' => $row['name'],
+                                        'description' => $row['description'],
+                                        'price' => $row['price'],
+                                        'image' => $row['image'],
+                                        'quantity' => $row['quantity']
+                                    ];
+                                }
+                                
+                                mysqli_stmt_close($cart_stmt);
+                            }
+                            
                             // Check if user is admin, redirect to admin dashboard
                             if ($role === 'admin') {
                                 header("location: admin/index.php");

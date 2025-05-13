@@ -26,5 +26,17 @@
     background-color: #f1f1f1; /* Change color on hover */
   }
 
+/* Global styles */
+html, body {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
 
+footer {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
   

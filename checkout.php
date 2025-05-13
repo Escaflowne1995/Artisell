@@ -210,9 +210,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
         header { background: #fff; padding: 15px 0; border-bottom: 1px solid #eee; }
         .header-inner { display: flex; justify-content: space-between; align-items: center; }
         .logo a { color: #ff6b00; text-decoration: none; font-size: 20px; font-weight: bold; }
-        nav ul { display: flex; list-style: none; }
+        nav ul { display: flex; list-style: none; margin: 0; padding: 0; }
         nav ul li { margin-left: 25px; }
-        nav ul li a { color: #333; text-decoration: none; font-weight: 500; }
+        nav ul li a { color: #333; text-decoration: none; font-weight: 500; display: flex; align-items: center; }
         .profile-dropdown { position: relative; }
         .profile-dropdown:hover .dropdown-content { display: block; }
         .dropdown-content { position: absolute; right: 0; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 4px; min-width: 120px; }
@@ -260,18 +260,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
             border-left: 4px solid #0066cc;
             font-size: 14px;
         }
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 15px;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #e0e0e0;
+        }
+        .back-button svg {
+            width: 16px;
+            height: 16px;
+        }
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .header-container h1 {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header>
         <div class="container header-inner">
-            <div class="logo"><a href="#">Art<span style="color: #333;">Sell</span></a></div>
+            <div class="logo"><a href="index.php">Art<span style="color: #333;">Sell</span></a></div>
             <nav>
                 <ul>
                     <li><a href="index.php">Home</a></li>
                     <li><a href="shop.php">Shop</a></li>
-                    <li><a href="cart.php">Cart (<?php echo count($_SESSION['cart']); ?>)</a></li>
+                    <li><a href="cart.php">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16" style="margin-right: 5px;">
+                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                        </svg>
+                        <span>(<?php echo count($_SESSION['cart']); ?>)</span>
+                    </a></li>
                     <li class="profile-dropdown">
                         <a href="profile.php" class="profile-link">
                             <?php echo htmlspecialchars($_SESSION['username']); ?>
@@ -294,6 +328,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
     <!-- Checkout Content -->
     <div class="container checkout-container">
         <div class="shipping-form">
+            <div class="header-container">
+                <a href="cart.php" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Back to Cart
+                </a>
+            </div>
             <h1>Shipping Information</h1>
             <?php if(!empty($csrfError)): ?>
                 <div class="error" style="margin-bottom: 15px;"><?php echo $csrfError; ?></div>

@@ -35,7 +35,7 @@ if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
     }
     
     // Check if product exists and has enough stock
-    $query = "SELECT product_id, product_name, price, stock_quantity FROM products WHERE product_id = ?";
+    $query = "SELECT id, name, price, stock, image, description FROM products WHERE id = ?";
     $stmt = mysqli_prepare($conn, $query);
     mysqli_stmt_bind_param($stmt, "i", $product_id);
     mysqli_stmt_execute($stmt);
@@ -43,11 +43,11 @@ if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
     
     if ($product = mysqli_fetch_assoc($result)) {
         // Check if there's enough stock
-        if ($product['stock_quantity'] < $quantity) {
+        if ($product['stock'] < $quantity) {
             $response = [
                 'success' => false,
                 'message' => 'Not enough stock available',
-                'available' => $product['stock_quantity']
+                'available' => $product['stock']
             ];
             
             header('Content-Type: application/json');
@@ -63,23 +63,43 @@ if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
         // Check if the product is already in the cart
         $product_in_cart = false;
         
-        foreach ($_SESSION['cart'] as &$item) {
-            if ($item['product_id'] == $product_id) {
-                // Update quantity
-                $item['quantity'] += $quantity;
-                $product_in_cart = true;
-                break;
-            }
+        if (isset($_SESSION['cart'][$product_id])) {
+            // Update quantity
+            $_SESSION['cart'][$product_id]['quantity'] += $quantity;
+            $product_in_cart = true;
         }
         
         // Add product to cart if not already there
         if (!$product_in_cart) {
-            $_SESSION['cart'][] = [
-                'product_id' => $product_id,
-                'name' => $product['product_name'],
+            $_SESSION['cart'][$product_id] = [
+                'name' => $product['name'],
+                'description' => $product['description'],
                 'price' => $product['price'],
+                'image' => $product['image'],
                 'quantity' => $quantity
             ];
+        }
+        
+        // Update stock in the database
+        $new_stock = $product['stock'] - $quantity;
+        $update_stock_query = "UPDATE products SET stock = ? WHERE id = ?";
+        $update_stmt = mysqli_prepare($conn, $update_stock_query);
+        mysqli_stmt_bind_param($update_stmt, "ii", $new_stock, $product_id);
+        mysqli_stmt_execute($update_stmt);
+        mysqli_stmt_close($update_stmt);
+        
+        // Check if redirect parameter is set
+        if (isset($_POST['redirect']) && !empty($_POST['redirect'])) {
+            $redirect_url = $_POST['redirect'];
+            
+            // Preserve query parameters when redirecting back to shop.php
+            if ($redirect_url === 'shop.php' && isset($_POST['current_url'])) {
+                $redirect_url = $_POST['current_url'];
+            }
+            
+            // Redirect to the specified page
+            header("Location: " . $redirect_url);
+            exit;
         }
         
         // Prepare success response
@@ -87,7 +107,7 @@ if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
             'success' => true,
             'message' => 'Product added to cart',
             'cart_count' => count($_SESSION['cart']),
-            'product_name' => $product['product_name']
+            'product_name' => $product['name']
         ];
         
     } else {

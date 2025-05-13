@@ -60,8 +60,10 @@ session_start(); // Start the session to access session variables
     
     .cart-icon {
         font-weight: 700;
-        display: flex;
+        display: inline-flex;
         align-items: center;
+        vertical-align: middle;
+        margin-right: 4px;
     }
 
     .about-image {
@@ -101,6 +103,9 @@ session_start(); // Start the session to access session variables
                         <?php endif; ?>
                     </a>
                     <div class="dropdown-content">
+                        <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
+                            <a href="vendor_products.php" class="dropdown-item">My Products</a>
+                        <?php endif; ?>
                         <a href="settings.php" class="dropdown-item">Settings</a>
                         <a href="logout.php" class="dropdown-item">Logout</a>
                     </div>

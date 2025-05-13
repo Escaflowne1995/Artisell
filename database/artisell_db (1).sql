@@ -121,49 +121,50 @@ CREATE TABLE `products` (
   `city` varchar(100) DEFAULT NULL,
   `vendor_id` int(11) NOT NULL,
   `stock` int(11) NOT NULL DEFAULT 0,
-  `is_featured` tinyint(1) NOT NULL DEFAULT 0
+  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
+  `feature` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`id`, `name`, `description`, `price`, `category`, `image`, `created_at`, `city`, `vendor_id`, `stock`, `is_featured`) VALUES
-(1, 'Handmade Basket', 'A beautiful handmade basket.', 25.00, 'minglanilla', 'https://angelsarms.org/wp-content/uploads/2020/09/shop_11-1.jpg', '2025-03-19 13:07:46', NULL, 1, 25, 1),
-(2, 'Traditional Mat', 'A traditional mat made from local materials.', 15.00, 'minglanilla', 'https://m.media-amazon.com/images/I/71hwtEwHhhL._AC_UF894,1000_QL80_.jpg', '2025-03-19 13:07:46', NULL, 1, 15, 0),
-(3, 'Artisan Jewelry', 'Unique artisan jewelry.', 30.00, 'minglanilla', 'https://queencitycebu.com/wp-content/uploads/2022/09/susan.jpg', '2025-03-19 13:07:46', NULL, 1, 42, 1),
-(4, 'Minglanilla Handwoven Bag', 'A stylish handwoven bag made from local materials.', 35.00, 'minglanilla', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTONuIQi32Btviw_xfzOV9YRWotpeXuAsP8QljAKUUWUg&s&ec=72940544', '2025-03-19 13:12:32', NULL, 1, 20, 1),
-(5, 'Minglanilla Rattan Chair', 'A comfortable rattan chair perfect for your home.', 120.00, 'minglanilla', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3W9lsDO4rbJmZzb1yG3sGZyzGfc_fypvCDddVEhnOzQ&s&ec=72940544', '2025-03-19 13:12:32', NULL, 1, 47, 1),
-(6, 'Minglanilla Decorative Plate', 'Beautifully crafted decorative plate for your dining table.', 20.00, 'minglanilla', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFSJV1bYFbLyM5DptVOB4ctyCDGQL3uf4nNjQFGQNFsA&s&ec=72940544', '2025-03-19 13:12:32', NULL, 1, 46, 0),
-(7, 'Aloquinsan Bamboo Utensils', 'Eco-friendly bamboo utensils for your kitchen.', 15.00, 'aloquinsan', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1EZ0pjH2Cqy3yrf4DpA4C3TZajtXzQut5ZG4ibM3wDA&s&ec=72940544', '2025-03-19 13:12:32', NULL, 1, 27, 0),
-(8, 'Aloquinsan Handcrafted Soap', 'Natural handcrafted soap made from local ingredients.', 8.00, 'aloquinsan', 'https://ecowarriorph.com/wp-content/uploads/2020/09/soap-1-scaled.jpg', '2025-03-19 13:12:32', NULL, 1, 46, 0),
-(9, 'Aloquinsan Woven Basket', 'A traditional woven basket for storage or decoration.', 25.00, 'aloquinsan', 'https://api.deepai.org/job-view-file/d55f162f-3d70-4499-b659-dabf322b517c/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 46, 0),
-(10, 'Catmon Clay Pot', 'Handmade clay pot for cooking and serving.', 30.00, 'catmon', 'path/to/catmon_pot.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(11, 'Catmon Coconut Candies', 'Delicious coconut candies made from fresh coconuts.', 5.00, 'catmon', 'path/to/catmon_candies.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(12, 'Catmon Traditional Hat', 'A traditional hat made from local materials.', 12.00, 'catmon', 'path/to/catmon_hat.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(13, 'Dumanjug Torta', 'Famous Dumanjug Torta, a local delicacy.', 10.00, 'dumanjug', 'path/to/dumanjug_torta.jpg', '2025-03-19 13:12:32', NULL, 1, 13, 0),
-(14, 'Dumanjug Handwoven Mat', 'A beautiful handwoven mat for your home.', 40.00, 'dumanjug', 'https://api.deepai.org/job-view-file/c2da71fd-498a-481f-98a1-88fea58fd44f/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 23, 0),
-(15, 'Dumanjug Native Basket', 'A native basket perfect for carrying goods.', 18.00, 'dumanjug', 'https://api.deepai.org/job-view-file/da1ec28f-434b-4666-b28c-37114a15b4af/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 39, 0),
-(16, 'Santander Fresh Seafood', 'Freshly caught seafood from Santander.', 50.00, 'santander', 'https://api.deepai.org/job-view-file/323db2be-eb6a-417f-aa74-82f7c744fb10/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(17, 'Santander Handcrafted Souvenirs', 'Unique handcrafted souvenirs from Santander.', 15.00, 'santander', 'https://api.deepai.org/job-view-file/3e713f33-e3fa-4b2a-9f66-ef838f8bd9f3/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(18, 'Santander Local Spices', 'A selection of local spices for your cooking.', 7.00, 'santander', 'path/to/santander_spices.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(19, 'Alcoy Coconut Jam', 'Delicious coconut jam made from fresh coconuts.', 6.00, 'alcoy', 'path/to/alcoy_jam.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(20, 'Alcoy Handwoven Bags', 'Stylish handwoven bags made by local artisans.', 30.00, 'alcoy', 'path/to/alcoy_bags.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(21, 'Alcoy Beach Towels', 'Soft and absorbent beach towels for your trips.', 20.00, 'alcoy', 'path/to/alcoy_towels.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(22, 'Moalboal Shell Crafts', 'Beautiful shell crafts made by local artisans.', 25.00, 'moalboal', 'path/to/moalboal_shells.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(23, 'Moalboal Dried Fish', 'Traditional dried fish, a local delicacy.', 12.00, 'moalboal', 'path/to/moalboal_fish.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(24, 'Moalboal Beach Mats', 'Comfortable mats for your beach outings.', 15.00, 'moalboal', 'path/to/moalboal_mats.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(25, 'Borbon Takyong', 'Delicious Takyong (land snails) delicacy from Borbon.', 8.00, 'borbon', 'path/to/borbon_takyong.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(26, 'Borbon Handcrafted Baskets', 'Unique handcrafted baskets from Borbon.', 20.00, 'borbon', 'path/to/borbon_baskets.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(27, 'Borbon Local Produce', 'Fresh local produce from Borbon farmers.', 10.00, 'borbon', 'path/to/borbon_produce.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0),
-(28, 'Handwoven Basket', 'Beautifully crafted basket made from natural fibers', 0.00, 'crafts', 'images/basket.jpg', '2025-04-02 15:05:27', 'minglanilla', 1, 45, 0),
-(29, 'Honey Cake', 'Delicious homemade cake with natural honey', 0.00, 'delicacies', 'images/honeycake.jpg', '2025-04-02 15:05:27', 'catmon', 1, 32, 0),
-(30, 'Wooden Sculpture', 'Intricate hand-carved wooden sculpture', 0.00, 'crafts', 'images/sculpture.jpg', '2025-04-02 15:05:27', 'moalboal', 1, 35, 0),
-(31, 'Spiced Nuts', 'Roasted nuts with traditional spices', 0.00, 'delicacies', 'images/spicednuts.jpg', '2025-04-02 15:05:27', 'borbon', 1, 50, 0),
-(32, 'Test Product', 'A sample product', 100.00, 'crafts', 'uploads/test.jpg', '2025-04-02 16:25:25', 'cebu', 1, 16, 0),
-(33, 'LAPOK', 'SADAS', 1.03, 'FOODS', 'uploads/67ed65fb89471.png', '2025-04-02 16:29:47', 'BISAGASA', 1, 34, 0),
-(39, 'Cleo Flynn', 'Aut nisi veniam ill', 903.00, 'Adipisci enim fugiat', 'uploads/images.jpg', '2025-04-03 15:24:53', 'Anim accusantium ex', 2, 40, 0),
-(40, 'Keiko Potter', 'Totam incidunt sequ', 88.00, 'Eu dolore quo et bea', 'uploads/ERD.png', '2025-04-03 15:30:19', 'Sit officia omnis et', 2, 47, 0);
+INSERT INTO `products` (`id`, `name`, `description`, `price`, `category`, `image`, `created_at`, `city`, `vendor_id`, `stock`, `is_featured`, `feature`) VALUES
+(1, 'Handmade Basket', 'A beautiful handmade basket.', 25.00, 'minglanilla', 'https://angelsarms.org/wp-content/uploads/2020/09/shop_11-1.jpg', '2025-03-19 13:07:46', NULL, 1, 25, 1, NULL),
+(2, 'Traditional Mat', 'A traditional mat made from local materials.', 15.00, 'minglanilla', 'https://m.media-amazon.com/images/I/71hwtEwHhhL._AC_UF894,1000_QL80_.jpg', '2025-03-19 13:07:46', NULL, 1, 15, 0, NULL),
+(3, 'Artisan Jewelry', 'Unique artisan jewelry.', 30.00, 'minglanilla', 'https://queencitycebu.com/wp-content/uploads/2022/09/susan.jpg', '2025-03-19 13:07:46', NULL, 1, 42, 1, NULL),
+(4, 'Minglanilla Handwoven Bag', 'A stylish handwoven bag made from local materials.', 35.00, 'minglanilla', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTONuIQi32Btviw_xfzOV9YRWotpeXuAsP8QljAKUUWUg&s&ec=72940544', '2025-03-19 13:12:32', NULL, 1, 20, 1, NULL),
+(5, 'Minglanilla Rattan Chair', 'A comfortable rattan chair perfect for your home.', 120.00, 'minglanilla', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3W9lsDO4rbJmZzb1yG3sGZyzGfc_fypvCDddVEhnOzQ&s&ec=72940544', '2025-03-19 13:12:32', NULL, 1, 47, 1, NULL),
+(6, 'Minglanilla Decorative Plate', 'Beautifully crafted decorative plate for your dining table.', 20.00, 'minglanilla', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFSJV1bYFbLyM5DptVOB4ctyCDGQL3uf4nNjQFGQNFsA&s&ec=72940544', '2025-03-19 13:12:32', NULL, 1, 46, 0, NULL),
+(7, 'Aloquinsan Bamboo Utensils', 'Eco-friendly bamboo utensils for your kitchen.', 15.00, 'aloquinsan', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1EZ0pjH2Cqy3yrf4DpA4C3TZajtXzQut5ZG4ibM3wDA&s&ec=72940544', '2025-03-19 13:12:32', NULL, 1, 27, 0, NULL),
+(8, 'Aloquinsan Handcrafted Soap', 'Natural handcrafted soap made from local ingredients.', 8.00, 'aloquinsan', 'https://ecowarriorph.com/wp-content/uploads/2020/09/soap-1-scaled.jpg', '2025-03-19 13:12:32', NULL, 1, 46, 0, NULL),
+(9, 'Aloquinsan Woven Basket', 'A traditional woven basket for storage or decoration.', 25.00, 'aloquinsan', 'https://api.deepai.org/job-view-file/d55f162f-3d70-4499-b659-dabf322b517c/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 46, 0, NULL),
+(10, 'Catmon Clay Pot', 'Handmade clay pot for cooking and serving.', 30.00, 'catmon', 'path/to/catmon_pot.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(11, 'Catmon Coconut Candies', 'Delicious coconut candies made from fresh coconuts.', 5.00, 'catmon', 'path/to/catmon_candies.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(12, 'Catmon Traditional Hat', 'A traditional hat made from local materials.', 12.00, 'catmon', 'path/to/catmon_hat.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(13, 'Dumanjug Torta', 'Famous Dumanjug Torta, a local delicacy.', 10.00, 'dumanjug', 'path/to/dumanjug_torta.jpg', '2025-03-19 13:12:32', NULL, 1, 13, 0, NULL),
+(14, 'Dumanjug Handwoven Mat', 'A beautiful handwoven mat for your home.', 40.00, 'dumanjug', 'https://api.deepai.org/job-view-file/c2da71fd-498a-481f-98a1-88fea58fd44f/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 23, 0, NULL),
+(15, 'Dumanjug Native Basket', 'A native basket perfect for carrying goods.', 18.00, 'dumanjug', 'https://api.deepai.org/job-view-file/da1ec28f-434b-4666-b28c-37114a15b4af/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 39, 0, NULL),
+(16, 'Santander Fresh Seafood', 'Freshly caught seafood from Santander.', 50.00, 'santander', 'https://api.deepai.org/job-view-file/323db2be-eb6a-417f-aa74-82f7c744fb10/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(17, 'Santander Handcrafted Souvenirs', 'Unique handcrafted souvenirs from Santander.', 15.00, 'santander', 'https://api.deepai.org/job-view-file/3e713f33-e3fa-4b2a-9f66-ef838f8bd9f3/outputs/output.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(18, 'Santander Local Spices', 'A selection of local spices for your cooking.', 7.00, 'santander', 'path/to/santander_spices.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(19, 'Alcoy Coconut Jam', 'Delicious coconut jam made from fresh coconuts.', 6.00, 'alcoy', 'path/to/alcoy_jam.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(20, 'Alcoy Handwoven Bags', 'Stylish handwoven bags made by local artisans.', 30.00, 'alcoy', 'path/to/alcoy_bags.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(21, 'Alcoy Beach Towels', 'Soft and absorbent beach towels for your trips.', 20.00, 'alcoy', 'path/to/alcoy_towels.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(22, 'Moalboal Shell Crafts', 'Beautiful shell crafts made by local artisans.', 25.00, 'moalboal', 'path/to/moalboal_shells.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(23, 'Moalboal Dried Fish', 'Traditional dried fish, a local delicacy.', 12.00, 'moalboal', 'path/to/moalboal_fish.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(24, 'Moalboal Beach Mats', 'Comfortable mats for your beach outings.', 15.00, 'moalboal', 'path/to/moalboal_mats.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(25, 'Borbon Takyong', 'Delicious Takyong (land snails) delicacy from Borbon.', 8.00, 'borbon', 'path/to/borbon_takyong.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(26, 'Borbon Handcrafted Baskets', 'Unique handcrafted baskets from Borbon.', 20.00, 'borbon', 'path/to/borbon_baskets.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(27, 'Borbon Local Produce', 'Fresh local produce from Borbon farmers.', 10.00, 'borbon', 'path/to/borbon_produce.jpg', '2025-03-19 13:12:32', NULL, 1, 0, 0, NULL),
+(28, 'Handwoven Basket', 'Beautifully crafted basket made from natural fibers', 0.00, 'crafts', 'images/basket.jpg', '2025-04-02 15:05:27', 'minglanilla', 1, 45, 0, NULL),
+(29, 'Honey Cake', 'Delicious homemade cake with natural honey', 0.00, 'delicacies', 'images/honeycake.jpg', '2025-04-02 15:05:27', 'catmon', 1, 32, 0, NULL),
+(30, 'Wooden Sculpture', 'Intricate hand-carved wooden sculpture', 0.00, 'crafts', 'images/sculpture.jpg', '2025-04-02 15:05:27', 'moalboal', 1, 35, 0, NULL),
+(31, 'Spiced Nuts', 'Roasted nuts with traditional spices', 0.00, 'delicacies', 'images/spicednuts.jpg', '2025-04-02 15:05:27', 'borbon', 1, 50, 0, NULL),
+(32, 'Test Product', 'A sample product', 100.00, 'crafts', 'uploads/test.jpg', '2025-04-02 16:25:25', 'cebu', 1, 16, 0, NULL),
+(33, 'LAPOK', 'SADAS', 1.03, 'FOODS', 'uploads/67ed65fb89471.png', '2025-04-02 16:29:47', 'BISAGASA', 1, 34, 0, NULL),
+(39, 'Cleo Flynn', 'Aut nisi veniam ill', 903.00, 'Adipisci enim fugiat', 'uploads/images.jpg', '2025-04-03 15:24:53', 'Anim accusantium ex', 2, 40, 0, NULL),
+(40, 'Keiko Potter', 'Totam incidunt sequ', 88.00, 'Eu dolore quo et bea', 'uploads/ERD.png', '2025-04-03 15:30:19', 'Sit officia omnis et', 2, 47, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -213,96 +214,4 @@ CREATE TABLE `vendors` (
 --
 ALTER TABLE `cart`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `product_id` (`product_id`);
-
---
--- Indexes for table `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- Indexes for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `product_id` (`product_id`);
-
---
--- Indexes for table `products`
---
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `cart`
---
-ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
-
---
--- AUTO_INCREMENT for table `orders`
---
-ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `order_items`
---
-ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
-
---
--- AUTO_INCREMENT for table `products`
---
-ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `cart`
---
-ALTER TABLE `cart`
-  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
-
---
--- Constraints for table `orders`
---
-ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
-  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+  ADD KEY `user_id`

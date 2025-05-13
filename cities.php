@@ -14,6 +14,33 @@ if (!file_exists($cityImagesDir)) {
     mkdir($cityImagesDir, 0777, true);
 }
 
+// Create barangay images directory if it doesn't exist
+$barangayImagesDir = 'images/barangays/minglanilla';
+if (!file_exists($barangayImagesDir)) {
+    mkdir($barangayImagesDir, 0777, true);
+}
+
+// Define barangays for Minglanilla
+$minglanilla_barangays = [
+    'Cadulawan',
+    'Calajo-an',
+    'Cuanos',
+    'Guindaruhan',
+    'Linao',
+    'Manduang',
+    'Pakigne',
+    'Poblacion Ward I',
+    'Poblacion Ward II',
+    'Poblacion Ward III',
+    'Poblacion Ward IV',
+    'Tubod',
+    'Tulay',
+    'Tunghaan',
+    'Tungkil',
+    'Tungkop',
+    'Vito'
+];
+
 // Fetch distinct cities from products table with LIMIT to prevent excessive data
 $sql = "SELECT DISTINCT city FROM products WHERE city IS NOT NULL LIMIT 20";
 $result = mysqli_query($conn, $sql);
@@ -35,7 +62,7 @@ $city_descriptions = [
     'Alcantara' => 'Home to Ronda Beach and agricultural products.',
     'Moalboal' => 'Popular for diving, snorkeling, and the sardine run.',
     'Borbon' => 'Known for the Ilocos Fishery Reserve and beautiful coastlines.',
-    'Cebu City' => 'The capital city of the province, known for its rich history and culture.'
+    'Talisay City' => 'Famous for its "Inasal" grilled food and Talisay Beach, located just south of Metro Cebu.'
 ];
 
 // Check if all cities from the database have descriptions, if not add defaults
@@ -68,6 +95,14 @@ $defaultImageData = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9I
             margin: 0;
             padding: 0;
             background-color: #f5f5f5;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 300px; /* Adjusted based on footer height plus some extra space */
+        }
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
         }
         .container {
             max-width: 1200px;
@@ -169,6 +204,65 @@ $defaultImageData = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9I
             60% { content: ".."; }
             80%, 100% { content: "..."; }
         }
+        /* Barangay styles */
+        .barangay-container {
+            margin-top: 30px;
+        }
+        .barangay-heading {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 24px;
+        }
+        .barangay-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .barangay-card {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .barangay-card:hover {
+            transform: translateY(-5px);
+        }
+        .barangay-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #f0f0f0;
+        }
+        .barangay-info {
+            padding: 20px;
+        }
+        .barangay-name {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .barangay-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .barangay-button {
+            background-color: #FF6B35;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .barangay-button:hover {
+            background-color: #E85A2D;
+        }
     </style>
 </head>
 <body>
@@ -197,6 +291,26 @@ $defaultImageData = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9I
                 </div>
             </div>
             <?php endforeach; ?>
+        </div>
+        
+        <!-- Minglanilla Barangays Container (Hidden by default) -->
+        <div id="minglanillaBarangays" class="barangay-container" style="display: none;">
+            <h2 class="barangay-heading">Barangays in Minglanilla</h2>
+            <div class="barangay-grid">
+                <?php foreach ($minglanilla_barangays as $barangay): ?>
+                <div class="barangay-card">
+                    <img src="<?php echo $defaultImageData; ?>" 
+                         data-src="images/barangays/minglanilla/<?php echo strtolower(str_replace(' ', '-', $barangay)); ?>.jpg" 
+                         alt="<?php echo $barangay; ?>" 
+                         class="barangay-image">
+                    <div class="barangay-info">
+                        <h3 class="barangay-name"><?php echo $barangay; ?></h3>
+                        <p class="barangay-description">Explore local products from <?php echo $barangay; ?> barangay in Minglanilla.</p>
+                        <a href="shop.php?city=Minglanilla&barangay=<?php echo urlencode($barangay); ?>" class="barangay-button">View Products</a>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 
@@ -230,7 +344,7 @@ $defaultImageData = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9I
         }
         
         function setupImageLoading() {
-            const images = document.querySelectorAll('.city-image');
+            const images = document.querySelectorAll('.city-image, .barangay-image');
             const defaultImage = '<?php echo $defaultImageData; ?>';
             
             images.forEach(img => {
@@ -256,12 +370,40 @@ $defaultImageData = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9I
         
         function setupSearch() {
             const searchInput = document.getElementById('citySearch');
+            const minglanillaBarangaysContainer = document.getElementById('minglanillaBarangays');
             if (!searchInput) return;
             
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase().trim();
                 const cityCards = document.querySelectorAll('.city-card');
                 
+                // Hide Minglanilla barangays container by default
+                minglanillaBarangaysContainer.style.display = 'none';
+                
+                // Special case for Minglanilla
+                const isMinglanillaSearch = searchTerm === 'minglanilla' || 
+                                          (searchTerm.length >= 3 && 'minglanilla'.includes(searchTerm));
+                
+                if (isMinglanillaSearch) {
+                    // Show Minglanilla barangays container
+                    minglanillaBarangaysContainer.style.display = 'block';
+                    
+                    // Filter barangay cards if there's more to the search term
+                    if (searchTerm.length > 10) { // More than just 'minglanilla'
+                        const barangayCards = document.querySelectorAll('.barangay-card');
+                        barangayCards.forEach(card => {
+                            const barangayName = card.querySelector('.barangay-name').textContent.toLowerCase();
+                            if (barangayName.includes(searchTerm.replace('minglanilla', '').trim())) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    }
+                }
+                
+                // Regular city filtering
+                let visibleCount = 0;
                 cityCards.forEach(card => {
                     const cityName = card.getAttribute('data-city').toLowerCase();
                     const cityText = card.querySelector('.city-name').textContent.toLowerCase();
@@ -269,10 +411,18 @@ $defaultImageData = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9I
                     
                     if (cityName.includes(searchTerm) || cityText.includes(searchTerm) || cityDesc.includes(searchTerm)) {
                         card.style.display = 'block';
+                        visibleCount++;
                     } else {
                         card.style.display = 'none';
                     }
                 });
+                
+                // Add a minimum height to the grid container if few results are shown
+                if (visibleCount <= 2) {
+                    document.getElementById('citiesGrid').style.minHeight = '500px';
+                } else {
+                    document.getElementById('citiesGrid').style.minHeight = 'auto';
+                }
             });
         }
     </script>

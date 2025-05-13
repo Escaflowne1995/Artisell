@@ -70,6 +70,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
+// Define categories and cities for dropdowns
+$categories = ["Crafts", "Delicacies"];
+$cities = ["Cebu City", "Mandaue City", "Lapu-Lapu City", "Talisay City", "Minglanilla", "Consolacion", "Liloan", "Cordova", "Compostela", "Danao City", "Carcar City", "Naga City", "Toledo City", "Bogo City"];
+
 mysqli_close($conn);
 ?>
 
@@ -99,24 +103,58 @@ mysqli_close($conn);
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
+            height: 60px;
         }
         .logo a { 
             color: #ff6b00; 
             text-decoration: none; 
-            font-size: 20px; 
+            font-size: 24px; 
             font-weight: bold; 
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+        .logo span {
+            color: #333;
         }
         nav ul { 
             display: flex; 
             list-style: none; 
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            height: 100%;
         }
         nav ul li { 
-            margin-left: 25px; 
+            margin-left: 30px;
+            height: 100%;
+            display: flex;
+            align-items: center;
         }
         nav ul li a { 
             color: #333; 
             text-decoration: none; 
-            font-weight: 500; 
+            font-weight: 500;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        nav ul li a:hover {
+            color: #ff6b00;
+        }
+        nav ul li a.active {
+            color: #ff6b00;
+        }
+        nav ul li a.active:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #ff6b00;
         }
         h1 { 
             font-size: 24px; 
@@ -146,12 +184,17 @@ mysqli_close($conn);
             font-weight: 500; 
         }
         .form-group input, 
-        .form-group textarea { 
+        .form-group textarea,
+        .form-group select { 
             width: 100%; 
             padding: 8px; 
             border: 1px solid #ddd; 
             border-radius: 4px; 
             box-sizing: border-box; 
+        }
+        .form-group select {
+            background-color: white;
+            height: 38px;
         }
         .form-group textarea { 
             height: 100px; 
@@ -179,18 +222,97 @@ mysqli_close($conn);
             background: #f8d7da; 
             color: #721c24; 
         }
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+            .header-inner {
+                flex-direction: column;
+                height: auto;
+                padding: 15px 0;
+            }
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 15px;
+            }
+            nav ul li {
+                margin: 0 15px;
+                padding: 5px 0;
+            }
+            .shipping-form {
+                padding: 15px;
+            }
+        }
+        /* Profile dropdown styling */
+        .profile-dropdown {
+            position: relative;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .profile-dropdown > a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dropdown-content {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: #fff;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            min-width: 150px;
+            z-index: 1000;
+            margin-top: 8px;
+            display: none;
+        }
+        .dropdown-content a {
+            display: block;
+            padding: 12px 15px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+        .dropdown-content a:hover {
+            background-color: #f9f9f9;
+        }
+        .profile-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="container header-inner">
-            <div class="logo"><a href="#">Art<span style="color: #333;">Sell</span></a></div>
+            <div class="logo"><a href="index.php">Art<span>Sell</span></a></div>
             <nav>
                 <ul>
-                    <li><a href="index.php">Home</a></li>
                     <li><a href="shop.php">Shop</a></li>
                     <li><a href="add_product.php">Add Product</a></li>
-                    <li><a href="logout.php">Logout</a></li>
+                    <li class="profile-dropdown">
+                        <a href="profile.php">
+                            <?php echo htmlspecialchars($_SESSION['username']); ?>
+                            <?php if (isset($_SESSION['profile_picture']) && !empty($_SESSION['profile_picture'])): ?>
+                                <img src="<?php echo htmlspecialchars($_SESSION['profile_picture']); ?>" alt="Profile" class="profile-pic">
+                            <?php else: ?>
+                                <img src="images/default-profile.jpg" alt="Profile" class="profile-pic">
+                            <?php endif; ?>
+                        </a>
+                        <div class="dropdown-content">
+                            <a href="settings.php">Settings</a>
+                            <a href="logout.php">Logout</a>
+                        </div>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -218,11 +340,21 @@ mysqli_close($conn);
                     </div>
                     <div class="form-group">
                         <label>Category:</label>
-                        <input type="text" name="category" value="<?php echo isset($_POST['category']) ? htmlspecialchars($_POST['category']) : ''; ?>" required>
+                        <select name="category" required>
+                            <option value="" disabled <?php echo !isset($_POST['category']) ? 'selected' : ''; ?>>Select Category</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo (isset($_POST['category']) && $_POST['category'] === $cat) ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>City:</label>
-                        <input type="text" name="city" value="<?php echo isset($_POST['city']) ? htmlspecialchars($_POST['city']) : ''; ?>" required>
+                        <select name="city" required>
+                            <option value="" disabled <?php echo !isset($_POST['city']) ? 'selected' : ''; ?>>Select City</option>
+                            <?php foreach ($cities as $cty): ?>
+                                <option value="<?php echo htmlspecialchars($cty); ?>" <?php echo (isset($_POST['city']) && $_POST['city'] === $cty) ? 'selected' : ''; ?>><?php echo htmlspecialchars($cty); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Stock:</label>
@@ -237,5 +369,27 @@ mysqli_close($conn);
             </div>
         </div>
     </div>
+
+    <script>
+        // Add this at the end of your body tag
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            const dropdownContent = document.querySelector('.dropdown-content');
+            
+            profileDropdown.addEventListener('click', function(e) {
+                if (e.target.closest('a').getAttribute('href') === 'profile.php') {
+                    e.preventDefault();
+                    dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.profile-dropdown')) {
+                    dropdownContent.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

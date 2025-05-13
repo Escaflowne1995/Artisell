@@ -3,6 +3,9 @@ footer {
   background-color: #1a3d55;
   color: white;
   padding: 50px 0 20px;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .footer-content {
@@ -10,6 +13,14 @@ footer {
   justify-content: space-between;
   margin-bottom: 30px;
   flex-wrap: wrap;
+  width: 100%;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
 }
 
 .footer-column {
