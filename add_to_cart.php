@@ -80,14 +80,6 @@ if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
             ];
         }
         
-        // Update stock in the database
-        $new_stock = $product['stock'] - $quantity;
-        $update_stock_query = "UPDATE products SET stock = ? WHERE id = ?";
-        $update_stmt = mysqli_prepare($conn, $update_stock_query);
-        mysqli_stmt_bind_param($update_stmt, "ii", $new_stock, $product_id);
-        mysqli_stmt_execute($update_stmt);
-        mysqli_stmt_close($update_stmt);
-        
         // Check if redirect parameter is set
         if (isset($_POST['redirect']) && !empty($_POST['redirect'])) {
             $redirect_url = $_POST['redirect'];
@@ -99,6 +91,10 @@ if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
             
             // Redirect to the specified page
             header("Location: " . $redirect_url);
+            exit;
+        } else {
+            // Default redirect back to shop page if no redirect specified
+            header("Location: shop.php");
             exit;
         }
         

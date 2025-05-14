@@ -415,6 +415,9 @@ foreach ($paginated_products as $key => $product) {
                                         
                                         <form action="add_to_cart.php" method="POST" style="flex-grow: 1;">
                                             <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <input type="hidden" name="current_url" value="<?php echo $_SERVER['REQUEST_URI']; ?>">
+                                            <input type="hidden" name="redirect" value="shop.php">
                                             <button type="submit" class="btn btn-primary" style="width: 100%;" <?php echo $stock <= 0 ? 'disabled' : ''; ?>>
                                                 <i class="fas fa-cart-plus"></i> Add to Cart
                                             </button>

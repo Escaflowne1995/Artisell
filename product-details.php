@@ -8,9 +8,9 @@ $product_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 // Get product details
 $product = null;
 if ($product_id > 0) {
-    $query = "SELECT * FROM products WHERE id = ? OR product_id = ?";
+    $query = "SELECT * FROM products WHERE id = ?";
     $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "ii", $product_id, $product_id);
+    mysqli_stmt_bind_param($stmt, "i", $product_id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     
@@ -25,8 +25,8 @@ if (!$product) {
     exit;
 }
 
-// Get product name from either name or product_name field
-$product_name = isset($product['name']) ? $product['name'] : (isset($product['product_name']) ? $product['product_name'] : 'Product');
+// Get product name from name field
+$product_name = isset($product['name']) ? $product['name'] : 'Product';
 
 // Get image path
 $image_path = isset($product['image']) && !empty($product['image']) ? $product['image'] : "image/coconut-bowl-palm.jpg";
@@ -356,17 +356,17 @@ $stock = isset($product['stock']) ? (int)$product['stock'] : 0;
             <div class="product-grid">
                 <?php
                 // Get related products
-                $related_query = "SELECT * FROM products WHERE id != ? OR product_id != ? ORDER BY RAND() LIMIT 4";
+                $related_query = "SELECT * FROM products WHERE id != ? ORDER BY RAND() LIMIT 4";
                 $related_stmt = mysqli_prepare($conn, $related_query);
-                mysqli_stmt_bind_param($related_stmt, "ii", $product_id, $product_id);
+                mysqli_stmt_bind_param($related_stmt, "i", $product_id);
                 mysqli_stmt_execute($related_stmt);
                 $related_result = mysqli_stmt_get_result($related_stmt);
                 
                 if ($related_result && mysqli_num_rows($related_result) > 0) {
                     while ($related = mysqli_fetch_assoc($related_result)) {
-                        $related_name = isset($related['name']) ? $related['name'] : (isset($related['product_name']) ? $related['product_name'] : 'Product');
+                        $related_name = isset($related['name']) ? $related['name'] : 'Product';
                         $related_image = isset($related['image']) && !empty($related['image']) ? $related['image'] : "image/coconut-bowl-palm.jpg";
-                        $related_id = isset($related['id']) ? $related['id'] : (isset($related['product_id']) ? $related['product_id'] : 1);
+                        $related_id = isset($related['id']) ? $related['id'] : 1;
                         $related_price = isset($related['price']) ? $related['price'] : 0;
                         $related_description = isset($related['description']) ? $related['description'] : 'Authentic Cebuano product';
                 ?>

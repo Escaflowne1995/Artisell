@@ -266,14 +266,18 @@ if (isset($_GET['error'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArtSell - Checkout</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/modern.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #ff6b00;
-            --primary-dark: #e65c00;
-            --secondary: #2c3e50;
+            --primary: #2E8B57;         /* Sea Green primary */
+            --primary-dark: #1e6e45;    /* Dark green */
+            --primary-light: #3cb371;   /* Light green */
+            --secondary: #1a3d55;       /* Deep blue */
+            --secondary-light: #2c5a7c; /* Medium blue */
+            --accent: #4fb3ff;
+            --blue: #0066cc;           /* Logo blue */
             --light: #f8f9fa;
             --dark: #343a40;
             --success: #28a745;
@@ -290,7 +294,7 @@ if (isset($_GET['error'])) {
         body {
             background-color: var(--light);
             color: var(--dark);
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
             margin: 0;
             padding: 0;
@@ -319,25 +323,32 @@ if (isset($_GET['error'])) {
         }
 
         .logo a {
-            color: var(--primary);
             text-decoration: none;
             font-size: 24px;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
 
-        nav ul {
+        /* Navigation styles */
+        nav {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .nav-links {
             display: flex;
             list-style: none;
             margin: 0;
             padding: 0;
+            align-items: center;
         }
 
-        nav ul li {
+        .nav-links li {
             margin-left: 25px;
         }
 
-        nav ul li a {
+        .nav-links li a {
             color: var(--dark);
             text-decoration: none;
             font-weight: 500;
@@ -347,12 +358,13 @@ if (isset($_GET['error'])) {
             font-size: 15px;
         }
 
-        nav ul li a:hover {
+        .nav-links li a:hover {
             color: var(--primary);
         }
 
         .profile-dropdown {
             position: relative;
+            margin-left: auto;
         }
 
         .profile-dropdown:hover .dropdown-content {
@@ -391,7 +403,22 @@ if (isset($_GET['error'])) {
         .dropdown-content a:hover {
             background: var(--gray-light);
         }
+        
+        /* Profile Link */
+        .profile-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+        
         /* Checkout Container */
         .checkout-container {
             padding: 40px 0;
@@ -453,7 +480,7 @@ if (isset($_GET['error'])) {
             padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: var(--border-radius);
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
             transition: var(--transition);
             font-size: 15px;
         }
@@ -461,7 +488,7 @@ if (isset($_GET['error'])) {
         .form-group input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
         }
 
         /* Payment Methods */
@@ -525,7 +552,7 @@ if (isset($_GET['error'])) {
             transition: var(--transition);
             font-size: 16px;
             font-weight: 600;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -585,21 +612,6 @@ if (isset($_GET['error'])) {
         .summary-total .total-amount {
             color: var(--primary);
             font-size: 20px;
-        }
-
-        /* Profile Link */
-        .profile-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .profile-pic {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary);
         }
 
         /* Error Messages */
@@ -707,15 +719,12 @@ if (isset($_GET['error'])) {
     <!-- Header -->
     <header>
         <div class="container header-inner">
-            <div class="logo"><a href="index.php">Art<span style="color: var(--secondary);">Sell</span></a></div>
+            <div class="logo"><a href="index.php"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a></div>
             <nav>
-                <ul>
+                <ul class="nav-links">
                     <li><a href="index.php"><i class="fas fa-home"></i> Home</a></li>
                     <li><a href="shop.php"><i class="fas fa-store"></i> Shop</a></li>
-                    <li><a href="cart.php">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>(<?php echo count($_SESSION['cart']); ?>)</span>
-                    </a></li>
+                    <li><a href="cart.php"><i class="fas fa-shopping-cart"></i> (<?php echo count($_SESSION['cart']); ?>)</a></li>
                     <li class="profile-dropdown">
                         <a href="profile.php" class="profile-link">
                             <?php echo htmlspecialchars($_SESSION['username']); ?>

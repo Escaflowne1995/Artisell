@@ -10,6 +10,7 @@
   --secondary: #1a3d55;       /* Deep blue */
   --secondary-light: #2c5a7c; /* Medium blue */
   --accent: #4fb3ff;
+  --blue: #0066cc;           /* Logo blue */
   --neutral-100: #ffffff;
   --neutral-200: #f8f9fa;
   --neutral-300: #e9ecef;
@@ -826,6 +827,7 @@ footer {
 .text-info { color: #17a2b8; }
 .text-green { color: var(--green-400); }
 .text-blue { color: var(--blue-400); }
+.text-blue-logo { color: var(--blue); }
 
 .bg-primary { background-color: var(--primary); }
 .bg-secondary { background-color: var(--secondary); }

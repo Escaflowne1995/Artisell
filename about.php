@@ -10,6 +10,11 @@ session_start();
     <title>About ArtiSell - Cebu's Cultural Marketplace</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* About page specific styles */
         body { 
@@ -44,23 +49,22 @@ session_start();
         .logo {
             font-size: 24px;
             font-weight: bold;
-            color: #2E8B57;
             text-decoration: none;
-        }
-        
-        .logo span {
-            color: #333;
         }
         
         .nav-links {
             display: flex;
+            list-style: none;
             gap: 25px;
+            margin: 0;
+            padding: 0;
         }
         
         .nav-link {
             color: #333;
             text-decoration: none;
             font-size: 16px;
+            font-weight: 500;
             transition: color 0.3s;
         }
         
@@ -103,6 +107,47 @@ session_start();
         
         .header-right a.login:hover {
             background-color: #236b42;
+        }
+        
+        .profile-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .btn {
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline {
+            border: 1px solid #2E8B57;
+            color: #2E8B57;
+            background: transparent;
+        }
+        
+        .btn-primary {
+            background-color: #2E8B57;
+            color: white !important;
+        }
+        
+        .btn-sm {
+            padding: 6px 15px;
+            font-size: 14px;
+        }
+        
+        .text-green {
+            color: #008a39;
+        }
+        
+        .text-blue {
+            color: #0066cc;
         }
         
         /* Hero Section */
@@ -302,7 +347,7 @@ session_start();
         
         /* CTA Section */
         .cta-section {
-            background: #2E8B57;
+            background: #6E6E6E;
             color: white;
             padding: 60px 0;
             text-align: center;
@@ -331,25 +376,6 @@ session_start();
             flex-wrap: wrap;
         }
         
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-white {
-            background: white;
-            color: #2E8B57;
-        }
-        
-        .btn-outline {
-            border: 2px solid white;
-            color: white;
-        }
-        
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -359,12 +385,6 @@ session_start();
         .profile-dropdown {
             position: relative;
             display: inline-block;
-        }
-        
-        .profile-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
         .profile-pic {
@@ -428,51 +448,60 @@ session_start();
 <body>
     <div class="main-container">
         <header class="header">
-            <div class="header-inner">
-                <a href="index.php" class="logo">Arti<span>Sell</span></a>
+            <div class="container header-inner">
+                <a href="index.php" class="logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
                 
                 <nav>
-                    <div class="nav-links">
-                        <a href="index.php" class="nav-link">Home</a>
-                        <a href="shop.php" class="nav-link">Shop</a>
-                        <a href="cities.php" class="nav-link">Cities</a>
-                        <a href="about.php" class="nav-link active">About</a>
-                    </div>
+                    <ul class="nav-links">
+                        <li><a href="index.php" class="nav-link">Home</a></li>
+                        <li><a href="shop.php" class="nav-link">Shop</a></li>
+                        <li><a href="cities.php" class="nav-link">Cities</a></li>
+                        <li><a href="about.php" class="nav-link active">About</a></li>
+                    </ul>
                 </nav>
                 
                 <div class="header-right">
-                    <a href="cart.php">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                        </svg>
-                        <?php echo isset($_SESSION['cart']) ? " (" . count($_SESSION['cart']) . ")" : ""; ?>
+                    <a href="cart.php" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <?php
+                        $cart_count = 0;
+                        if (isset($_SESSION['cart'])) {
+                            foreach ($_SESSION['cart'] as $item) {
+                                $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
+                            }
+                        }
+                        if ($cart_count > 0) {
+                            echo "<span>($cart_count)</span>";
+                        }
+                        ?>
                     </a>
                     
                     <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
                         <div class="profile-dropdown">
-                            <a href="profile.php" class="nav-link profile-link">
-                                <?php echo htmlspecialchars($_SESSION['username']); ?>
-                                <?php if (!empty($_SESSION['profile_picture'])): ?>
-                                    <?php
-                                    // Check if the profile picture is a URL or a local file
-                                    $profile_pic = $_SESSION['profile_picture'];
-                                    if (strpos($profile_pic, 'http') === 0) {
-                                        // Use default profile picture instead of external URLs
-                                        $profile_pic = "images/default-profile.jpg";
-                                    }
-                                    ?>
-                                    <img src="<?php echo htmlspecialchars($profile_pic); ?>" alt="Profile" class="profile-pic">
-                                <?php else: ?>
-                                    <img src="images/default-profile.jpg" alt="Profile" class="profile-pic">
-                                <?php endif; ?>
+                            <a href="#" class="profile-link">
+                                <span><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                                <i class="fas fa-chevron-down"></i>
                             </a>
                             <div class="dropdown-content">
-                                <a href="settings.php" class="dropdown-item">Settings</a>
-                                <a href="logout.php" class="dropdown-item">Logout</a>
+                                <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
+                                    <a href="vendor_products.php" class="dropdown-item">
+                                        <i class="fas fa-box"></i> My Products
+                                    </a>
+                                <?php endif; ?>
+                                <a href="profile.php" class="dropdown-item">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
+                                <a href="settings.php" class="dropdown-item">
+                                    <i class="fas fa-cog"></i> Settings
+                                </a>
+                                <a href="logout.php" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
                             </div>
                         </div>
                     <?php else: ?>
-                        <a href="login.php" class="login">Login</a>
+                        <a href="login.php" class="btn btn-outline btn-sm">Login</a>
+                        <a href="signup.php" class="btn btn-primary btn-sm">Sign Up</a>
                     <?php endif; ?>
                 </div>
             </div>

@@ -113,7 +113,7 @@ if (!empty($_SESSION['cart'])) {
 <body>
     <header class="header">
         <div class="container header-inner">
-            <a href="index.php" class="logo">Arti<span class="text-primary">Sell</span></a>
+            <a href="index.php" class="logo">Arti<span class="text-blue-logo">Sell</span></a>
             
             <nav>
                 <ul class="nav-links">

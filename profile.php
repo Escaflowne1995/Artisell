@@ -54,70 +54,13 @@ if ($role === 'vendor') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - ArtSell</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>My Profile - ArtiSell</title>
+    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background-color: #f9f9f9; 
-            color: #333; 
-            font-family: 'Open Sans', sans-serif; 
-        }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 0 20px; 
-        }
-        header { 
-            background: #fff; 
-            padding: 15px 0; 
-            border-bottom: 1px solid #eee; 
-        }
-        .header-inner { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .logo a { 
-            color: #ff6b00; 
-            text-decoration: none; 
-            font-size: 20px; 
-            font-weight: bold; 
-        }
-        nav ul { 
-            display: flex; 
-            list-style: none; 
-        }
-        nav ul li { 
-            margin-left: 25px; 
-        }
-        nav ul li a { 
-            color: #333; 
-            text-decoration: none; 
-            font-weight: 500; 
-        }
-        .profile-dropdown { 
-            position: relative; 
-        }
-        .profile-dropdown:hover .dropdown-content { 
-            display: block; 
-        }
-        .dropdown-content { 
-            position: absolute; 
-            right: 0; 
-            background: #fff; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            border-radius: 4px; 
-            min-width: 120px; 
-        }
-        .dropdown-content a { 
-            display: block; 
-            padding: 10px 15px; 
-            color: #333; 
-            text-decoration: none; 
-        }
-        .dropdown-content a:hover { 
-            background: #f5f5f5; 
-        }
         .profile-container {
             padding: 30px 0;
         }
@@ -125,10 +68,10 @@ if ($role === 'vendor') {
             display: flex;
             align-items: center;
             margin-bottom: 30px;
-            background: #fff;
+            background: var(--neutral-100);
             padding: 20px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
         }
         .profile-pic-large {
             width: 120px;
@@ -138,54 +81,54 @@ if ($role === 'vendor') {
             margin-right: 25px;
         }
         .profile-info h1 {
-            font-size: 24px;
+            font-size: var(--font-size-2xl);
             font-weight: 600;
             margin-bottom: 5px;
-            color: #333;
+            color: var(--neutral-900);
         }
         .profile-info p {
-            color: #666;
+            color: var(--neutral-700);
             margin-bottom: 15px;
         }
         .profile-role {
             display: inline-block;
             padding: 4px 10px;
-            background: #f0f0f0;
+            background: var(--neutral-200);
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
-            color: #555;
+            color: var(--neutral-700);
             margin-bottom: 15px;
         }
         .profile-role.vendor {
-            background: #e6f7ff;
-            color: #0080ff;
+            background: var(--blue-100);
+            color: var(--blue);
         }
         .profile-role.admin {
-            background: #f6e6ff;
-            color: #9933cc;
+            background: var(--green-100);
+            color: var(--primary);
         }
         .edit-profile-btn {
             display: inline-block;
             padding: 8px 16px;
-            background: #ff6b00;
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: var(--radius-md);
             text-decoration: none;
             font-weight: 500;
             transition: background 0.3s ease;
         }
         .edit-profile-btn:hover {
-            background: #e65c00;
+            background: var(--primary-dark);
             text-decoration: none;
         }
         .profile-tabs {
             display: flex;
             margin-bottom: 20px;
-            background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--neutral-100);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
             overflow: hidden;
         }
         .profile-tab {
@@ -197,19 +140,19 @@ if ($role === 'vendor') {
             transition: all 0.3s ease;
         }
         .profile-tab.active {
-            border-bottom: 2px solid #ff6b00;
+            border-bottom: 2px solid var(--primary);
             font-weight: 600;
-            color: #ff6b00;
+            color: var(--primary);
         }
         .profile-tab:hover {
-            background: #f9f9f9;
+            background: var(--neutral-200);
         }
         .tab-content {
             display: none;
-            background: #fff;
+            background: var(--neutral-100);
             padding: 20px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
             margin-bottom: 30px;
         }
         .tab-content.active {
@@ -220,7 +163,24 @@ if ($role === 'vendor') {
             font-weight: 600;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--neutral-300);
+            color: var(--neutral-800);
+        }
+        .account-info {
+            margin-bottom: 20px;
+        }
+        .account-info p {
+            display: flex;
+            margin-bottom: 12px;
+            color: var(--neutral-700);
+        }
+        .account-info strong {
+            width: 150px;
+            color: var(--neutral-800);
+            font-weight: 500;
+        }
+        .account-actions {
+            margin-top: 24px;
         }
         .orders-table {
             width: 100%;
@@ -229,11 +189,11 @@ if ($role === 'vendor') {
         .orders-table th, .orders-table td {
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--neutral-300);
         }
         .orders-table th {
             font-weight: 600;
-            color: #555;
+            color: var(--neutral-700);
         }
         .status-badge {
             display: inline-block;
@@ -247,150 +207,105 @@ if ($role === 'vendor') {
             color: #ffa500;
         }
         .status-shipped {
-            background: #e6f7ff;
-            color: #0080ff;
+            background: var(--blue-100);
+            color: var(--blue);
         }
         .status-delivered {
-            background: #e6ffe6;
-            color: #00cc00;
+            background: var(--green-100);
+            color: var(--primary);
         }
-        .no-items {
-            text-align: center;
-            padding: 20px;
-            color: #666;
+        .status-cancelled {
+            background: #ffe6e6;
+            color: #ff4d4d;
         }
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        .product-card {
-            background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.2s;
-        }
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
-        .product-image {
-            height: 150px;
-            overflow: hidden;
-        }
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .product-details {
-            padding: 15px;
-        }
-        .product-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        .product-price {
-            color: #ff6b00;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        .product-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .product-actions a {
-            flex: 1;
-            text-align: center;
-            padding: 6px 0;
-            font-size: 12px;
-            color: white;
-            border-radius: 4px;
-            text-decoration: none;
-        }
-        .edit-btn {
-            background: #3b5998;
-        }
-        .view-btn {
-            background: #33cc33;
-        }
-        .profile-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .profile-pic {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .account-info {
-            margin-bottom: 20px;
-        }
-        .account-info p {
-            display: flex;
-            margin-bottom: 10px;
-            color: #666;
-        }
-        .account-info strong {
-            width: 150px;
-            color: #333;
-        }
-        .account-actions {
-            margin-top: 20px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            margin-right: 10px;
-            transition: background 0.3s ease;
-        }
-        .btn-primary {
-            background: #ff6b00;
-            color: white;
-        }
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-        .btn:hover {
-            opacity: 0.9;
+        
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .profile-pic-large {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            .profile-tabs {
+                flex-wrap: wrap;
+            }
+            .profile-tab {
+                flex: 1 0 100%;
+                padding: 12px;
+            }
+            .account-info p {
+                flex-direction: column;
+            }
+            .account-info strong {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            .orders-table {
+                display: block;
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
+    <header class="header">
         <div class="container header-inner">
-            <div class="logo"><a href="#">Art<span style="color: #333;">Sell</span></a></div>
+            <a href="index.php" class="logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
+            
             <nav>
-                <ul>
-                    <li><a href="index.php">Home</a></li>
-                    <li><a href="shop.php">Shop</a></li>
-                    <?php if ($role === 'vendor'): ?>
-                        <li><a href="add_product.php">Add Product</a></li>
-                        <li><a href="vendor_products.php">My Products</a></li>
-                    <?php else: ?>
-                        <li><a href="cart.php"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
-                        </svg>(<?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>)</a></li>
-                    <?php endif; ?>
-                    <li class="profile-dropdown">
-                        <a href="profile.php" class="profile-link">
-                            <?php echo htmlspecialchars($username); ?>
-                            <img src="<?php echo htmlspecialchars($profile_picture); ?>" alt="Profile" class="profile-pic">
-                        </a>
-                        <div class="dropdown-content">
-                            <a href="settings.php">Settings</a>
-                            <a href="logout.php">Logout</a>
-                        </div>
-                    </li>
+                <ul class="nav-links">
+                    <li><a href="index.php" class="nav-link">Home</a></li>
+                    <li><a href="shop.php" class="nav-link">Shop</a></li>
+                    <li><a href="cities.php" class="nav-link">Cities</a></li>
+                    <li><a href="about.php" class="nav-link">About</a></li>
                 </ul>
             </nav>
+            
+            <div class="header-right">
+                <a href="cart.php" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <?php
+                    $cart_count = 0;
+                    if (isset($_SESSION['cart'])) {
+                        foreach ($_SESSION['cart'] as $item) {
+                            $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
+                        }
+                    }
+                    if ($cart_count > 0) {
+                        echo "<span>($cart_count)</span>";
+                    }
+                    ?>
+                </a>
+                
+                <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                <div class="profile-dropdown">
+                    <a href="#" class="profile-link">
+                        <?php echo htmlspecialchars($_SESSION["username"]); ?> <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div class="dropdown-content">
+                        <a href="profile.php" class="dropdown-item">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                        <?php if ($_SESSION["role"] == "vendor"): ?>
+                        <a href="vendor_products.php" class="dropdown-item">
+                            <i class="fas fa-box"></i> My Products
+                        </a>
+                        <a href="vendor_inventory.php" class="dropdown-item">
+                            <i class="fas fa-clipboard-list"></i> Inventory
+                        </a>
+                        <?php endif; ?>
+                        <a href="logout.php" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+                <?php else: ?>
+                <a href="login.php" class="btn btn-primary">Login</a>
+                <?php endif; ?>
+            </div>
         </div>
     </header>
 
@@ -460,16 +375,16 @@ if ($role === 'vendor') {
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="order_details.php?id=<?php echo $order['id']; ?>">View</a>
+                                        <a href="order_details.php?id=<?php echo $order['id']; ?>" class="text-primary">View</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
                 <?php else: ?>
-                    <div class="no-items">
-                        <p>You haven't placed any orders yet.</p>
-                        <p><a href="shop.php">Start shopping</a></p>
+                    <div class="text-center p-5">
+                        <p class="mb-3">You haven't placed any orders yet.</p>
+                        <a href="shop.php" class="btn btn-primary">Start shopping</a>
                     </div>
                 <?php endif; ?>
             </div>
@@ -482,25 +397,25 @@ if ($role === 'vendor') {
                 <?php if (!empty($products)): ?>
                     <div class="product-grid">
                         <?php foreach ($products as $product): ?>
-                            <div class="product-card">
-                                <div class="product-image">
+                            <div class="card">
+                                <div class="card-img">
                                     <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                                 </div>
-                                <div class="product-details">
-                                    <h3 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h3>
-                                    <p class="product-price">₱<?php echo number_format($product['price'], 2); ?></p>
-                                    <div class="product-actions">
-                                        <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="edit-btn">Edit</a>
-                                        <a href="shop.php?id=<?php echo $product['id']; ?>" class="view-btn">View</a>
+                                <div class="card-body">
+                                    <h3 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h3>
+                                    <p class="card-price">₱<?php echo number_format($product['price'], 2); ?></p>
+                                    <div class="d-flex justify-content-between mt-3">
+                                        <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="btn btn-secondary btn-sm">Edit</a>
+                                        <a href="shop.php?id=<?php echo $product['id']; ?>" class="btn btn-primary btn-sm">View</a>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <div class="no-items">
-                        <p>You haven't added any products yet.</p>
-                        <p><a href="add_product.php">Add your first product</a></p>
+                    <div class="text-center p-5">
+                        <p class="mb-3">You haven't added any products yet.</p>
+                        <a href="add_product.php" class="btn btn-primary">Add your first product</a>
                     </div>
                 <?php endif; ?>
             </div>
