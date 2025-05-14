@@ -87,344 +87,337 @@ $defaultImageData = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9I
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArtiSell - Explore Cebu Province</title>
-    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/modern.css">
     <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-            min-height: 100vh;
-            position: relative;
-            padding-bottom: 300px; /* Adjusted based on footer height plus some extra space */
-        }
-        footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .cities-heading {
+        .hero-cities {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('images/cebu-panorama.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: var(--space-8) 0;
             text-align: center;
-            margin-bottom: 30px;
-            color: #333;
+            margin-bottom: var(--space-6);
         }
+        
+        .hero-title {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--space-4);
+            color: white;
+        }
+        
+        .search-container {
+            margin: var(--space-6) auto;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        #citySearch {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-md);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal) ease;
+        }
+        
+        #citySearch:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+        
         .cities-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--space-5);
+            margin-bottom: var(--space-8);
         }
+        
         .city-card {
-            background-color: #fff;
-            border-radius: 8px;
+            background-color: var(--neutral-100);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-md);
+            transition: transform var(--transition-normal) ease, box-shadow var(--transition-normal) ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
+        
         .city-card:hover {
             transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
         }
+        
         .city-image {
             width: 100%;
-            height: 200px;
+            height: 220px;
             object-fit: cover;
-            background-color: #f0f0f0;
         }
+        
         .city-info {
-            padding: 20px;
-        }
-        .city-name {
-            font-size: 20px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .city-description {
-            color: #666;
-            margin-bottom: 15px;
-        }
-        .city-button {
-            background-color: #FF6B35;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .city-button:hover {
-            background-color: #E85A2D;
-        }
-        .search-container {
-            margin: 20px 0;
-            text-align: center;
-        }
-        #citySearch {
-            padding: 10px;
-            width: 300px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        .profile-link {
+            padding: var(--space-4);
+            flex-grow: 1;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
         }
-        .profile-pic {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
+        
+        .city-name {
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--space-2);
+            color: var(--neutral-900);
+            font-weight: 600;
         }
-        /* Loading indicator */
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-            padding: 20px;
-            font-size: 18px;
+        
+        .city-description {
+            color: var(--neutral-700);
+            margin-bottom: var(--space-4);
+            flex-grow: 1;
         }
-        .loading::after {
-            content: "...";
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-        @keyframes dots {
-            0%, 20% { content: ""; }
-            40% { content: "."; }
-            60% { content: ".."; }
-            80%, 100% { content: "..."; }
-        }
-        /* Barangay styles */
-        .barangay-container {
-            margin-top: 30px;
-        }
-        .barangay-heading {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-            font-size: 24px;
-        }
-        .barangay-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        .barangay-card {
-            background-color: #fff;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-        .barangay-card:hover {
-            transform: translateY(-5px);
-        }
-        .barangay-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            background-color: #f0f0f0;
-        }
-        .barangay-info {
-            padding: 20px;
-        }
-        .barangay-name {
-            font-size: 20px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .barangay-description {
-            color: #666;
-            margin-bottom: 15px;
-        }
-        .barangay-button {
-            background-color: #FF6B35;
+        
+        .city-button {
+            align-self: flex-start;
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 8px 16px;
-            text-align: center;
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color var(--transition-normal) ease;
             text-decoration: none;
             display: inline-block;
-            font-size: 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
         }
-        .barangay-button:hover {
-            background-color: #E85A2D;
+        
+        .city-button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin: var(--space-6) 0;
+            font-size: var(--font-size-3xl);
+            color: var(--neutral-800);
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -10px;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: var(--radius-full);
+        }
+        
+        .no-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--neutral-200);
+            color: var(--neutral-600);
+            font-weight: 500;
+            height: 100%;
         }
     </style>
 </head>
 <body>
-    <?php include 'components/header.php'; ?>
+    <header class="header">
+        <div class="container header-inner">
+            <a href="index.php" class="logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.php" class="nav-link">Home</a></li>
+                    <li><a href="shop.php" class="nav-link">Shop</a></li>
+                    <li><a href="cities.php" class="nav-link active">Cities</a></li>
+                    <li><a href="about.php" class="nav-link">About</a></li>
+                </ul>
+            </nav>
+            
+            <div class="header-right">
+                <a href="cart.php" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <?php
+                    $cart_count = 0;
+                    if (isset($_SESSION['cart'])) {
+                        foreach ($_SESSION['cart'] as $item) {
+                            $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
+                        }
+                    }
+                    if ($cart_count > 0) {
+                        echo "<span>($cart_count)</span>";
+                    }
+                    ?>
+                </a>
+                
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <div class="profile-dropdown">
+                        <a href="#" class="profile-link">
+                            <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Account'; ?>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-content">
+                            <a href="profile.php" class="dropdown-item">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="orders.php" class="dropdown-item">
+                                <i class="fas fa-box"></i> Orders
+                            </a>
+                            <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin']): ?>
+                                <a href="admin/dashboard.php" class="dropdown-item">
+                                    <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                                </a>
+                            <?php endif; ?>
+                            <a href="logout.php" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <a href="login.php" class="btn btn-sm btn-primary">Login</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-cities">
+        <div class="container">
+            <h1 class="hero-title">Explore - Cebu Province</h1>
+            <p>Discover the rich culture, traditions, and artisan products from different cities across Cebu</p>
+        </div>
+    </section>
 
     <div class="container">
-        <h1 class="cities-heading">Explore - Cebu Province</h1>
-        
         <div class="search-container">
-            <input type="text" id="citySearch" placeholder="Search for a city...">
+            <input type="text" id="citySearch" placeholder="Search for a city..." oninput="filterCities()">
         </div>
+
+        <h2 class="section-title">Cities in Cebu</h2>
         
-        <div class="loading" id="loadingIndicator">Loading cities</div>
-        
-        <div class="cities-grid" id="citiesGrid" style="display: none;">
-            <?php foreach ($city_descriptions as $city => $description): ?>
-            <div class="city-card" data-city="<?php echo strtolower($city); ?>">
-                <img src="<?php echo $defaultImageData; ?>" 
-                     data-src="images/cities/<?php echo strtolower(str_replace(' ', '-', $city)); ?>.jpg" 
-                     alt="<?php echo $city; ?>" 
-                     class="city-image">
-                <div class="city-info">
-                    <h2 class="city-name"><?php echo $city; ?></h2>
-                    <p class="city-description"><?php echo $description; ?></p>
-                    <a href="shop.php?city=<?php echo urlencode($city); ?>" class="city-button">Explore Artisan Products</a>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-        
-        <!-- Minglanilla Barangays Container (Hidden by default) -->
-        <div id="minglanillaBarangays" class="barangay-container" style="display: none;">
-            <h2 class="barangay-heading">Barangays in Minglanilla</h2>
-            <div class="barangay-grid">
-                <?php foreach ($minglanilla_barangays as $barangay): ?>
-                <div class="barangay-card">
-                    <img src="<?php echo $defaultImageData; ?>" 
-                         data-src="images/barangays/minglanilla/<?php echo strtolower(str_replace(' ', '-', $barangay)); ?>.jpg" 
-                         alt="<?php echo $barangay; ?>" 
-                         class="barangay-image">
-                    <div class="barangay-info">
-                        <h3 class="barangay-name"><?php echo $barangay; ?></h3>
-                        <p class="barangay-description">Explore local products from <?php echo $barangay; ?> barangay in Minglanilla.</p>
-                        <a href="shop.php?city=Minglanilla&barangay=<?php echo urlencode($barangay); ?>" class="barangay-button">View Products</a>
+        <div class="cities-grid" id="citiesGrid">
+            <?php
+            foreach ($cities as $city) {
+                $cityImageFile = "images/cities/" . strtolower(str_replace(' ', '_', $city)) . ".jpg";
+                $cityImageUrl = file_exists($cityImageFile) ? $cityImageFile : $defaultImageData;
+                $description = isset($city_descriptions[$city]) ? $city_descriptions[$city] : 'A beautiful city in Cebu with unique local products.';
+            ?>
+                <div class="city-card" data-city="<?php echo strtolower($city); ?>">
+                    <?php if (file_exists($cityImageFile)): ?>
+                        <img src="<?php echo $cityImageUrl; ?>" alt="<?php echo htmlspecialchars($city); ?>" class="city-image">
+                    <?php else: ?>
+                        <div class="city-image no-image">
+                            <span>City Image</span>
+                        </div>
+                    <?php endif; ?>
+                    <div class="city-info">
+                        <h3 class="city-name"><?php echo htmlspecialchars($city); ?></h3>
+                        <p class="city-description"><?php echo htmlspecialchars($description); ?></p>
+                        <a href="city_products.php?city=<?php echo urlencode($city); ?>" class="city-button">Explore Artisan Products</a>
                     </div>
                 </div>
-                <?php endforeach; ?>
-            </div>
+            <?php } ?>
         </div>
+
+        <div id="loading" class="loading">Loading more cities...</div>
     </div>
 
-    <?php include 'components/footer.php'; ?>
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <a href="index.php" class="footer-logo">ArtiSell</a>
+                    <p>Connecting artisans of Cebu with customers around the world.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Explore</h3>
+                    <ul class="footer-links">
+                        <li><a href="shop.php">Shop</a></li>
+                        <li><a href="cities.php">Cities</a></li>
+                        <li><a href="categories.php">Categories</a></li>
+                        <li><a href="artisans.php">Artisans</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="contact.php">Contact Us</a></li>
+                        <li><a href="faq.php">FAQs</a></li>
+                        <li><a href="shipping.php">Shipping Policy</a></li>
+                        <li><a href="returns.php">Returns & Exchanges</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>About Us</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.php">Our Story</a></li>
+                        <li><a href="blog.php">Blog</a></li>
+                        <li><a href="testimonials.php">Testimonials</a></li>
+                        <li><a href="careers.php">Careers</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date('Y'); ?> ArtiSell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        // Show loading indicator
-        document.getElementById('loadingIndicator').style.display = 'block';
-        
-        // Wait for DOM to be fully loaded
+        function filterCities() {
+            const searchTerm = document.getElementById('citySearch').value.toLowerCase();
+            const cityCards = document.querySelectorAll('.city-card');
+            
+            cityCards.forEach(card => {
+                const cityName = card.getAttribute('data-city');
+                if (cityName.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Lazy loading for images (optional enhancement)
         document.addEventListener('DOMContentLoaded', function() {
-            // Make sure all scripts and styles are loaded before displaying content
-            window.addEventListener('load', function() {
-                initializePageContent();
-            });
+            const lazyImages = document.querySelectorAll('.city-image');
             
-            // Fallback in case 'load' event doesn't fire
-            setTimeout(initializePageContent, 1000);
-        });
-        
-        function initializePageContent() {
-            // Hide loading indicator and show grid
-            document.getElementById('loadingIndicator').style.display = 'none';
-            document.getElementById('citiesGrid').style.display = 'grid';
-            
-            // Setup image loading
-            setupImageLoading();
-            
-            // Setup search functionality
-            setupSearch();
-        }
-        
-        function setupImageLoading() {
-            const images = document.querySelectorAll('.city-image, .barangay-image');
-            const defaultImage = '<?php echo $defaultImageData; ?>';
-            
-            images.forEach(img => {
-                if (img.dataset.src) {
-                    // Create a new image element to preload
-                    const preloadImg = new Image();
-                    
-                    // Set up load event
-                    preloadImg.onload = function() {
-                        img.src = preloadImg.src;
-                    };
-                    
-                    // Set up error event
-                    preloadImg.onerror = function() {
-                        img.src = defaultImage;
-                    };
-                    
-                    // Start loading the image
-                    preloadImg.src = img.dataset.src;
-                }
-            });
-        }
-        
-        function setupSearch() {
-            const searchInput = document.getElementById('citySearch');
-            const minglanillaBarangaysContainer = document.getElementById('minglanillaBarangays');
-            if (!searchInput) return;
-            
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase().trim();
-                const cityCards = document.querySelectorAll('.city-card');
-                
-                // Hide Minglanilla barangays container by default
-                minglanillaBarangaysContainer.style.display = 'none';
-                
-                // Special case for Minglanilla
-                const isMinglanillaSearch = searchTerm === 'minglanilla' || 
-                                          (searchTerm.length >= 3 && 'minglanilla'.includes(searchTerm));
-                
-                if (isMinglanillaSearch) {
-                    // Show Minglanilla barangays container
-                    minglanillaBarangaysContainer.style.display = 'block';
-                    
-                    // Filter barangay cards if there's more to the search term
-                    if (searchTerm.length > 10) { // More than just 'minglanilla'
-                        const barangayCards = document.querySelectorAll('.barangay-card');
-                        barangayCards.forEach(card => {
-                            const barangayName = card.querySelector('.barangay-name').textContent.toLowerCase();
-                            if (barangayName.includes(searchTerm.replace('minglanilla', '').trim())) {
-                                card.style.display = 'block';
-                            } else {
-                                card.style.display = 'none';
+            if ('IntersectionObserver' in window) {
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            if (img.tagName === 'IMG' && img.hasAttribute('data-src')) {
+                                img.src = img.getAttribute('data-src');
+                                img.removeAttribute('data-src');
                             }
-                        });
-                    }
-                }
-                
-                // Regular city filtering
-                let visibleCount = 0;
-                cityCards.forEach(card => {
-                    const cityName = card.getAttribute('data-city').toLowerCase();
-                    const cityText = card.querySelector('.city-name').textContent.toLowerCase();
-                    const cityDesc = card.querySelector('.city-description').textContent.toLowerCase();
-                    
-                    if (cityName.includes(searchTerm) || cityText.includes(searchTerm) || cityDesc.includes(searchTerm)) {
-                        card.style.display = 'block';
-                        visibleCount++;
-                    } else {
-                        card.style.display = 'none';
-                    }
+                            observer.unobserve(img);
+                        }
+                    });
                 });
                 
-                // Add a minimum height to the grid container if few results are shown
-                if (visibleCount <= 2) {
-                    document.getElementById('citiesGrid').style.minHeight = '500px';
-                } else {
-                    document.getElementById('citiesGrid').style.minHeight = 'auto';
-                }
-            });
-        }
+                lazyImages.forEach(img => {
+                    if (img.tagName === 'IMG') {
+                        imageObserver.observe(img);
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html> 

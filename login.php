@@ -59,7 +59,7 @@ if (!isset($_SESSION['csrf_token'])) {
         
         .forgot-password {
             font-size: 14px;
-            color: #FF6B17;
+            color: #2E8B57;
             text-decoration: none;
         }
         
@@ -71,9 +71,65 @@ if (!isset($_SESSION['csrf_token'])) {
         }
         
         .signup-link a {
-            color: #FF6B17;
+            color: #2E8B57;
             text-decoration: none;
             font-weight: 500;
+        }
+        
+        /* Override any Sign In button styles to ensure it's green */
+        button[type="submit"],
+        input[type="submit"],
+        .submit-button,
+        button:not([class]),
+        .btn-primary,
+        a.btn-primary,
+        button.sign-in,
+        .sign-in-button {
+            background-color: #2E8B57 !important;
+            color: white !important;
+            border: none !important;
+            transition: background-color 0.3s !important;
+        }
+        
+        button[type="submit"]:hover,
+        input[type="submit"]:hover,
+        .submit-button:hover,
+        button:not([class]):hover,
+        .btn-primary:hover,
+        a.btn-primary:hover,
+        button.sign-in:hover,
+        .sign-in-button:hover {
+            background-color: #1e6e45 !important;
+        }
+        
+        /* Handle the case of the specific Sign In button shown in the image */
+        a.sign-in,
+        button.sign-in,
+        a.btn-sign-in,
+        button.btn-sign-in,
+        *[class*="sign-in"],
+        input[value="Sign In"] {
+            background-color: #2E8B57 !important;
+            color: white !important;
+            border: none !important;
+        }
+        
+        /* Directly target the orange button visible in the screenshot */
+        .container input[type="button"]:not(.show-password),
+        .container button:not(.show-password),
+        .container a.button,
+        .container .btn,
+        .container [role="button"],
+        .container input[type="submit"] {
+            background-color: #2E8B57 !important;
+        }
+        
+        /* Add specific style for show-password button */
+        .show-password,
+        button.show-password {
+            background-color: transparent !important;
+            color: #666 !important;
+            border: none !important;
         }
     </style>
 </head>
@@ -93,5 +149,40 @@ if (!isset($_SESSION['csrf_token'])) {
         <!-- Footer -->
         <?php include 'components/footer.php'; ?>
     </div>
+    
+    <!-- Script to ensure Sign In button is green -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Target all possible Sign In buttons on the page
+            const signInButtons = document.querySelectorAll('button, a.button, input[type="button"], input[type="submit"], .btn, [role="button"]');
+            
+            signInButtons.forEach(button => {
+                // Skip the show-password button
+                if(button.classList.contains('show-password')) {
+                    return;
+                }
+                
+                // Check if the button contains 'Sign In' text or has sign-in related classes/attributes
+                if (button.textContent && button.textContent.trim() === 'Sign In' || 
+                    button.value === 'Sign In' ||
+                    button.id && button.id.toLowerCase().includes('sign') ||
+                    button.className && button.className.toLowerCase().includes('sign')) {
+                    
+                    // Force the green color
+                    button.style.backgroundColor = '#2E8B57';
+                    button.style.color = 'white';
+                    button.style.border = 'none';
+                }
+            });
+            
+            // Special case - if there's exactly one standalone button that might be the login button
+            const allButtons = document.querySelectorAll('button:not([class]), input[type="button"]:not([class]), input[type="submit"]:not([class])');
+            if (allButtons.length === 1) {
+                allButtons[0].style.backgroundColor = '#2E8B57';
+                allButtons[0].style.color = 'white';
+                allButtons[0].style.border = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

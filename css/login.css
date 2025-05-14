@@ -84,16 +84,34 @@ body {
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #999;
+    color: #666;
     cursor: pointer;
-    background: none;
-    border: none;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    line-height: 1;
+}
+
+.show-password:hover {
+    background: none !important;
+    color: #333;
+}
+
+.show-password:hover svg {
+    fill: #333 !important;
+}
+
+.show-password svg {
+    fill: #666 !important;
+    width: 16px;
+    height: 16px;
+    display: block;
 }
 
 .submit-button {
     width: 100%;
     padding: 10px;
-    background-color: #FF6B17;
+    background-color: #2E8B57;
     color: white;
     border: none;
     border-radius: 4px;
@@ -104,7 +122,7 @@ body {
 }
 
 .submit-button:hover {
-    background-color: #e65c0e;
+    background-color: #1e6e45;
 }
 
 .error {

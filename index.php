@@ -4,613 +4,587 @@ session_start(); // Start the session to access session variables
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArtiSell - Cebu Artisan Marketplace</title>
-    <meta name="description" content="Discover authentic Cebuano arts, crafts, and traditional foods" />
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/index.css">
-        <style>
-            .profile-link {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 700;
-    }
-    .profile-pic {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-
-    .social-links {
-  display: flex;
-  gap: 15px;
-}
-
-.social-links a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-  background-color: rgba(255,255,255,0.1);
-  transition: background-color 0.3s ease;
-}
-
-.social-links a:hover {
-  background-color: #ff6b00;
-}
-
-    .header-right a {
-        font-weight: 700;
-        text-decoration: none;
-        color: #333;
-    }
-
-    .nav-link {
-        font-weight: 700;
-    }
-    
-    .cart-icon {
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        vertical-align: middle;
-        margin-right: 4px;
-    }
-
-    .about-image {
-    width: 100%; /* Adjust as needed */
-    max-width: 100%;
-}
-
-.about-image img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover; /* Ensures the image fills the space while maintaining aspect ratio */
-}
-        </style>
-  </head>
-  <body>
-    
-    <div class="main-container">
-      <main class="main-content">
-    
-      <header class="header">
-    <div class="container header-inner">
-        <a href="" class="logo">Art<span>iSell</span></a>
+    <meta name="description" content="Discover authentic Cebuano arts, crafts, and traditional foods">
+    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Hero section styles */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/cebu-crafts-hero.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: var(--space-10) 0;
+            margin-top: -80px;
+            position: relative;
+        }
         
-        <div class="header-right">
-            <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
-                <a href="cart.php" class="nav-link"><i class="cart-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
-                </svg></i><?php echo isset($_SESSION['cart']) ? " (" . count($_SESSION['cart']) . ")" : ""; ?></a>
-                <div class="profile-dropdown">
-                    <a href="profile.php" class="nav-link profile-link">
-                        <?php echo htmlspecialchars($_SESSION['username']); ?>
-                        <?php if (!empty($_SESSION['profile_picture'])): ?>
-                            <img src="<?php echo htmlspecialchars($_SESSION['profile_picture']); ?>" alt="Profile" class="profile-pic">
-                        <?php else: ?>
-                            <img src="images/default-profile.jpg" alt="Profile" class="profile-pic">
-                        <?php endif; ?>
-                    </a>
-                    <div class="dropdown-content">
-                        <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
-                            <a href="vendor_products.php" class="dropdown-item">My Products</a>
-                        <?php endif; ?>
-                        <a href="settings.php" class="dropdown-item">Settings</a>
-                        <a href="logout.php" class="dropdown-item">Logout</a>
-                    </div>
-                </div>
-            <?php else: ?>
-                <a href="login.php" class="nav-link">Login</a>
+        .hero-content {
+            max-width: 600px;
+            padding-top: 80px;
+        }
+        
+        .hero h1 {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--space-4);
+            color: white;
+        }
+        
+        .hero p {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--space-6);
+            opacity: 0.9;
+        }
+        
+        .hero .btn {
+            margin-right: var(--space-3);
+        }
+        
+        /* Featured products section */
+        .featured-section {
+            padding: var(--space-8) 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--space-6);
+        }
+        
+        .section-title {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--space-2);
+        }
+        
+        .section-subtitle {
+            color: var(--neutral-600);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-5);
+        }
+        
+        /* Categories section */
+        .categories-section {
+            padding: var(--space-8) 0;
+            background-color: var(--neutral-100);
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: var(--space-4);
+        }
+        
+        .category-card {
+            position: relative;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            height: 200px;
+            transition: transform var(--transition-normal) ease;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .category-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .category-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: var(--space-3);
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: white;
+        }
+        
+        .category-name {
+            font-weight: 600;
+            font-size: var(--font-size-lg);
+        }
+        
+        /* Testimonials section */
+        .testimonials-section {
+            padding: var(--space-8) 0;
+            background-color: var(--neutral-200);
+        }
+        
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--space-5);
+        }
+        
+        .testimonial-card {
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
+            background-color: var(--neutral-100);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: var(--space-4);
+            color: var(--neutral-700);
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: var(--space-3);
+            object-fit: cover;
+        }
+        
+        .author-info h4 {
+            margin-bottom: var(--space-1);
+            font-size: var(--font-size-md);
+        }
+        
+        .author-info p {
+            color: var(--neutral-600);
+            font-size: var(--font-size-sm);
+            margin: 0;
+        }
+        
+        /* CTA section */
+        .cta-section {
+            padding: var(--space-10) 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('images/cebu-artisans.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+        }
+        
+        .cta-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .cta-title {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--space-4);
+            color: white;
+        }
+        
+        .cta-text {
+            margin-bottom: var(--space-6);
+            font-size: var(--font-size-lg);
+            opacity: 0.9;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: var(--font-size-3xl);
+            }
+            
+            .hero p {
+                font-size: var(--font-size-md);
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .text-blue {
+            color: #0066cc;
+        }
+        
+        .text-green {
+            color: #008a39;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-inner">
+            <a href="index.php" class="logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.php" class="nav-link active">Home</a></li>
+                    <li><a href="shop.php" class="nav-link">Shop</a></li>
+                    <li><a href="cities.php" class="nav-link">Cities</a></li>
+                    <li><a href="about.php" class="nav-link">About</a></li>
+                </ul>
+            </nav>
+            
+            <div class="header-right">
+                <a href="cart.php" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <?php
+                    $cart_count = 0;
+                    if (isset($_SESSION['cart'])) {
+                        foreach ($_SESSION['cart'] as $item) {
+                            $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
+                        }
+                    }
+                    if ($cart_count > 0) {
+                        echo "<span>($cart_count)</span>";
+                    }
+                    ?>
+                </a>
                 
-            <?php endif; ?>
+                <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                    <div class="profile-dropdown">
+                        <a href="#" class="profile-link">
+                            <span><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-content">
+                            <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
+                                <a href="vendor_products.php" class="dropdown-item">
+                                    <i class="fas fa-box"></i> My Products
+                                </a>
+                            <?php endif; ?>
+                            <a href="profile.php" class="dropdown-item">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="settings.php" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <a href="logout.php" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <a href="login.php" class="btn btn-outline btn-sm">Login</a>
+                    <a href="signup.php" class="btn btn-primary btn-sm">Sign Up</a>
+                <?php endif; ?>
+            </div>
         </div>
-    </div>
-</header>
+    </header>
 
-        <!-- Hero Section -->
-        <section class="hero">
+    <!-- Hero Section -->
+    <section class="hero">
         <div class="container">
             <div class="hero-content">
                 <h1>Discover Cebu's Native Crafts & Delicacies</h1>
                 <p>Connecting you with authentic local treasures, handcrafted by Filipino artisans. Support local businesses and find the best of Cebu's culture.</p>
-                <a href="shop.php" class="btn btn-primary">Shop Now</a>
-                <a href="#" class="btn btn-secondary">Learn More</a>
+                <div class="d-flex">
+                    <a href="shop.php" class="btn btn-primary btn-lg">Shop Now</a>
+                    <a href="about.php" class="btn btn-outline btn-lg" style="color: white; border-color: white;">Learn More</a>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Featured Products Section -->
-    <section class="featured-products">
+    <section class="featured-section">
         <div class="container">
-            <h2>Featured Products</h2>
-            <p>Explore our curated selection of Cebu's finest treasures, each with authentic craftsmanship and cultural significance.</p>
+            <div class="section-header">
+                <h2 class="section-title">Featured Products</h2>
+                <p class="section-subtitle">Explore our curated selection of Cebu's finest treasures, each with authentic craftsmanship and cultural significance.</p>
+            </div>
             
-            <div class="product-controls">
-                <button id="prev-product" class="product-nav-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
-                </svg></button>
+            <div class="product-grid">
+                <?php
+                // Connect to the database
+                include 'db_connection.php';
                 
-                <div class="products-slider-container">
-                    <div class="products-slider">
-                        <?php
-                        // Connect to the database
-                        include 'db_connection.php';
+                // Query to get featured products
+                try {
+                    // First check if vendors table exists and has vendor_id column
+                    $check_table = mysqli_query($conn, "SHOW TABLES LIKE 'vendors'");
+                    
+                    // Get featured products with error handling
+                    try {
+                        $query = "SELECT * FROM products WHERE is_featured = 1 LIMIT 8";
+                        $result = mysqli_query($conn, $query);
                         
-                        // Query to get featured products (with error handling for vendors table)
-                        try {
-                            // First check if vendors table exists and has vendor_id column
-                            $check_table = mysqli_query($conn, "SHOW TABLES LIKE 'vendors'");
+                        if (!$result) {
+                            // If that fails, try without the is_featured condition
+                            $query = "SELECT * FROM products LIMIT 8";
+                            $result = mysqli_query($conn, $query);
                             
-                            // Get featured products with error handling
-                            try {
-                                $query = "SELECT * FROM products WHERE is_featured = 1 LIMIT 8";
-                                $result = mysqli_query($conn, $query);
-                                
-                                if (!$result) {
-                                    // If that fails, try without the is_featured condition
-                                    $query = "SELECT * FROM products LIMIT 8";
-                                    $result = mysqli_query($conn, $query);
-                                    
-                                    if (!$result) {
-                                        throw new Exception(mysqli_error($conn));
-                                    }
-                                }
-                            } catch (Exception $e) {
-                                // If all queries fail, show dummy products
-                                $result = false;
-                                echo "<!-- Database error: " . htmlspecialchars($e->getMessage()) . " -->";
+                            if (!$result) {
+                                throw new Exception(mysqli_error($conn));
+                            }
+                        }
+                    } catch (Exception $e) {
+                        // If all queries fail, show dummy products
+                        $result = false;
+                        echo "<!-- Database error: " . htmlspecialchars($e->getMessage()) . " -->";
+                    }
+                    
+                    // Check if products exist
+                    if ($result && mysqli_num_rows($result) > 0) {
+                        while ($product = mysqli_fetch_assoc($result)) {
+                            // Set default image since product_images table doesn't exist
+                            $image_path = isset($product['image']) && !empty($product['image']) ? 
+                                htmlspecialchars($product['image']) : 
+                                "image/coconut-bowl-palm.jpg"; // Default image
+                            
+                            // Format price with error handling
+                            $price = isset($product['price']) && is_numeric($product['price']) ? 
+                                number_format($product['price'], 2) : 
+                                "0.00";
+                            
+                            // Make sure product_name exists and is not a file path
+                            $product_name = isset($product['name']) ? $product['name'] : 
+                                (isset($product['product_name']) ? $product['product_name'] : "Product");
+                            
+                            // If product_name contains a file path indicator, use a generic name
+                            if (strpos($product_name, '\\') !== false || strpos($product_name, '/') !== false) {
+                                $product_name = "Handcrafted Product";
                             }
                             
-                            // Check if products exist
-                            if (mysqli_num_rows($result) > 0) {
-                                while ($product = mysqli_fetch_assoc($result)) {
-                                    // Set default image since product_images table doesn't exist
-                                    $image_path = "image/coconut-bowl-palm.jpg"; // Default image
-                                    
-                                    // Format price with error handling
-                                    $price = isset($product['price']) && is_numeric($product['price']) ? 
-                                        number_format($product['price'], 2) : 
-                                        "0.00";
-                                    
-                                    // Make sure product_name exists and is not a file path
-                                    $product_name = isset($product['product_name']) ? $product['product_name'] : "Product";
-                                    
-                                    // If product_name contains a file path indicator, use a generic name
-                                    if (strpos($product_name, '\\') !== false || strpos($product_name, '/') !== false) {
-                                        $product_name = "Handcrafted Product";
-                                    }
-                                    
-                                    // Ensure product_id exists
-                                    $product_id = isset($product['product_id']) ? $product['product_id'] : "1";
-                        ?>
-                        <div class="product-card">
-                            <div class="product-image">
-                                <div class="product-badge">Featured</div>
-                                <img src="<?php echo htmlspecialchars($image_path); ?>" alt="<?php echo htmlspecialchars($product_name); ?>">
-                                <div class="product-quick-actions">
-                                    <button class="quick-view-btn" data-id="<?php echo $product_id; ?>">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-                                        </svg>
-                                    </button>
-                                    <button class="add-to-wishlist" data-id="<?php echo $product_id; ?>">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="product-details">
-                                <div class="product-vendor">
-                                    <?php 
-                                        // Safely display vendor name if available, otherwise show default
-                                        echo 'Artisell Vendor';
-                                    ?>
-                                </div>
-                                <h3 class="product-title">
-                                    <a href="product-details.php?id=<?php echo $product_id; ?>">
-                                        <?php echo htmlspecialchars($product_name); ?>
-                                    </a>
-                                </h3>
-                                <p class="product-price">₱ <?php echo $price; ?></p>
-                                <button class="add-to-cart-btn" data-id="<?php echo $product_id; ?>">Add to Cart</button>
-                            </div>
-                        </div>
-                        <?php
-                            }
-                        } else {
-                            // If no featured products found in database, show dummy products
-                        ?>
-                            <div class="product-card">
-                                <div class="product-image">
-                                    <div class="product-badge">Featured</div>
-                                    <img src="image/coconut-bowl-palm.jpg" alt="Coconut Bowl">
-                                    <div class="product-quick-actions">
-                                        <button class="quick-view-btn" data-id="1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-                                            </svg>
-                                        </button>
-                                        <button class="add-to-wishlist" data-id="1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="product-details">
-                                    <div class="product-vendor">Cebu Crafts</div>
-                                    <h3 class="product-title"><a href="product-details.php?id=1">Handcrafted Coconut Bowl</a></h3>
-                                    <p class="product-price">₱ 450.00</p>
-                                    <button class="add-to-cart-btn" data-id="1">Add to Cart</button>
-                                </div>
-                            </div>
+                            // Ensure product_id exists
+                            $product_id = isset($product['id']) ? $product['id'] : 
+                                (isset($product['product_id']) ? $product['product_id'] : "1");
                             
-                            <div class="product-card">
-                                <div class="product-image">
-                                    <div class="product-badge">Featured</div>
-                                    <img src="image/coconut-bowls.jpg" alt="Coconut Bowl Set">
-                                    <div class="product-quick-actions">
-                                        <button class="quick-view-btn" data-id="2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-                                            </svg>
-                                        </button>
-                                        <button class="add-to-wishlist" data-id="2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="product-details">
-                                    <div class="product-vendor">Island Artisans</div>
-                                    <h3 class="product-title"><a href="product-details.php?id=2">Coconut Bowl Set (4 pcs)</a></h3>
-                                    <p class="product-price">₱ 1,200.00</p>
-                                    <button class="add-to-cart-btn" data-id="2">Add to Cart</button>
-                                </div>
-                            </div>
-                            
-                            <div class="product-card">
-                                <div class="product-image">
-                                    <div class="product-badge">Featured</div>
-                                    <img src="image/alcoy.jpg" alt="Bamboo Tumbler">
-                                    <div class="product-quick-actions">
-                                        <button class="quick-view-btn" data-id="3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-                                            </svg>
-                                        </button>
-                                        <button class="add-to-wishlist" data-id="3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="product-details">
-                                    <div class="product-vendor">Eco Crafters</div>
-                                    <h3 class="product-title"><a href="product-details.php?id=3">Bamboo Tumbler</a></h3>
-                                    <p class="product-price">₱ 350.00</p>
-                                    <button class="add-to-cart-btn" data-id="3">Add to Cart</button>
-                                </div>
-                            </div>
-                            
-                            <div class="product-card">
-                                <div class="product-image">
-                                    <div class="product-badge">Featured</div>
-                                    <img src="image/CATMON.jpg" alt="Handwoven Basket">
-                                    <div class="product-quick-actions">
-                                        <button class="quick-view-btn" data-id="4">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-                                            </svg>
-                                        </button>
-                                        <button class="add-to-wishlist" data-id="4">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="product-details">
-                                    <div class="product-vendor">Weave Artisans</div>
-                                    <h3 class="product-title"><a href="product-details.php?id=4">Handwoven Basket</a></h3>
-                                    <p class="product-price">₱ 550.00</p>
-                                    <button class="add-to-cart-btn" data-id="4">Add to Cart</button>
-                                </div>
-                            </div>
-                        <?php
+                            // Get description
+                            $description = isset($product['description']) ? $product['description'] : "Beautiful handcrafted item from Cebu";
+                ?>
+                <div class="card">
+                    <img src="<?php echo $image_path; ?>" alt="<?php echo htmlspecialchars($product_name); ?>" class="card-img">
+                    <div class="card-body">
+                        <h3 class="card-title"><?php echo htmlspecialchars($product_name); ?></h3>
+                        <p class="card-text"><?php echo htmlspecialchars(substr($description, 0, 80)) . (strlen($description) > 80 ? '...' : ''); ?></p>
+                        <div class="card-price">₱<?php echo $price; ?></div>
+                        <a href="product-details.php?id=<?php echo $product_id; ?>" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+                <?php
                         }
+                    } else {
+                        // Display dummy products if no products found
+                        $dummy_products = [
+                            ["name" => "Handcrafted Jewelry", "price" => "1200.00", "image" => "image/jewelry.jpg", "description" => "Beautiful handmade jewelry from local artisans"],
+                            ["name" => "Coconut Shell Bowl", "price" => "450.00", "image" => "image/coconut-bowl-palm.jpg", "description" => "Eco-friendly bowl made from coconut shells"],
+                            ["name" => "Woven Basket", "price" => "850.00", "image" => "image/basket.jpg", "description" => "Traditional woven basket using local materials"],
+                            ["name" => "Handwoven Fabric", "price" => "1500.00", "image" => "image/fabric.jpg", "description" => "Colorful handwoven fabric with traditional patterns"]
+                        ];
                         
-                        // Close database connection
-                        mysqli_close($conn);
-                        } catch (Exception $e) {
-                            echo "Error: " . $e->getMessage();
+                        foreach ($dummy_products as $index => $product) {
+                ?>
+                <div class="card">
+                    <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="card-img">
+                    <div class="card-body">
+                        <h3 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h3>
+                        <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
+                        <div class="card-price">₱<?php echo $product['price']; ?></div>
+                        <a href="product-details.php?id=<?php echo $index + 1; ?>" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+                <?php
                         }
-                        ?>
+                    }
+                } catch (Exception $e) {
+                    echo "<!-- Error: " . htmlspecialchars($e->getMessage()) . " -->";
+                    // Display dummy products as fallback
+                    $dummy_products = [
+                        ["name" => "Handcrafted Jewelry", "price" => "1200.00", "image" => "image/jewelry.jpg", "description" => "Beautiful handmade jewelry from local artisans"],
+                        ["name" => "Coconut Shell Bowl", "price" => "450.00", "image" => "image/coconut-bowl-palm.jpg", "description" => "Eco-friendly bowl made from coconut shells"],
+                        ["name" => "Woven Basket", "price" => "850.00", "image" => "image/basket.jpg", "description" => "Traditional woven basket using local materials"],
+                        ["name" => "Handwoven Fabric", "price" => "1500.00", "image" => "image/fabric.jpg", "description" => "Colorful handwoven fabric with traditional patterns"]
+                    ];
+                    
+                    foreach ($dummy_products as $index => $product) {
+                ?>
+                <div class="card">
+                    <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="card-img">
+                    <div class="card-body">
+                        <h3 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h3>
+                        <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
+                        <div class="card-price">₱<?php echo $product['price']; ?></div>
+                        <a href="product-details.php?id=<?php echo $index + 1; ?>" class="btn btn-primary">View Details</a>
                     </div>
                 </div>
-                
-                <button id="next-product" class="product-nav-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                </svg></button>
+                <?php
+                    }
+                }
+                ?>
             </div>
             
-            <div class="product-indicators">
-                <span class="active"></span>
-                <span></span>
-                <span></span>
-                <span></span>
+            <div class="text-center mt-5">
+                <a href="shop.php" class="btn btn-outline">View All Products</a>
             </div>
-            
-            <!-- Quick View Modal -->
-            <div id="quick-view-modal" class="modal">
-                <div class="modal-content">
-                    <span class="close-modal">&times;</span>
-                    <div id="quick-view-content">
-                        <!-- Product details will be loaded here via AJAX -->
-                    </div>
-                </div>
-            </div>
-            
-            <a href="shop.php" class="view-all-btn">View All Products</a>
         </div>
     </section>
 
-    <!-- Explore by City Section -->
-    <section class="explore-city">
+    <!-- Categories Section -->
+    <section class="categories-section">
         <div class="container">
-            <h2>Explore by City</h2>
-            <p>Find local arts, crafts, and delicacies unique to each city. Discover items from different regions across the Philippines.</p>
-            <a href="cities.php" class="view-all-btn">View All Cities</a>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section class="about">
-        <div class="container">
-            <div class="about-wrapper" style="display: flex; gap: 2rem; align-items: center;">
-                <div class="about-image" style="flex: 1;">
-                    <img src="image/about.jpg" alt="About ArtiSell" style="width: 100%; height: auto; border-radius: 8px; object-fit: cover;">
-                </div>
-                <div class="about-content" style="flex: 1;">
-                    <h2>About ArtiSell</h2>
-                    <p>ArtiSell is a marketplace dedicated to promoting authentic local arts and connecting artisans with customers who care about heritage through craft and culture.</p>
-                    <p>Our mission is to empower local artisans and preserve Filipino craft traditions while providing quality products to customers around the globe.</p>
-                    <p>By supporting ArtSell, you're not just buying products - you're helping preserve traditional craftsmanship and supporting local communities.</p>
-                    <a href="#" class="btn btn-primary">Learn More About Us</a>
-                </div>
+            <div class="section-header">
+                <h2 class="section-title">Shop by Category</h2>
+                <p class="section-subtitle">Explore Cebu's diverse artisanal products across different categories</p>
+            </div>
+            
+            <div class="category-grid">
+                <a href="shop.php?category=jewelry" class="category-card">
+                    <img src="image/jewelry.jpg" alt="Jewelry">
+                    <div class="category-overlay">
+                        <div class="category-name">Jewelry</div>
+                    </div>
+                </a>
+                
+                <a href="shop.php?category=home-decor" class="category-card">
+                    <img src="image/coconut-bowl-palm.jpg" alt="Home Decor">
+                    <div class="category-overlay">
+                        <div class="category-name">Home Decor</div>
+                    </div>
+                </a>
+                
+                <a href="shop.php?category=textiles" class="category-card">
+                    <img src="image/fabric.jpg" alt="Textiles">
+                    <div class="category-overlay">
+                        <div class="category-name">Textiles</div>
+                    </div>
+                </a>
+                
+                <a href="shop.php?category=food" class="category-card">
+                    <img src="image/food.jpg" alt="Food & Delicacies">
+                    <div class="category-overlay">
+                        <div class="category-name">Food & Delicacies</div>
+                    </div>
+                </a>
             </div>
         </div>
     </section>
 
     <!-- Testimonials Section -->
-    <section class="testimonials">
+    <section class="testimonials-section">
         <div class="container">
-            <h2>What Our Customers Say</h2>
-            <div class="testimonials-container">
+            <div class="section-header">
+                <h2 class="section-title">What Our Customers Say</h2>
+                <p class="section-subtitle">Hear from people who have discovered the beauty of Cebuano craftsmanship through ArtiSell</p>
+            </div>
+            
+            <div class="testimonials-grid">
                 <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
-                    <p>"The quality of the products is exceptional! I love how each item comes with a story about the artisan who made it."</p>
-                    <div class="testimonial-name">Maria Garcia</div>
-                    <div class="testimonial-location">Manila, PH</div>
+                    <div class="testimonial-text">
+                        "I discovered ArtiSell while visiting Cebu and was amazed by the quality of handcrafted items. Now I can order my favorite Cebuano products even when I'm back home in Manila!"
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="images/avatar-1.jpg" alt="Maria Santos" class="author-avatar">
+                        <div class="author-info">
+                            <h4>Maria Santos</h4>
+                            <p>Manila, Philippines</p>
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
-                    <p>"I ordered several items as gifts for my family, and they all arrived beautifully packaged. Will definitely order again!"</p>
-                    <div class="testimonial-name">John Santos</div>
-                    <div class="testimonial-location">Cebu, PH</div>
+                    <div class="testimonial-text">
+                        "As a collector of indigenous crafts, I'm impressed by the authenticity and quality of products on ArtiSell. It's wonderful to directly support local artisans."
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="images/avatar-2.jpg" alt="John Reyes" class="author-avatar">
+                        <div class="author-info">
+                            <h4>John Reyes</h4>
+                            <p>Davao City, Philippines</p>
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
-                    <p>"The coconut bowls are gorgeous! Supporting local artisans while getting beautiful, sustainable products feels great."</p>
-                    <div class="testimonial-name">Sophie Reyes</div>
-                    <div class="testimonial-location">Davao, PH</div>
+                    <div class="testimonial-text">
+                        "The coconut shell crafts I purchased are absolutely beautiful! Shipping was fast and everything arrived perfectly packaged. Will definitely order again!"
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="images/avatar-3.jpg" alt="Lisa Tan" class="author-avatar">
+                        <div class="author-info">
+                            <h4>Lisa Tan</h4>
+                            <p>Singapore</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="cta">
+    <section class="cta-section">
         <div class="container">
-            <h2>Ready to Discover Cebu's Treasures?</h2>
-            <p>Join ArtSell today and start your journey through Cebu's rich culture of native crafts and delicacies.</p>
-            <div class="cta-buttons">
-                <a href="categories.php" class="btn btn-primary">Shop Now</a>
-                <a href="#" class="btn btn-secondary">Become a Vendor</a>
+            <div class="cta-content">
+                <h2 class="cta-title">Join Our Artisan Community</h2>
+                <p class="cta-text">Are you a local artisan looking to reach more customers? Partner with ArtiSell and showcase your crafts to a wider audience.</p>
+                <a href="signup.php?as=vendor" class="btn btn-primary btn-lg">Become a Seller</a>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <?php include 'components/footer.php'; ?>
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <a href="index.php" class="footer-logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
+                    <p>Connecting artisans with customers who appreciate authentic local crafts and delicacies.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="shop.php">Products</a></li>
+                        <li><a href="cities.php">Cities</a></li>
+                        <li><a href="about.php">About Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping & Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Main Street, Cebu City, Philippines</li>
+                        <li><i class="fas fa-phone"></i> +63 (32) 123-4567</li>
+                        <li><i class="fas fa-envelope"></i> info@artisell.com</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date("Y"); ?> ArtiSell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
-    <!-- JavaScript for Featured Products Slider -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elements
-            const slider = document.querySelector('.products-slider');
-            const prevBtn = document.getElementById('prev-product');
-            const nextBtn = document.getElementById('next-product');
-            const indicators = document.querySelectorAll('.product-indicators span');
-            const productCards = document.querySelectorAll('.product-card');
-            const modal = document.getElementById('quick-view-modal');
-            const closeModal = document.querySelector('.close-modal');
-            const quickViewContent = document.getElementById('quick-view-content');
-            
-            // Variables
-            let slideIndex = 0;
-            const cardsPerView = window.innerWidth < 768 ? 2 : 3;
-            const cardWidth = productCards[0].offsetWidth + 20; // Card width + gap
-            
-            // Initialize slider
-            updateSlider();
-            
-            // Event Listeners
-            prevBtn.addEventListener('click', () => {
-                slideIndex = Math.max(0, slideIndex - 1);
-                updateSlider();
-            });
-            
-            nextBtn.addEventListener('click', () => {
-                slideIndex = Math.min(productCards.length - cardsPerView, slideIndex + 1);
-                updateSlider();
-            });
-            
-            // Indicator click events
-            indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    slideIndex = index * Math.floor(productCards.length / indicators.length);
-                    slideIndex = Math.min(slideIndex, productCards.length - cardsPerView);
-                    updateSlider();
-                });
-            });
-            
-            // Quick view buttons
-            const quickViewBtns = document.querySelectorAll('.quick-view-btn');
-            quickViewBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const productId = btn.getAttribute('data-id');
-                    openQuickView(productId);
-                });
-            });
-            
-            // Close modal
-            closeModal.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-            
-            window.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-            
-            // Add to cart buttons
-            const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
-            addToCartBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const productId = btn.getAttribute('data-id');
-                    addToCart(productId);
-                });
-            });
-            
-            // Add to wishlist buttons
-            const wishlistBtns = document.querySelectorAll('.add-to-wishlist');
-            wishlistBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const productId = btn.getAttribute('data-id');
-                    addToWishlist(productId);
-                    
-                    // Visual feedback
-                    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
-                    </svg>`;
-                    btn.style.backgroundColor = '#FF6B17';
-                    btn.style.color = 'white';
-                });
-            });
-            
-            // Functions
-            function updateSlider() {
-                const translateValue = -slideIndex * cardWidth;
-                slider.style.transform = `translateX(${translateValue}px)`;
-                
-                // Update indicators
-                const indicatorIndex = Math.floor(slideIndex / Math.floor(productCards.length / indicators.length));
-                indicators.forEach((indicator, index) => {
-                    indicator.classList.toggle('active', index === indicatorIndex);
-                });
-                
-                // Enable/disable navigation buttons
-                prevBtn.disabled = slideIndex === 0;
-                nextBtn.disabled = slideIndex >= productCards.length - cardsPerView;
-                
-                // Visual feedback for buttons
-                prevBtn.style.opacity = prevBtn.disabled ? '0.5' : '1';
-                nextBtn.style.opacity = nextBtn.disabled ? '0.5' : '1';
-            }
-            
-            function openQuickView(productId) {
-                // Show loading state
-                quickViewContent.innerHTML = '<div style="text-align: center; padding: 30px;"><p>Loading product details...</p></div>';
-                modal.style.display = 'block';
-                
-                // Fetch product details via AJAX
-                fetch(`get_product_details.php?product_id=${productId}`)
-                    .then(response => response.json())
-                    .catch(error => {
-                        console.error('Error fetching product details:', error);
-                        quickViewContent.innerHTML = `
-                            <div style="text-align: center; padding: 30px;">
-                                <p>Error loading product details. Please try again later.</p>
-                                <button onclick="modal.style.display='none'" class="btn btn-primary">Close</button>
-                            </div>
-                        `;
-                    });
-            }
-            
-            function addToCart(productId, quantity = 1) {
-                // Prepare form data
-                const formData = new FormData();
-                formData.append('product_id', productId);
-                formData.append('quantity', quantity);
-                
-                // Show loading feedback
-                const targetBtn = document.querySelector(`.add-to-cart-btn[data-id="${productId}"]`);
-                if (targetBtn) {
-                    const originalText = targetBtn.textContent;
-                    targetBtn.textContent = 'Adding...';
-                    targetBtn.disabled = true;
-                    
-                    // Enable button after 1 second
-                    setTimeout(function() {
-                        targetBtn.disabled = false;
-                        targetBtn.textContent = 'Add to Cart';
-                        alert('Product added to cart!');
-                    }, 1000);
-                }
-            }
-            
-            function addToWishlist(productId) {
-                // In a real implementation, this would use AJAX to add the product to wishlist
-                console.log(`Added product #${productId} to wishlist`);
-                
-                // For demo purposes
-                alert(`Product added to wishlist!`);
-            }
-            
-            // Responsive adjustment
-            window.addEventListener('resize', () => {
-                const newCardsPerView = window.innerWidth < 768 ? 2 : 3;
-                if (newCardsPerView !== cardsPerView) {
-                    cardsPerView = newCardsPerView;
-                    slideIndex = Math.min(slideIndex, productCards.length - cardsPerView);
-                    updateSlider();
-                }
-            });
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('open');
         });
     </script>
 </body>
-</html>
+</html> 

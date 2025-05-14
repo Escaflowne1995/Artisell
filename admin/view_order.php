@@ -197,6 +197,20 @@ while ($item = mysqli_fetch_assoc($items_result)) {
             color: white;
             border: none;
         }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .payment-verified {
+            color: #155724;
+            font-weight: 500;
+            background-color: #d4edda;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -226,6 +240,17 @@ while ($item = mysqli_fetch_assoc($items_result)) {
                     <div class="info-group">
                         <label>Shipping Address</label>
                         <span><?php echo htmlspecialchars($order['shipping_address']); ?></span>
+                    </div>
+                    <div class="info-group">
+                        <label>Payment Method</label>
+                        <span>
+                            <?php 
+                                echo ucfirst(htmlspecialchars($order['payment_method'])); 
+                                if ($order['status'] == 'Paid' && $order['payment_method'] != 'cod') {
+                                    echo ' <span class="payment-verified">(Payment Verified ✓)</span>';
+                                }
+                            ?>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -293,6 +318,7 @@ while ($item = mysqli_fetch_assoc($items_result)) {
                 <?php endif; ?>
                 
                 <button onclick="printInvoice()" class="btn btn-secondary">Print Invoice</button>
+                <button onclick="deleteOrder()" class="btn btn-danger">Delete Order</button>
             </div>
         </main>
     </div>
@@ -306,6 +332,12 @@ while ($item = mysqli_fetch_assoc($items_result)) {
 
         function printInvoice() {
             window.location.href = `print_invoice.php?id=<?php echo $order_id; ?>`;
+        }
+        
+        function deleteOrder() {
+            if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+                window.location.href = `delete_order.php?id=<?php echo $order_id; ?>`;
+            }
         }
     </script>
 </body>

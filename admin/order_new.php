@@ -11,6 +11,7 @@ require_once "../db_connection.php";
 
 // Initialize filter variables
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+$payment_filter = isset($_GET['payment']) ? $_GET['payment'] : 'all';
 $search_query = isset($_GET['search']) ? $_GET['search'] : '';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
@@ -19,6 +20,7 @@ $sort_order = isset($_GET['order']) ? $_GET['order'] : 'DESC';
 
 // Prepare base SQL query with more details
 $sql = "SELECT o.id, o.order_date, o.status, o.total_amount, o.shipping_address,
+               o.payment_method, 
                u.username, u.email,
                GROUP_CONCAT(p.name SEPARATOR ', ') as products,
                COUNT(oi.product_id) as item_count
@@ -32,6 +34,10 @@ $where_conditions = array();
 
 if ($status_filter != 'all') {
     $where_conditions[] = "o.status = '" . mysqli_real_escape_string($conn, $status_filter) . "'";
+}
+
+if ($payment_filter != 'all') {
+    $where_conditions[] = "o.payment_method = '" . mysqli_real_escape_string($conn, $payment_filter) . "'";
 }
 
 if (!empty($search_query)) {
@@ -87,6 +93,19 @@ $status_result = mysqli_query($conn, $status_sql);
 while($row = mysqli_fetch_assoc($status_result)) {
     $status_counts[$row['status']] = $row['count'];
 }
+
+// Get payment method counts
+$payment_counts = array();
+$payment_sql = "SELECT payment_method, COUNT(*) as count FROM orders GROUP BY payment_method";
+$payment_result = mysqli_query($conn, $payment_sql);
+while($row = mysqli_fetch_assoc($payment_result)) {
+    $payment_counts[$row['payment_method']] = $row['count'];
+}
+
+// Get paid orders count
+$paid_sql = "SELECT COUNT(*) as count FROM orders WHERE status = 'Paid'";
+$paid_result = mysqli_query($conn, $paid_sql);
+$paid_count = mysqli_fetch_assoc($paid_result)['count'];
 ?>
 
 <!DOCTYPE html>
@@ -250,6 +269,37 @@ while($row = mysqli_fetch_assoc($status_result)) {
         .completed { background: #d4edda; color: #155724; }
         .cancelled { background: #f8d7da; color: #721c24; }
         .refunded { background: #ffeeba; color: #856404; }
+        
+        .payment-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .payment-badge.paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .payment-badge.cod {
+            background: #f8f9fa;
+            color: #383940;
+        }
+        
+        .payment-badge.gcash {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .paid-indicator {
+            color: #155724;
+            font-weight: bold;
+        }
+        
         .dropdown-menu {
             display: none;
             position: absolute;
@@ -352,6 +402,18 @@ while($row = mysqli_fetch_assoc($status_result)) {
                     <h3>Pending Orders</h3>
                     <div class="value"><?php echo number_format($status_counts['pending'] ?? 0); ?></div>
                 </div>
+                <div class="stat-box">
+                    <h3>Paid Orders</h3>
+                    <div class="value"><?php echo number_format($paid_count ?? 0); ?></div>
+                </div>
+                <div class="stat-box">
+                    <h3>PayPal Payments</h3>
+                    <div class="value"><?php echo number_format($payment_counts['paypal'] ?? 0); ?></div>
+                </div>
+                <div class="stat-box">
+                    <h3>Cash on Delivery</h3>
+                    <div class="value"><?php echo number_format($payment_counts['cod'] ?? 0); ?></div>
+                </div>
             </div>
 
             <div class="advanced-filters">
@@ -371,6 +433,14 @@ while($row = mysqli_fetch_assoc($status_result)) {
                             <option value="completed" <?php echo $status_filter == 'completed' ? 'selected' : ''; ?>>Completed</option>
                             <option value="cancelled" <?php echo $status_filter == 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                             <option value="refunded" <?php echo $status_filter == 'refunded' ? 'selected' : ''; ?>>Refunded</option>
+                            <option value="Paid" <?php echo $status_filter == 'Paid' ? 'selected' : ''; ?>>Paid</option>
+                        </select>
+                        
+                        <select name="payment" class="form-control">
+                            <option value="all">All Payment Methods</option>
+                            <option value="paypal" <?php echo $payment_filter == 'paypal' ? 'selected' : ''; ?>>PayPal</option>
+                            <option value="cod" <?php echo $payment_filter == 'cod' ? 'selected' : ''; ?>>Cash on Delivery</option>
+                            <option value="gcash" <?php echo $payment_filter == 'gcash' ? 'selected' : ''; ?>>GCash</option>
                         </select>
                         
                         <div class="date-filter">
@@ -414,6 +484,7 @@ while($row = mysqli_fetch_assoc($status_result)) {
                                 </a>
                             </th>
                             <th>Status</th>
+                            <th>Payment</th>
                             <th>Items</th>
                             <th>Actions</th>
                         </tr>
@@ -441,6 +512,26 @@ while($row = mysqli_fetch_assoc($status_result)) {
                                         </span>
                                     </td>
                                     <td>
+                                        <?php 
+                                            $payment_method = ucfirst($order['payment_method']);
+                                            $payment_badge_class = '';
+                                            
+                                            if ($order['payment_method'] == 'paypal' && $order['status'] == 'Paid') {
+                                                $payment_badge_class = 'paid';
+                                            } elseif ($order['payment_method'] == 'cod') {
+                                                $payment_badge_class = 'cod';
+                                            } elseif ($order['payment_method'] == 'gcash') {
+                                                $payment_badge_class = 'gcash';
+                                            }
+                                        ?>
+                                        <span class="payment-badge <?php echo $payment_badge_class; ?>">
+                                            <?php echo $payment_method; ?>
+                                            <?php if ($order['status'] == 'Paid' && $order['payment_method'] != 'cod'): ?>
+                                                <span class="paid-indicator">✓</span>
+                                            <?php endif; ?>
+                                        </span>
+                                    </td>
+                                    <td>
                                         <div class="order-products">
                                             <?php echo $order['item_count']; ?> items<br>
                                             <small><?php echo htmlspecialchars($order['products']); ?></small>
@@ -448,8 +539,8 @@ while($row = mysqli_fetch_assoc($status_result)) {
                                     </td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="view_order.php?id=<?php echo $order['id']; ?>" class="btn btn-sm btn-primary">View</a>
-                                            <a href="update_order_status.php?id=<?php echo $order['id']; ?>&status=pending" class="btn btn-sm btn-primary">Restore</a>
+                                            <button onclick="viewOrder(<?php echo $order['id']; ?>)" class="btn btn-sm btn-primary">View</button>
+                                            <button onclick="restoreOrder(<?php echo $order['id']; ?>)" class="btn btn-sm btn-primary">Restore</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -465,6 +556,16 @@ while($row = mysqli_fetch_assoc($status_result)) {
         function exportOrders() {
             // Implementation for exporting all filtered orders
             alert('Export functionality would go here');
+        }
+        
+        function viewOrder(orderId) {
+            window.location.href = `view_order.php?id=${orderId}`;
+        }
+        
+        function restoreOrder(orderId) {
+            if (confirm('Are you sure you want to restore this order to pending status?')) {
+                window.location.href = `update_order_status.php?id=${orderId}&status=pending`;
+            }
         }
     </script>
 </body>

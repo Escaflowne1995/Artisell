@@ -83,390 +83,444 @@ foreach ($paginated_products as $key => $product) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArtSell - Cebu Cultural Marketplace</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>ArtiSell - Shop Cebu Artisan Products</title>
+    <meta name="description" content="Shop our curated collection of authentic Cebuano arts, crafts, and traditional foods">
+    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background-color: #f9f9f9; 
-            color: #333; 
-            font-family: 'Open Sans', sans-serif; 
-            margin: 80px 0 0 0; 
-            padding: 0; 
-            overflow-x: hidden; 
+        .shop-container {
+            padding: var(--space-6) 0;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        header { 
-            background: #fff; 
-            padding: 15px 0; 
-            border-bottom: 1px solid #eee; 
+        
+        .shop-header {
+            background-color: var(--neutral-100);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-md);
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('images/cebu-crafts-banner.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+        
+        .shop-title {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--space-2);
+        }
+        
+        .shop-subtitle {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--space-4);
+            opacity: 0.9;
+        }
+        
+        .filter-section {
+            margin-bottom: var(--space-6);
+        }
+        
+        .shop-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-6);
+        }
+        
+        .filter-card {
+            background-color: var(--neutral-100);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            box-shadow: var(--shadow-md);
+            height: fit-content;
+        }
+        
+        .filter-title {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--space-4);
+            padding-bottom: var(--space-2);
+            border-bottom: 1px solid var(--neutral-300);
+        }
+        
+        .filter-group {
+            margin-bottom: var(--space-4);
+        }
+        
+        .filter-label {
+            display: block;
+            margin-bottom: var(--space-2);
+            font-weight: 500;
+            color: var(--neutral-700);
+        }
+        
+        .filter-control {
+            width: 100%;
+            padding: var(--space-2);
+            border: 1px solid var(--neutral-400);
+            border-radius: var(--radius-md);
+            background-color: var(--neutral-100);
+            margin-bottom: var(--space-3);
+        }
+        
+        .filter-btn {
+            width: 100%;
+            margin-top: var(--space-2);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: var(--space-6);
+            gap: var(--space-2);
+        }
+        
+        .pagination a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--neutral-400);
+            font-weight: 500;
+            transition: all var(--transition-fast) ease;
+        }
+        
+        .pagination a:hover {
+            background-color: var(--neutral-200);
+        }
+        
+        .pagination a.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .stock-badge {
+            display: inline-block;
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            margin-bottom: var(--space-3);
+        }
+        
+        .in-stock {
+            background-color: rgba(52, 199, 89, 0.1);
+            color: var(--accent);
+        }
+        
+        .low-stock {
+            background-color: rgba(255, 204, 0, 0.1);
+            color: #ffc107;
+        }
+        
+        .out-of-stock {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
             position: fixed;
+            z-index: 1000;
             top: 0;
             left: 0;
-            right: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             width: 100%;
-        }
-        .header-inner { display: flex; justify-content: space-between; align-items: center; }
-        .logo a { color: #ff6b00; text-decoration: none; font-size: 20px; font-weight: bold; }
-        nav ul { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; justify-content: flex-end; }
-        nav ul li { margin-left: 25px; }
-        nav ul li a { color: #333; text-decoration: none; font-weight: 700; transition: color 0.3s ease; }
-        nav ul li a:hover { color: #FF6B17; }
-        .login-link { 
-            background-color: #f5f5f5;
-            padding: 5px 15px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-        }
-        .login-link:hover { 
-            color: #FF6B17 !important;
-            background-color: #e0e0e0;
-        }
-        .profile-dropdown { position: relative; }
-        .profile-dropdown:hover .dropdown-content { display: block; }
-        .dropdown-content { position: absolute; right: 0; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 4px; min-width: 120px; }
-        .dropdown-content a { display: block; padding: 10px 15px; color: #333; text-decoration: none; }
-        .dropdown-content a:hover { background: #f5f5f5; }
-        .main-content { 
-            display: flex; 
-            padding: 30px 0; 
-            min-height: calc(100vh - 240px); /* Ensures minimum height for content area */
-        }
-        .filters { width: 240px; padding-right: 30px; }
-        .filters h3 { font-size: 14px; margin-bottom: 10px; color: #555; }
-        .filters select, .filters input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 15px; }
-        .products-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; }
-        .product-card { background: #fff; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.2s; }
-        .product-card:hover { transform: translateY(-5px); }
-        .product-image { height: 200px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .product-image img { max-width: 100%; max-height: 100%; object-fit: cover; }
-        .product-details { padding: 15px; }
-        .product-name { font-weight: bold; margin: 5px 0; font-size: 16px; }
-        .product-description { font-size: 14px; color: #666; margin: 10px 0; }
-        .product-price { font-weight: 600; color: #ff6b00; }
-        .stock-info { font-size: 14px; margin: 5px 0; }
-        .in-stock { color: #28a745; }
-        .low-stock { color: #ffc107; }
-        .out-of-stock { color: #dc3545; }
-        .button-container { display: flex; gap: 10px; }
-        .add-to-cart, .buy-now { flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer; text-align: center; font-weight: 500; }
-        .add-to-cart { background: #3b5998; color: white; }
-        .buy-now { background: #ff6b00; color: white; }
-        .add-to-cart:hover { background: #2a4373; }
-        .buy-now:hover { background: #e65c00; }
-        .add-to-cart:disabled, .buy-now:disabled { 
-            background: #cccccc; 
-            color: #666666; 
-            cursor: not-allowed; 
-        }
-        .pagination { margin: 20px 0; text-align: center; }
-        .pagination a { padding: 8px 12px; margin: 0 5px; text-decoration: none; color: #333; border: 1px solid #ddd; border-radius: 4px; }
-        .pagination a.active { background: #3b5998; color: white; }
-        footer { 
-            background: #1a3d55; 
-            color: white; 
-            padding: 40px 0 20px; 
-            width: 100%; 
-            box-sizing: border-box;
-            margin: 0;
-        }
-        .footer-content { display: flex; justify-content: space-between; width: 100%; }
-        .footer-column { flex: 1; padding: 0 15px; }
-        .footer-logo { color: #ff6b00; font-size: 20px; font-weight: bold; }
-        .newsletter input { padding: 8px; width: 70%; border: none; border-radius: 4px 0 0 4px; }
-        .newsletter button { padding: 8px; background: #ff6b00; color: white; border: none; border-radius: 0 4px 4px 0; }
-
-        /* Modal Styles */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
-        .modal-content { max-width: 90%; max-height: 90%; border-radius: 6px; }
-        .close { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
-       
-        .profile-link {
-            display: flex;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
             align-items: center;
-            gap: 8px;
-            font-weight: 700;
+            justify-content: center;
         }
-        .profile-pic {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: var(--radius-lg);
         }
-        /* Cart styling */
-        .cart-link {
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-        }
-        .cart-link svg {
-            margin-right: 3px;
-        }
-
-        /* Back to Cities Button */
-        .back-to-cities {
-            display: inline-flex;
-            align-items: center;
-            background-color: #3b5998;
+        
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
             color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
+            font-size: 30px;
+            cursor: pointer;
         }
-
-        .back-to-cities:hover {
-            background-color: #2a4373;
+        
+        @media (max-width: 992px) {
+            .shop-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-card {
+                margin-bottom: var(--space-4);
+            }
+        }
+        
+        .text-blue {
+            color: #0066cc;
+        }
+        
+        .text-green {
+            color: #008a39;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
+    <header class="header">
         <div class="container header-inner">
-            <div class="logo"><a href="index.php">Art<span style="color: #333;">Sell</span></a></div>
+            <a href="index.php" class="logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
+            
             <nav>
-                <ul>
-                    <li><a href="shop.php">Shop</a></li>
-                    <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
-                        <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
-                            <li><a href="add_product.php">Add Product</a></li>
-                            <li><a href="vendor_products.php">My Products</a></li>
-                        <?php else: ?>
-                            <li><a href="cart.php" class="cart-link">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-                                  <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                                </svg> (<?php echo count($_SESSION['cart']); ?>)
-                            </a></li>
-                        <?php endif; ?>
-                        <li class="profile-dropdown">
-                            <a href="profile.php" class="profile-link">
-                                <?php echo htmlspecialchars($_SESSION['username']); ?>
-                                <?php if (!empty($_SESSION['profile_picture'])): ?>
-                                    <img src="<?php echo htmlspecialchars($_SESSION['profile_picture']); ?>" alt="Profile" class="profile-pic">
-                                <?php else: ?>
-                                    <img src="images/default-profile.jpg" alt="Profile" class="profile-pic">
-                                <?php endif; ?>
-                            </a>
-                            <div class="dropdown-content">
-                                <a href="profile.php">Settings</a>
-                                <a href="logout.php">Logout</a>
-                            </div>
-                        </li>
-                    <?php else: ?>
-                        <li><a href="login.php" class="login-link">Login</a></li>
-                        <li><a href="signup.php" class="login-link">Sign Up</a></li>
-                    <?php endif; ?>
+                <ul class="nav-links">
+                    <li><a href="index.php" class="nav-link">Home</a></li>
+                    <li><a href="shop.php" class="nav-link active">Shop</a></li>
+                    <li><a href="cities.php" class="nav-link">Cities</a></li>
+                    <li><a href="about.php" class="nav-link">About</a></li>
                 </ul>
             </nav>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container">
-        <main class="main-content">
-            <!-- Filters -->
-            <aside class="filters">
-                <h3>Category</h3>
-                <select onchange="location = this.value;">
-                    <?php 
-                    // Build the base URL for all categories option
-                    $all_categories_url = "?";
-                    if (!empty($city)) {
-                        $all_categories_url .= "city=" . urlencode($city) . "&";
-                    }
-                    if (!empty($search)) {
-                        $all_categories_url .= "search=" . urlencode($search) . "&";
-                    }
-                    // Remove trailing & if exists
-                    $all_categories_url = rtrim($all_categories_url, "&");
-                    ?>
-                    <option value="<?php echo $all_categories_url; ?>">All Categories</option>
+            
+            <div class="header-right">
+                <a href="cart.php" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
                     <?php
-                    $categories = ['crafts', 'delicacies'];
-                    foreach ($categories as $cat) {
-                        $cat_url = "?category=" . urlencode($cat);
-                        if (!empty($city)) {
-                            $cat_url .= "&city=" . urlencode($city);
+                    $cart_count = 0;
+                    if (isset($_SESSION['cart'])) {
+                        foreach ($_SESSION['cart'] as $item) {
+                            $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
                         }
-                        if (!empty($search)) {
-                            $cat_url .= "&search=" . urlencode($search);
-                        }
-                        echo "<option value='$cat_url'" . ($category === $cat ? ' selected' : '') . ">" . ucfirst($cat) . "</option>";
+                    }
+                    if ($cart_count > 0) {
+                        echo "<span>($cart_count)</span>";
                     }
                     ?>
-                </select>
-                <h3>City</h3>
-                <select onchange="location = this.value;">
-                    <option value="?<?php echo !empty($category) ? 'category=' . urlencode($category) . '&' : ''; ?><?php echo !empty($search) ? 'search=' . urlencode($search) . '&' : ''; ?>">All Cities</option>
-                    <?php
-                    $cities = ['aloguinsan', 'catmon', 'dumanjug', 'santander', 'alcoy', 'minglanilla', 'alcantara', 'moalboal', 'borbon'];
-                    foreach ($cities as $c) {
-                        $city_url = "?city=" . urlencode($c);
-                        if (!empty($category)) {
-                            $city_url .= "&category=" . urlencode($category);
-                        }
-                        if (!empty($search)) {
-                            $city_url .= "&search=" . urlencode($search);
-                        }
-                        echo "<option value='$city_url'" . ($city === $c ? ' selected' : '') . ">" . ucfirst($c) . "</option>";
-                    }
-                    ?>
-                </select>
-                <h3>Search</h3>
-                <form method="GET">
-                    <input type="text" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search); ?>">
-                    <?php if (!empty($city)): ?>
-                        <input type="hidden" name="city" value="<?php echo htmlspecialchars($city); ?>">
-                    <?php endif; ?>
-                    <?php if (!empty($category)): ?>
-                        <input type="hidden" name="category" value="<?php echo htmlspecialchars($category); ?>">
-                    <?php endif; ?>
-                    <input type="submit" value="Search" style="display: none;">
-                </form>
+                </a>
                 
-                <!-- Back to Cities Button -->
-                <div style="margin-top: 20px; text-align: center;">
-                    <a href="cities.php" class="back-to-cities">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 5px;">
-                            <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-                        </svg>
-                        Back to Cities
-                    </a>
-                </div>
-            </aside>
-
-            <!-- Products Grid -->
-            <div class="products-grid">
-                <?php if (!empty($paginated_products)): ?>
-                    <?php foreach ($paginated_products as $product): ?>
-                        <div class="product-card">
-                            <div class="product-image" onclick="openModal('<?php echo htmlspecialchars($product['image']); ?>')">
-                                <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
-                            </div>
-                            <div class="product-details">
-                                <h3 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h3>
-                                <p class="product-description"><?php echo htmlspecialchars(substr($product['description'], 0, 70)) . '...'; ?></p>
-                                <p class="product-price">₱<?php echo number_format($product['price'], 2); ?></p>
-                                
-                                <?php 
-                                $stock_status = "";
-                                $is_in_stock = true;
-                                if (isset($product['stock'])) {
-                                    if ($product['stock'] <= 0) {
-                                        $stock_status = "Out of Stock";
-                                        $stock_class = "out-of-stock";
-                                        $is_in_stock = false;
-                                    } elseif ($product['stock'] <= 5) {
-                                        $stock_status = "Low Stock: " . $product['stock'] . " left";
-                                        $stock_class = "low-stock";
-                                    } else {
-                                        $stock_status = "In Stock: " . $product['stock'] . " available";
-                                        $stock_class = "in-stock";
-                                    }
-                                } else {
-                                    $stock_status = "Stock status unknown";
-                                    $stock_class = "";
-                                }
-                                ?>
-                                
-                                <p class="stock-info <?php echo $stock_class; ?>"><?php echo $stock_status; ?></p>
-                                
-                                <div class="button-container">
-                                    <form method="POST" action="add_to_cart.php">
-                                        <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <input type="hidden" name="redirect" value="shop.php">
-                                        <?php
-                                        // Build current URL with all parameters for "Add to Cart" form
-                                        $current_url = "shop.php";
-                                        $params = [];
-                                        if (!empty($category)) $params[] = "category=" . urlencode($category);
-                                        if (!empty($city)) $params[] = "city=" . urlencode($city);
-                                        if (!empty($search)) $params[] = "search=" . urlencode($search);
-                                        if (!empty($page)) $params[] = "page=" . urlencode($page);
-                                        if (!empty($params)) {
-                                            $current_url .= "?" . implode("&", $params);
-                                        }
-                                        ?>
-                                        <input type="hidden" name="current_url" value="<?php echo $current_url; ?>">
-                                        <button type="submit" name="add_to_cart" class="add-to-cart" <?php echo !$is_in_stock ? 'disabled' : ''; ?>>Add to Cart</button>
-                                    </form>
-                                    <form method="POST" action="add_to_cart.php">
-                                        <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <input type="hidden" name="redirect" value="cart.php">
-                                        <button type="submit" name="buy_now" class="buy-now" <?php echo !$is_in_stock ? 'disabled' : ''; ?>>Buy Now</button>
-                                    </form>
-                                </div>
-                            </div>
+                <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                    <div class="profile-dropdown">
+                        <a href="#" class="profile-link">
+                            <span><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-content">
+                            <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
+                                <a href="vendor_products.php" class="dropdown-item">
+                                    <i class="fas fa-box"></i> My Products
+                                </a>
+                            <?php endif; ?>
+                            <a href="profile.php" class="dropdown-item">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="settings.php" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <a href="logout.php" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
                         </div>
-                    <?php endforeach; ?>
+                    </div>
                 <?php else: ?>
-                    <p>No products found. Try a different search.</p>
+                    <a href="login.php" class="btn btn-outline btn-sm">Login</a>
+                    <a href="signup.php" class="btn btn-primary btn-sm">Sign Up</a>
                 <?php endif; ?>
             </div>
-        </main>
-
-        <!-- Pagination -->
-        <?php if ($total_pages > 1): ?>
-            <div class="pagination">
-                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <?php
-                    // Build pagination URL
-                    $pagination_url = "?page=" . $i;
-                    if (!empty($category)) {
-                        $pagination_url .= "&category=" . urlencode($category);
-                    }
-                    if (!empty($city)) {
-                        $pagination_url .= "&city=" . urlencode($city);
-                    }
-                    if (!empty($search)) {
-                        $pagination_url .= "&search=" . urlencode($search);
-                    }
-                    ?>
-                    <a href="<?php echo $pagination_url; ?>" class="<?php echo $i === $page ? 'active' : ''; ?>"><?php echo $i; ?></a>
-                <?php endfor; ?>
+        </div>
+    </header>
+    
+    <main class="container shop-container">
+        <div class="shop-header">
+            <h1 class="shop-title">Shop Cebu's Artisan Treasures</h1>
+            <p class="shop-subtitle">Authentic crafts and delicacies made by local artisans</p>
+        </div>
+        
+        <div class="shop-layout">
+            <div class="filters">
+                <div class="filter-card">
+                    <h2 class="filter-title">Filters</h2>
+                    <form action="shop.php" method="GET">
+                        <div class="filter-group">
+                            <label for="category" class="filter-label">Category</label>
+                            <select name="category" id="category" class="filter-control">
+                                <option value="">All Categories</option>
+                                <option value="jewelry" <?php echo $category == 'jewelry' ? 'selected' : ''; ?>>Jewelry</option>
+                                <option value="home-decor" <?php echo $category == 'home-decor' ? 'selected' : ''; ?>>Home Decor</option>
+                                <option value="textiles" <?php echo $category == 'textiles' ? 'selected' : ''; ?>>Textiles</option>
+                                <option value="food" <?php echo $category == 'food' ? 'selected' : ''; ?>>Food & Delicacies</option>
+                                <option value="crafts" <?php echo $category == 'crafts' ? 'selected' : ''; ?>>Handcrafted Items</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="city" class="filter-label">City</label>
+                            <select name="city" id="city" class="filter-control">
+                                <option value="">All Cities</option>
+                                <option value="Cebu City" <?php echo $city == 'Cebu City' ? 'selected' : ''; ?>>Cebu City</option>
+                                <option value="Mandaue" <?php echo $city == 'Mandaue' ? 'selected' : ''; ?>>Mandaue</option>
+                                <option value="Lapu-Lapu" <?php echo $city == 'Lapu-Lapu' ? 'selected' : ''; ?>>Lapu-Lapu</option>
+                                <option value="Carcar" <?php echo $city == 'Carcar' ? 'selected' : ''; ?>>Carcar</option>
+                                <option value="Talisay" <?php echo $city == 'Talisay' ? 'selected' : ''; ?>>Talisay</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="search" class="filter-label">Search</label>
+                            <input type="text" name="search" id="search" class="filter-control" placeholder="Search for products..." value="<?php echo htmlspecialchars($search); ?>">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary filter-btn">Apply Filters</button>
+                    </form>
+                </div>
             </div>
-        <?php endif; ?>
-    </div>
-
-    <!-- Modal -->
+            
+            <div class="products-section">
+                <div class="product-grid">
+                    <?php if (empty($paginated_products)): ?>
+                        <div class="card p-5 text-center" style="grid-column: 1 / -1;">
+                            <i class="fas fa-box-open fa-4x mb-3 text-neutral-500"></i>
+                            <h2 class="mb-3">No products found</h2>
+                            <p class="mb-4">Try adjusting your filters or check back later for new products.</p>
+                            <a href="shop.php" class="btn btn-primary">Clear Filters</a>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($paginated_products as $product): ?>
+                            <div class="card">
+                                <img src="<?php echo isset($product['image']) && !empty($product['image']) ? htmlspecialchars($product['image']) : 'image/coconut-bowl-palm.jpg'; ?>" 
+                                     alt="<?php echo isset($product['name']) ? htmlspecialchars($product['name']) : 'Product'; ?>" 
+                                     class="card-img"
+                                     onclick="openModal('<?php echo isset($product['image']) && !empty($product['image']) ? htmlspecialchars($product['image']) : 'image/coconut-bowl-palm.jpg'; ?>')">
+                                
+                                <div class="card-body">
+                                    <h3 class="card-title"><?php echo isset($product['name']) ? htmlspecialchars($product['name']) : 'Product'; ?></h3>
+                                    
+                                    <?php
+                                        $stock = isset($product['stock']) ? (int)$product['stock'] : 0;
+                                        if ($stock > 10) {
+                                            echo '<div class="stock-badge in-stock"><i class="fas fa-check-circle"></i> In Stock</div>';
+                                        } else if ($stock > 0) {
+                                            echo '<div class="stock-badge low-stock"><i class="fas fa-exclamation-circle"></i> Low Stock</div>';
+                                        } else {
+                                            echo '<div class="stock-badge out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</div>';
+                                        }
+                                    ?>
+                                    
+                                    <p class="card-text"><?php echo isset($product['description']) ? htmlspecialchars(substr($product['description'], 0, 80) . (strlen($product['description']) > 80 ? '...' : '')) : ''; ?></p>
+                                    
+                                    <div class="card-price">₱<?php echo isset($product['price']) ? number_format($product['price'], 2) : '0.00'; ?></div>
+                                    
+                                    <div class="d-flex mt-3" style="gap: var(--space-2);">
+                                        <a href="product-details.php?id=<?php echo $product['id']; ?>" class="btn btn-outline">View Details</a>
+                                        
+                                        <form action="add_to_cart.php" method="POST" style="flex-grow: 1;">
+                                            <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                                            <button type="submit" class="btn btn-primary" style="width: 100%;" <?php echo $stock <= 0 ? 'disabled' : ''; ?>>
+                                                <i class="fas fa-cart-plus"></i> Add to Cart
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+                
+                <!-- Pagination -->
+                <?php if ($total_pages > 1): ?>
+                    <div class="pagination">
+                        <?php if ($page > 1): ?>
+                            <a href="?page=<?php echo $page - 1; ?><?php echo !empty($category) ? '&category=' . urlencode($category) : ''; ?><?php echo !empty($city) ? '&city=' . urlencode($city) : ''; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        <?php endif; ?>
+                        
+                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                            <a href="?page=<?php echo $i; ?><?php echo !empty($category) ? '&category=' . urlencode($category) : ''; ?><?php echo !empty($city) ? '&city=' . urlencode($city) : ''; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" 
+                               class="<?php echo $i === $page ? 'active' : ''; ?>">
+                                <?php echo $i; ?>
+                            </a>
+                        <?php endfor; ?>
+                        
+                        <?php if ($page < $total_pages): ?>
+                            <a href="?page=<?php echo $page + 1; ?><?php echo !empty($category) ? '&category=' . urlencode($category) : ''; ?><?php echo !empty($city) ? '&city=' . urlencode($city) : ''; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Image Modal -->
     <div id="imageModal" class="modal">
-        <span class="close" onclick="closeModal()">×</span>
+        <span class="close" onclick="closeModal()">&times;</span>
         <img class="modal-content" id="modalImage">
     </div>
-
-    <!-- Footer -->
-    <?php include 'components/footer.php'; ?>
-
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <a href="index.php" class="footer-logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
+                    <p>Connecting artisans with customers who appreciate authentic local crafts and delicacies.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="shop.php">Products</a></li>
+                        <li><a href="cities.php">Cities</a></li>
+                        <li><a href="about.php">About Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping & Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Main Street, Cebu City, Philippines</li>
+                        <li><i class="fas fa-phone"></i> +63 (32) 123-4567</li>
+                        <li><i class="fas fa-envelope"></i> info@artisell.com</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date("Y"); ?> ArtiSell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
     <script>
-        // Modal functionality
-        function openModal(imageSrc) {
+        // Image modal functions
+        function openModal(imageUrl) {
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
             modal.style.display = 'flex';
-            modalImg.src = imageSrc;
+            modalImg.src = imageUrl;
         }
-
+        
         function closeModal() {
-            const modal = document.getElementById('imageModal');
-            modal.style.display = 'none';
+            document.getElementById('imageModal').style.display = 'none';
         }
-
-        // Close modal when clicking outside the image
-        document.getElementById('imageModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        // Buy Now alert
-        document.querySelectorAll('.buy-now').forEach(btn => {
-            btn.addEventListener('click', () => alert('Proceeding to checkout!'));
-        });
     </script>
 </body>
 </html>

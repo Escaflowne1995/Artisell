@@ -8,9 +8,9 @@ $product_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 // Get product details
 $product = null;
 if ($product_id > 0) {
-    $query = "SELECT * FROM products WHERE product_id = ?";
+    $query = "SELECT * FROM products WHERE id = ? OR product_id = ?";
     $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "i", $product_id);
+    mysqli_stmt_bind_param($stmt, "ii", $product_id, $product_id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     
@@ -25,8 +25,14 @@ if (!$product) {
     exit;
 }
 
-// Default image
-$image_path = "image/coconut-bowl-palm.jpg";
+// Get product name from either name or product_name field
+$product_name = isset($product['name']) ? $product['name'] : (isset($product['product_name']) ? $product['product_name'] : 'Product');
+
+// Get image path
+$image_path = isset($product['image']) && !empty($product['image']) ? $product['image'] : "image/coconut-bowl-palm.jpg";
+
+// Get stock info
+$stock = isset($product['stock']) ? (int)$product['stock'] : 0;
 ?>
 
 <!DOCTYPE html>
@@ -34,191 +40,454 @@ $image_path = "image/coconut-bowl-palm.jpg";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($product['product_name']); ?> - ArtiSell</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title><?php echo htmlspecialchars($product_name); ?> - ArtiSell</title>
+    <meta name="description" content="<?php echo htmlspecialchars(substr(isset($product['description']) ? $product['description'] : 'Authentic Cebuano crafts and delicacies', 0, 160)); ?>">
+    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         .product-container {
-            display: flex;
-            flex-wrap: wrap;
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
+            padding: var(--space-6) 0;
         }
         
-        .product-images {
-            flex: 1;
-            min-width: 300px;
-            padding-right: 40px;
+        .product-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-6);
+        }
+        
+        .product-image-container {
+            position: relative;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: auto;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+        }
+        
+        .product-badges {
+            position: absolute;
+            top: var(--space-4);
+            left: var(--space-4);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+        
+        .product-badge {
+            display: inline-block;
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            background-color: var(--primary);
+            color: white;
         }
         
         .product-info {
-            flex: 1;
-            min-width: 300px;
-        }
-        
-        .product-main-image {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
         }
         
         .product-title {
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--space-2);
         }
         
         .product-price {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ff6b00;
-            margin-bottom: 20px;
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: var(--space-4);
         }
         
         .product-description {
-            line-height: 1.6;
-            margin-bottom: 20px;
+            color: var(--neutral-700);
+            line-height: 1.7;
+            margin-bottom: var(--space-5);
         }
         
-        .add-to-cart-btn {
-            background-color: #ff6b00;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
+        .stock-badge {
+            display: inline-block;
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            margin-bottom: var(--space-4);
         }
         
-        .add-to-cart-btn:hover {
-            background-color: #e05f00;
+        .in-stock {
+            background-color: rgba(52, 199, 89, 0.1);
+            color: var(--accent);
         }
         
-        .quantity-selector {
+        .low-stock {
+            background-color: rgba(255, 204, 0, 0.1);
+            color: #ffc107;
+        }
+        
+        .out-of-stock {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .quantity-control {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: var(--space-4);
+            width: fit-content;
         }
         
-        .quantity-selector input {
-            width: 50px;
-            text-align: center;
-            margin: 0 10px;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .quantity-label {
+            margin-right: var(--space-3);
+            font-weight: 500;
         }
         
-        .quantity-selector button {
-            background: #eee;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
+        .product-actions {
+            margin-top: var(--space-4);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--space-3);
+        }
+        
+        .action-btn {
+            padding: var(--space-3) var(--space-4);
+        }
+        
+        /* Related products */
+        .related-products {
+            margin-top: var(--space-8);
+        }
+        
+        .section-title {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--space-5);
+            position: relative;
+            padding-bottom: var(--space-2);
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: var(--radius-full);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: var(--radius-lg);
+        }
+        
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 30px;
             cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .product-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-image-container {
+                margin-bottom: var(--space-4);
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <header class="header">
-            <div class="container header-inner">
-                <a href="index.php" class="logo">Art<span>iSell</span></a>
+    <header class="header">
+        <div class="container header-inner">
+            <a href="index.php" class="logo">Arti<span class="text-primary">Sell</span></a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.php" class="nav-link">Home</a></li>
+                    <li><a href="shop.php" class="nav-link active">Shop</a></li>
+                    <li><a href="cities.php" class="nav-link">Cities</a></li>
+                    <li><a href="about.php" class="nav-link">About</a></li>
+                </ul>
+            </nav>
+            
+            <div class="header-right">
+                <a href="cart.php" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <?php
+                    $cart_count = 0;
+                    if (isset($_SESSION['cart'])) {
+                        foreach ($_SESSION['cart'] as $item) {
+                            $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
+                        }
+                    }
+                    if ($cart_count > 0) {
+                        echo "<span>($cart_count)</span>";
+                    }
+                    ?>
+                </a>
                 
-                <div class="header-right">
-                    <a href="#"><i class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                    </svg></i></a>
-                    <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
-                        <a href="cart.php" class="nav-link"><i class="cart-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
-                        </svg></i><?php echo isset($_SESSION['cart']) ? " (" . count($_SESSION['cart']) . ")" : ""; ?></a>
-                        <a href="profile.php" class="nav-link"><?php echo htmlspecialchars($_SESSION['username']); ?></a>
-                    <?php else: ?>
-                        <a href="login.php" class="nav-link">Login</a>
+                <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                    <div class="profile-dropdown">
+                        <a href="#" class="profile-link">
+                            <span><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-content">
+                            <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
+                                <a href="vendor_products.php" class="dropdown-item">
+                                    <i class="fas fa-box"></i> My Products
+                                </a>
+                            <?php endif; ?>
+                            <a href="profile.php" class="dropdown-item">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="settings.php" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <a href="logout.php" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <a href="login.php" class="btn btn-outline btn-sm">Login</a>
+                    <a href="signup.php" class="btn btn-primary btn-sm">Sign Up</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container product-container">
+        <div class="product-layout">
+            <div class="product-image-container">
+                <img src="<?php echo htmlspecialchars($image_path); ?>" alt="<?php echo htmlspecialchars($product_name); ?>" class="product-image" onclick="openModal('<?php echo htmlspecialchars($image_path); ?>')">
+                
+                <div class="product-badges">
+                    <?php if (isset($product['is_featured']) && $product['is_featured']): ?>
+                        <div class="product-badge">Featured</div>
                     <?php endif; ?>
                 </div>
             </div>
-        </header>
-        
-        <main>
-            <div class="product-container">
-                <div class="product-images">
-                    <img src="<?php echo htmlspecialchars($image_path); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>" class="product-main-image">
+            
+            <div class="product-info">
+                <h1 class="product-title"><?php echo htmlspecialchars($product_name); ?></h1>
+                <div class="product-price">₱<?php echo number_format(isset($product['price']) ? $product['price'] : 0, 2); ?></div>
+                
+                <?php
+                if ($stock > 10) {
+                    echo '<div class="stock-badge in-stock"><i class="fas fa-check-circle"></i> In Stock</div>';
+                } else if ($stock > 0) {
+                    echo '<div class="stock-badge low-stock"><i class="fas fa-exclamation-circle"></i> Only ' . $stock . ' left</div>';
+                } else {
+                    echo '<div class="stock-badge out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</div>';
+                }
+                ?>
+                
+                <div class="product-description">
+                    <?php if (isset($product['description']) && !empty($product['description'])): ?>
+                        <?php echo nl2br(htmlspecialchars($product['description'])); ?>
+                    <?php else: ?>
+                        <p>This authentic Cebuano product represents the rich craftsmanship of local artisans. 
+                        Each piece is carefully handcrafted using traditional methods passed down through generations.</p>
+                    <?php endif; ?>
                 </div>
                 
-                <div class="product-info">
-                    <h1 class="product-title"><?php echo htmlspecialchars($product['product_name']); ?></h1>
-                    <p class="product-price">₱<?php echo number_format($product['price'], 2); ?></p>
+                <form action="add_to_cart.php" method="POST">
+                    <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
                     
-                    <div class="product-description">
-                        <?php if (isset($product['description']) && !empty($product['description'])): ?>
-                            <?php echo nl2br(htmlspecialchars($product['description'])); ?>
-                        <?php else: ?>
-                            <p>This authentic Cebuano product represents the rich craftsmanship of local artisans. 
-                            Each piece is carefully handcrafted using traditional methods passed down through generations.</p>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <form action="add_to_cart.php" method="post">
-                        <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
-                        
-                        <div class="quantity-selector">
-                            <label for="quantity">Quantity:</label>
-                            <button type="button" onclick="decrementQuantity()">-</button>
-                            <input type="number" id="quantity" name="quantity" value="1" min="1">
-                            <button type="button" onclick="incrementQuantity()">+</button>
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="quantity-label">Quantity:</span>
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn" onclick="decrementQuantity()">-</button>
+                            <input type="number" name="quantity" id="quantity" value="1" min="1" class="quantity-input">
+                            <button type="button" class="quantity-btn" onclick="incrementQuantity()">+</button>
                         </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button type="submit" name="add_to_cart" class="btn btn-primary action-btn" <?php echo $stock <= 0 ? 'disabled' : ''; ?>>
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
                         
-                        <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-                    </form>
-                </div>
+                        <a href="shop.php" class="btn btn-outline action-btn">
+                            <i class="fas fa-arrow-left"></i> Back to Shop
+                        </a>
+                    </div>
+                </form>
             </div>
-        </main>
+        </div>
         
-        <footer class="footer">
-            <div class="container">
-                <div class="footer-content">
-                    <div class="footer-logo">
-                        <h2>ArtiSell</h2>
-                        <p>Connecting you with authentic Cebuano crafts and delicacies.</p>
-                    </div>
-                    
-                    <div class="footer-links">
-                        <h3>Quick Links</h3>
-                        <ul>
-                            <li><a href="index.php">Home</a></li>
-                            <li><a href="shop.php">Shop</a></li>
-                            <li><a href="about.php">About Us</a></li>
-                            <li><a href="contact.php">Contact</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="footer-contact">
-                        <h3>Contact Us</h3>
-                        <p>Email: info@artisell.ph</p>
-                        <p>Phone: +63 32 123 4567</p>
-                    </div>
-                </div>
+        <!-- Related Products Section -->
+        <div class="related-products">
+            <h2 class="section-title">You May Also Like</h2>
+            
+            <div class="product-grid">
+                <?php
+                // Get related products
+                $related_query = "SELECT * FROM products WHERE id != ? OR product_id != ? ORDER BY RAND() LIMIT 4";
+                $related_stmt = mysqli_prepare($conn, $related_query);
+                mysqli_stmt_bind_param($related_stmt, "ii", $product_id, $product_id);
+                mysqli_stmt_execute($related_stmt);
+                $related_result = mysqli_stmt_get_result($related_stmt);
                 
-                <div class="footer-bottom">
-                    <p>&copy; 2023 ArtiSell. All rights reserved.</p>
+                if ($related_result && mysqli_num_rows($related_result) > 0) {
+                    while ($related = mysqli_fetch_assoc($related_result)) {
+                        $related_name = isset($related['name']) ? $related['name'] : (isset($related['product_name']) ? $related['product_name'] : 'Product');
+                        $related_image = isset($related['image']) && !empty($related['image']) ? $related['image'] : "image/coconut-bowl-palm.jpg";
+                        $related_id = isset($related['id']) ? $related['id'] : (isset($related['product_id']) ? $related['product_id'] : 1);
+                        $related_price = isset($related['price']) ? $related['price'] : 0;
+                        $related_description = isset($related['description']) ? $related['description'] : 'Authentic Cebuano product';
+                ?>
+                <div class="card">
+                    <img src="<?php echo htmlspecialchars($related_image); ?>" alt="<?php echo htmlspecialchars($related_name); ?>" class="card-img">
+                    <div class="card-body">
+                        <h3 class="card-title"><?php echo htmlspecialchars($related_name); ?></h3>
+                        <p class="card-text"><?php echo htmlspecialchars(substr($related_description, 0, 80) . (strlen($related_description) > 80 ? '...' : '')); ?></p>
+                        <div class="card-price">₱<?php echo number_format($related_price, 2); ?></div>
+                        <a href="product-details.php?id=<?php echo $related_id; ?>" class="btn btn-primary">View Details</a>
+                    </div>
                 </div>
+                <?php
+                    }
+                } else {
+                    // Display fallback products if related products not found
+                    $dummy_products = [
+                        ["name" => "Handcrafted Jewelry", "price" => "1200.00", "image" => "image/jewelry.jpg", "description" => "Beautiful handmade jewelry from local artisans"],
+                        ["name" => "Coconut Shell Bowl", "price" => "450.00", "image" => "image/coconut-bowl-palm.jpg", "description" => "Eco-friendly bowl made from coconut shells"],
+                        ["name" => "Woven Basket", "price" => "850.00", "image" => "image/basket.jpg", "description" => "Traditional woven basket using local materials"],
+                        ["name" => "Handwoven Fabric", "price" => "1500.00", "image" => "image/fabric.jpg", "description" => "Colorful handwoven fabric with traditional patterns"]
+                    ];
+                    
+                    foreach ($dummy_products as $index => $related) {
+                ?>
+                <div class="card">
+                    <img src="<?php echo $related['image']; ?>" alt="<?php echo htmlspecialchars($related['name']); ?>" class="card-img">
+                    <div class="card-body">
+                        <h3 class="card-title"><?php echo htmlspecialchars($related['name']); ?></h3>
+                        <p class="card-text"><?php echo htmlspecialchars($related['description']); ?></p>
+                        <div class="card-price">₱<?php echo $related['price']; ?></div>
+                        <a href="product-details.php?id=<?php echo $index + 1; ?>" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+                <?php
+                    }
+                }
+                ?>
             </div>
-        </footer>
+        </div>
+    </main>
+    
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
     </div>
     
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <a href="index.php" class="footer-logo">ArtiSell</a>
+                    <p>Connecting artisans with customers who appreciate authentic local crafts and delicacies.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="shop.php">Products</a></li>
+                        <li><a href="cities.php">Cities</a></li>
+                        <li><a href="about.php">About Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping & Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Main Street, Cebu City, Philippines</li>
+                        <li><i class="fas fa-phone"></i> +63 (32) 123-4567</li>
+                        <li><i class="fas fa-envelope"></i> info@artisell.com</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date("Y"); ?> ArtiSell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
     <script>
+        // Image modal functions
+        function openModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'flex';
+            modalImg.src = imageUrl;
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        // Quantity control
         function incrementQuantity() {
-            const quantityInput = document.getElementById('quantity');
-            quantityInput.value = parseInt(quantityInput.value) + 1;
+            const input = document.getElementById('quantity');
+            input.value = parseInt(input.value) + 1;
         }
         
         function decrementQuantity() {
-            const quantityInput = document.getElementById('quantity');
-            if (parseInt(quantityInput.value) > 1) {
-                quantityInput.value = parseInt(quantityInput.value) - 1;
+            const input = document.getElementById('quantity');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
             }
         }
     </script>
