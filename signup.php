@@ -141,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="main-container">
-        <?php include 'components/navbar.php'; ?>
+        <?php include 'components/navbar_auth.php'; ?>
         
         <main class="main-content">
             <!-- Signup Form -->

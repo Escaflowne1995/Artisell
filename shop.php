@@ -14,6 +14,45 @@ $category = isset($_GET['category']) ? $_GET['category'] : '';
 $city = isset($_GET['city']) ? $_GET['city'] : '';
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
+// Define available cities in Cebu province
+$valid_cities = [
+    'Cebu City',
+    'Mandaue',
+    'Lapu-Lapu',
+    'Carcar',
+    'Talisay',
+    'Danao',
+    'Toledo',
+    'Bogo',
+    'Naga',
+    'Minglanilla',
+    'Moalboal',
+    'Santander',
+    'Aloguinsan',
+    'Alcoy',
+    'Dumanjug',
+    'Catmon',
+    'Borbon',
+    'Alcantara'
+];
+
+// Optionally get additional cities from database
+$sql_cities = "SELECT DISTINCT city FROM products WHERE city IS NOT NULL AND city != '' ORDER BY city";
+$result_cities = mysqli_query($conn, $sql_cities);
+$db_cities = [];
+
+if ($result_cities) {
+    while ($row = mysqli_fetch_assoc($result_cities)) {
+        if (!empty($row['city'])) {
+            $db_cities[] = $row['city'];
+        }
+    }
+}
+
+// Merge and remove duplicates
+$all_cities = array_unique(array_merge($valid_cities, $db_cities));
+sort($all_cities);
+
 $sql = "SELECT * FROM products WHERE 1=1";
 $params = [];
 $types = "";
@@ -270,65 +309,7 @@ foreach ($paginated_products as $key => $product) {
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="container header-inner">
-            <a href="index.php" class="logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
-            
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="index.php" class="nav-link">Home</a></li>
-                    <li><a href="shop.php" class="nav-link active">Shop</a></li>
-                    <li><a href="cities.php" class="nav-link">Cities</a></li>
-                    <li><a href="about.php" class="nav-link">About</a></li>
-                </ul>
-            </nav>
-            
-            <div class="header-right">
-                <a href="cart.php" class="nav-link">
-                    <i class="fas fa-shopping-cart"></i>
-                    <?php
-                    $cart_count = 0;
-                    if (isset($_SESSION['cart'])) {
-                        foreach ($_SESSION['cart'] as $item) {
-                            $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
-                        }
-                    }
-                    if ($cart_count > 0) {
-                        echo "<span>($cart_count)</span>";
-                    }
-                    ?>
-                </a>
-                
-                <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
-                    <div class="profile-dropdown">
-                        <a href="#" class="profile-link">
-                            <span><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                            <i class="fas fa-chevron-down"></i>
-                        </a>
-                        <div class="dropdown-content">
-                            <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
-                                <a href="vendor_products.php" class="dropdown-item">
-                                    <i class="fas fa-box"></i> My Products
-                                </a>
-                            <?php endif; ?>
-                            <a href="profile.php" class="dropdown-item">
-                                <i class="fas fa-user"></i> Profile
-                            </a>
-                            <a href="settings.php" class="dropdown-item">
-                                <i class="fas fa-cog"></i> Settings
-                            </a>
-                            <a href="logout.php" class="dropdown-item">
-                                <i class="fas fa-sign-out-alt"></i> Logout
-                            </a>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <a href="login.php" class="btn btn-outline btn-sm">Login</a>
-                    <a href="signup.php" class="btn btn-primary btn-sm">Sign Up</a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </header>
+        <?php include 'components/navbar.php'; ?>
     
     <main class="container shop-container">
         <div class="shop-header">
@@ -357,11 +338,11 @@ foreach ($paginated_products as $key => $product) {
                             <label for="city" class="filter-label">City</label>
                             <select name="city" id="city" class="filter-control">
                                 <option value="">All Cities</option>
-                                <option value="Cebu City" <?php echo $city == 'Cebu City' ? 'selected' : ''; ?>>Cebu City</option>
-                                <option value="Mandaue" <?php echo $city == 'Mandaue' ? 'selected' : ''; ?>>Mandaue</option>
-                                <option value="Lapu-Lapu" <?php echo $city == 'Lapu-Lapu' ? 'selected' : ''; ?>>Lapu-Lapu</option>
-                                <option value="Carcar" <?php echo $city == 'Carcar' ? 'selected' : ''; ?>>Carcar</option>
-                                <option value="Talisay" <?php echo $city == 'Talisay' ? 'selected' : ''; ?>>Talisay</option>
+                                <?php foreach ($all_cities as $city_option): ?>
+                                    <option value="<?php echo htmlspecialchars($city_option); ?>" <?php echo $city == $city_option ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($city_option); ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         
@@ -395,16 +376,7 @@ foreach ($paginated_products as $key => $product) {
                                 <div class="card-body">
                                     <h3 class="card-title"><?php echo isset($product['name']) ? htmlspecialchars($product['name']) : 'Product'; ?></h3>
                                     
-                                    <?php
-                                        $stock = isset($product['stock']) ? (int)$product['stock'] : 0;
-                                        if ($stock > 10) {
-                                            echo '<div class="stock-badge in-stock"><i class="fas fa-check-circle"></i> In Stock</div>';
-                                        } else if ($stock > 0) {
-                                            echo '<div class="stock-badge low-stock"><i class="fas fa-exclamation-circle"></i> Low Stock</div>';
-                                        } else {
-                                            echo '<div class="stock-badge out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</div>';
-                                        }
-                                    ?>
+                                                                        <?php                                        $stock = isset($product['stock']) ? (int)$product['stock'] : 0;                                        if ($stock > 10) {                                            echo '<div class="stock-badge in-stock"><i class="fas fa-check-circle"></i> In Stock (' . $stock . ')</div>';                                        } else if ($stock > 0) {                                            echo '<div class="stock-badge low-stock"><i class="fas fa-exclamation-circle"></i> Low Stock (' . $stock . ')</div>';                                        } else {                                            echo '<div class="stock-badge out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock (0)</div>';                                        }                                    ?>
                                     
                                     <p class="card-text"><?php echo isset($product['description']) ? htmlspecialchars(substr($product['description'], 0, 80) . (strlen($product['description']) > 80 ? '...' : '')) : ''; ?></p>
                                     

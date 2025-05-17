@@ -361,6 +361,7 @@ $paid_count = mysqli_fetch_assoc($paid_result)['count'];
             <div class="page-header">
                 <h1>Advanced Orders Management</h1>
                 <div class="header-actions">
+                    <a href="index.php" class="btn btn-secondary">Back to Dashboard</a>
                     <button onclick="exportOrders()" class="btn btn-secondary">Export to CSV</button>
                 </div>
             </div>

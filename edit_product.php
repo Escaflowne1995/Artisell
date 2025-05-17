@@ -8,13 +8,43 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
     exit;
 }
 
+// Get the correct vendor_id from database
+$vendorId = null;
+$sql = "SELECT id FROM vendors WHERE user_id = ?";
+$stmt = mysqli_prepare($conn, $sql);
+if ($stmt) {
+    mysqli_stmt_bind_param($stmt, "i", $_SESSION['id']);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_store_result($stmt);
+    
+    if (mysqli_stmt_num_rows($stmt) > 0) {
+        mysqli_stmt_bind_result($stmt, $vendorId);
+        mysqli_stmt_fetch($stmt);
+    } else {
+        // Create a vendor record if it doesn't exist
+        $insertVendorSql = "INSERT INTO vendors (user_id, vendor_name) VALUES (?, ?)";
+        $insertStmt = mysqli_prepare($conn, $insertVendorSql);
+        if ($insertStmt) {
+            // Use username as vendor_name initially
+            $vendorName = $_SESSION['username'];
+            mysqli_stmt_bind_param($insertStmt, "is", $_SESSION['id'], $vendorName);
+            
+            if (mysqli_stmt_execute($insertStmt)) {
+                $vendorId = mysqli_insert_id($conn);
+            }
+            mysqli_stmt_close($insertStmt);
+        }
+    }
+    mysqli_stmt_close($stmt);
+}
+
 // Get product ID from URL
 $product_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 // Fetch product details
 $sql = "SELECT * FROM products WHERE id = ? AND vendor_id = ?";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "ii", $product_id, $_SESSION['id']);
+mysqli_stmt_bind_param($stmt, "ii", $product_id, $vendorId);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $product = mysqli_fetch_assoc($result);
@@ -66,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Update product in database
             $sql = "UPDATE products SET name = ?, description = ?, price = ?, category = ?, image = ?, city = ?, stock = ? WHERE id = ? AND vendor_id = ?";
             $stmt = mysqli_prepare($conn, $sql);
-            mysqli_stmt_bind_param($stmt, "ssdsssiis", $name, $description, $price, $category, $target_file, $city, $stock, $product_id, $_SESSION['id']);
+            mysqli_stmt_bind_param($stmt, "ssdsssiis", $name, $description, $price, $category, $target_file, $city, $stock, $product_id, $vendorId);
             if (mysqli_stmt_execute($stmt)) {
                 header("Location: vendor_products.php");
                 exit;

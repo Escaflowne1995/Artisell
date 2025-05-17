@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .city-image {
+            width: 800px;
+            height: 600px;
+            background-color: #4a90e2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        .instructions {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .download-btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>City Image Generator</h1>
+    
+    <div class="instructions">
+        <p>This page displays placeholder images for cities. To save an image:</p>
+        <ol>
+            <li>Right-click on the city image</li>
+            <li>Select "Save image as..."</li>
+            <li>Save with the filename shown under each image</li>
+            <li>Place the saved images in the images/cities folder</li>
+        </ol>
+    </div>
+    
+    <div class="city-image">Mandaue City</div>
+    <p>Save as: <code>images/cities/mandaue_city.jpg</code></p>
+    <a href="#" class="download-btn" onclick="downloadImage('Mandaue City', 'mandaue_city.jpg')">Download Image</a>
+    
+    <div class="city-image">Lapu-Lapu City</div>
+    <p>Save as: <code>images/cities/lapu-lapu_city.jpg</code></p>
+    <a href="#" class="download-btn" onclick="downloadImage('Lapu-Lapu City', 'lapu-lapu_city.jpg')">Download Image</a>
+    
+    <div class="city-image">Talisay City</div>
+    <p>Save as: <code>images/cities/talisay_city.jpg</code></p>
+    <a href="#" class="download-btn" onclick="downloadImage('Talisay City', 'talisay_city.jpg')">Download Image</a>
+    
+    <div class="city-image">Naga City</div>
+    <p>Save as: <code>images/cities/naga_city.jpg</code></p>
+    <a href="#" class="download-btn" onclick="downloadImage('Naga City', 'naga_city.jpg')">Download Image</a>
+    
+    <div class="city-image">Carcar City</div>
+    <p>Save as: <code>images/cities/carcar_city.jpg</code></p>
+    <a href="#" class="download-btn" onclick="downloadImage('Carcar City', 'carcar_city.jpg')">Download Image</a>
+    
+    <div class="city-image">Danao City</div>
+    <p>Save as: <code>images/cities/danao_city.jpg</code></p>
+    <a href="#" class="download-btn" onclick="downloadImage('Danao City', 'danao_city.jpg')">Download Image</a>
+    
+    <div class="city-image">Toledo City</div>
+    <p>Save as: <code>images/cities/toledo_city.jpg</code></p>
+    <a href="#" class="download-btn" onclick="downloadImage('Toledo City', 'toledo_city.jpg')">Download Image</a>
+    
+    <div class="city-image">Bogo City</div>
+    <p>Save as: <code>images/cities/bogo_city.jpg</code></p>
+    <a href="#" class="download-btn" onclick="downloadImage('Bogo City', 'bogo_city.jpg')">Download Image</a>
+
+    <script>
+        function downloadImage(cityName, fileName) {
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions
+            canvas.width = 800;
+            canvas.height = 600;
+            
+            // Fill background
+            ctx.fillStyle = '#4a90e2';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(cityName, canvas.width / 2, canvas.height / 2);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/jpeg', 0.9);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html> 

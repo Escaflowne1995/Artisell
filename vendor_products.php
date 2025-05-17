@@ -17,6 +17,43 @@ if (!isset($_SESSION['csrf_token'])) {
 $message = "";
 $error = "";
 
+// Get the correct vendor_id from database
+$vendorId = null;
+$sql = "SELECT id FROM vendors WHERE user_id = ?";
+$stmt = mysqli_prepare($conn, $sql);
+if ($stmt) {
+    mysqli_stmt_bind_param($stmt, "i", $_SESSION['id']);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_store_result($stmt);
+    
+    if (mysqli_stmt_num_rows($stmt) > 0) {
+        mysqli_stmt_bind_result($stmt, $vendorId);
+        mysqli_stmt_fetch($stmt);
+    } else {
+        // Create a vendor record if it doesn't exist
+        $insertVendorSql = "INSERT INTO vendors (user_id, vendor_name) VALUES (?, ?)";
+        $insertStmt = mysqli_prepare($conn, $insertVendorSql);
+        if ($insertStmt) {
+            // Use username as vendor_name initially
+            $vendorName = $_SESSION['username'];
+            mysqli_stmt_bind_param($insertStmt, "is", $_SESSION['id'], $vendorName);
+            
+            if (mysqli_stmt_execute($insertStmt)) {
+                $vendorId = mysqli_insert_id($conn);
+            } else {
+                $error = "Error creating vendor record: " . mysqli_stmt_error($insertStmt);
+            }
+            mysqli_stmt_close($insertStmt);
+        }
+    }
+    mysqli_stmt_close($stmt);
+}
+
+// If we couldn't get a vendor ID, show an error message
+if ($vendorId === null) {
+    $error = "Error: Could not determine your vendor ID. Please contact support.";
+}
+
 // Handle delete request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_product'])) {
     // Validate CSRF token
@@ -33,10 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_product'])) {
         $sql = "SELECT * FROM products WHERE id = ? AND vendor_id = ?";
         $stmt = mysqli_prepare($conn, $sql);
         
-        // Default to user_id if vendor_id doesn't exist
-        $vendor_id = isset($_SESSION['vendor_id']) ? $_SESSION['vendor_id'] : $_SESSION['id'];
-        
-        mysqli_stmt_bind_param($stmt, "ii", $product_id, $vendor_id);
+        mysqli_stmt_bind_param($stmt, "ii", $product_id, $vendorId);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         
@@ -52,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_product'])) {
                 // Delete from database
                 $sql = "DELETE FROM products WHERE id = ? AND vendor_id = ?";
                 $stmt = mysqli_prepare($conn, $sql);
-                mysqli_stmt_bind_param($stmt, "ii", $product_id, $vendor_id);
+                mysqli_stmt_bind_param($stmt, "ii", $product_id, $vendorId);
                 
                 if (mysqli_stmt_execute($stmt)) {
                     $message = "Product deleted successfully";
@@ -71,37 +105,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_product'])) {
     }
 }
 
-// Fetch vendor's products
-$vendor_id = isset($_SESSION['vendor_id']) ? $_SESSION['vendor_id'] : $_SESSION['id'];
-
 // Pagination
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $items_per_page = 12;
 $offset = ($page - 1) * $items_per_page;
 
-// Count total products
-$count_sql = "SELECT COUNT(*) as total FROM products WHERE vendor_id = ?";
-$count_stmt = mysqli_prepare($conn, $count_sql);
-mysqli_stmt_bind_param($count_stmt, "i", $vendor_id);
-mysqli_stmt_execute($count_stmt);
-$count_result = mysqli_stmt_get_result($count_stmt);
-$total_products = mysqli_fetch_assoc($count_result)['total'];
-$total_pages = ceil($total_products / $items_per_page);
-
-// Fetch products with pagination
-$sql = "SELECT * FROM products WHERE vendor_id = ? ORDER BY id DESC LIMIT ? OFFSET ?";
-$stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "iii", $vendor_id, $items_per_page, $offset);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-
+// Count total products only if we have a valid vendor ID
+$total_products = 0;
+$total_pages = 1;
 $products = [];
-if ($result) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $products[] = $row;
+
+if ($vendorId !== null) {
+    // Count total products
+    $count_sql = "SELECT COUNT(*) as total FROM products WHERE vendor_id = ?";
+    $count_stmt = mysqli_prepare($conn, $count_sql);
+    mysqli_stmt_bind_param($count_stmt, "i", $vendorId);
+    mysqli_stmt_execute($count_stmt);
+    $count_result = mysqli_stmt_get_result($count_stmt);
+    $total_products = mysqli_fetch_assoc($count_result)['total'];
+    $total_pages = ceil($total_products / $items_per_page);
+
+    // Fetch products with pagination
+    $sql = "SELECT * FROM products WHERE vendor_id = ? ORDER BY id DESC LIMIT ? OFFSET ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, "iii", $vendorId, $items_per_page, $offset);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $products[] = $row;
+        }
     }
 }
-mysqli_stmt_close($stmt);
 mysqli_close($conn);
 ?>
 
@@ -657,7 +693,7 @@ mysqli_close($conn);
                             <img src="<?php echo htmlspecialchars($image_path); ?>" alt="<?php echo htmlspecialchars($product['product_name'] ?? 'Product'); ?>">
                         </div>
                         <div class="product-details">
-                            <h3 class="product-name"><?php echo htmlspecialchars($product['product_name'] ?? 'Unnamed Product'); ?></h3>
+                            <h3 class="product-name"><?php echo htmlspecialchars($product['name'] ?? 'Unnamed Product'); ?></h3>
                             
                             <div class="product-meta">
                                 <div class="product-price">₱ <?php echo number_format((float)($product['price'] ?? 0), 2); ?></div>

@@ -2,79 +2,104 @@
 session_start();
 require 'db_connection.php';
 
-// Check if user is logged in and is a vendor
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION["role"] !== 'vendor') {
-    header("location: login.php");
-    exit;
+// Check if user is logged in and is an artisan or admin
+if (!isset($_SESSION['user_id']) || (!isset($_SESSION['is_admin']) && !isset($_SESSION['is_artisan']))) {
+    header("Location: login.php");
+    exit();
 }
 
-// Initialize feedback message
-$message = "";
+// Define available cities in Cebu province
+$valid_cities = [
+    'Cebu City',
+    'Mandaue',
+    'Lapu-Lapu',
+    'Carcar',
+    'Talisay',
+    'Danao',
+    'Toledo',
+    'Bogo',
+    'Naga',
+    'Minglanilla',
+    'Moalboal',
+    'Santander',
+    'Aloguinsan',
+    'Alcoy',
+    'Dumanjug',
+    'Catmon',
+    'Borbon',
+    'Alcantara'
+];
 
-// Define upload directory (relative path)
-$target_dir = "uploads/";
-if (!file_exists($target_dir)) {
-    mkdir($target_dir, 0777, true); // Create directory if it doesn't exist
-}
+// Define product categories
+$categories = [
+    'jewelry',
+    'home-decor',
+    'textiles',
+    'food',
+    'crafts'
+];
+
+$message = '';
 
 // Handle form submission
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get and validate form inputs
-    $name = trim($_POST["name"] ?? "");
-    $description = trim($_POST["description"] ?? "");
-    $price = floatval($_POST["price"] ?? 0);
-    $category = trim($_POST["category"] ?? "");
-    $city = trim($_POST["city"] ?? "");
-    $stock = intval($_POST["stock"] ?? 0);
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate inputs
+    $name = trim($_POST['name']);
+    $description = trim($_POST['description']);
+    $price = (float)$_POST['price'];
+    $category = $_POST['category'];
+    $city = $_POST['city'];
+    $stock = (int)$_POST['stock'];
+    
+    // Validate required fields
     if (empty($name) || empty($description) || $price <= 0 || empty($category) || empty($city) || $stock < 0) {
-        $message = "All fields are required, price must be greater than 0, and stock cannot be negative.";
-    } elseif (!isset($_FILES["image"]) || $_FILES["image"]["error"] == UPLOAD_ERR_NO_FILE) {
-        $message = "Please upload an image.";
+        $message = '<div class="alert alert-danger">Please fill all required fields correctly.</div>';
     } else {
-        // Handle file upload
-        $image = basename($_FILES["image"]["name"]);
-        $target_file = $target_dir . $image;
-        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-        $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
-
-        if (!in_array($imageFileType, $allowed_types)) {
-            $message = "Only JPG, JPEG, PNG, and GIF files are allowed.";
-        } elseif ($_FILES["image"]["size"] > 5000000) { // 5MB limit
-            $message = "Image file is too large. Maximum size is 5MB.";
-        } elseif (!move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            $message = "Error uploading image: " . $_FILES["image"]["error"];
-        } else {
-            // Save to database directly
-            $sql = "INSERT INTO products (name, description, price, category, image, city, vendor_id, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            $stmt = mysqli_prepare($conn, $sql);
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "ssdsssii", $name, $description, $price, $category, $target_file, $city, $_SESSION['id'], $stock);
-                if (mysqli_stmt_execute($stmt)) {
-                    mysqli_stmt_close($stmt);
-                    mysqli_close($conn);
-                    header("Location: shop.php"); // Redirect immediately to shop.php
-                    exit;
-                } else {
-                    $message = "Error saving product to database: " . mysqli_stmt_error($stmt);
-                    // Clean up uploaded file if database fails
-                    if (file_exists($target_file)) {
-                        unlink($target_file);
-                    }
-                }
-                mysqli_stmt_close($stmt);
-            } else {
-                $message = "Database error: Could not prepare statement - " . mysqli_error($conn);
+        // Process image upload
+        $image_path = '';
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $upload_dir = 'images/products/';
+            
+            // Create directory if it doesn't exist
+            if (!file_exists($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
             }
+            
+            // Generate unique filename
+            $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+            $filename = uniqid('product_') . '.' . $file_extension;
+            $target_file = $upload_dir . $filename;
+            
+            // Move uploaded file
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                $image_path = $target_file;
+            } else {
+                $message = '<div class="alert alert-danger">Failed to upload image.</div>';
+            }
+        }
+        
+        // If no errors, insert into database
+        if (empty($message)) {
+            $artisan_id = isset($_SESSION['is_admin']) ? 1 : $_SESSION['user_id']; // Default to admin if admin is adding
+            
+            $sql = "INSERT INTO products (name, description, price, category, city, stock, image, artisan_id) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = mysqli_prepare($conn, $sql);
+            mysqli_stmt_bind_param($stmt, "ssdssisd", $name, $description, $price, $category, $city, $stock, $image_path, $artisan_id);
+            
+            if (mysqli_stmt_execute($stmt)) {
+                $message = '<div class="alert alert-success">Product added successfully!</div>';
+                // Clear form data
+                $name = $description = $category = $city = $image_path = '';
+                $price = $stock = 0;
+            } else {
+                $message = '<div class="alert alert-danger">Failed to add product: ' . mysqli_error($conn) . '</div>';
+            }
+            
+            mysqli_stmt_close($stmt);
         }
     }
 }
-
-// Define categories and cities for dropdowns
-$categories = ["Crafts", "Delicacies"];
-$cities = ["Cebu City", "Mandaue City", "Lapu-Lapu City", "Talisay City", "Minglanilla", "Consolacion", "Liloan", "Cordova", "Compostela", "Danao City", "Carcar City", "Naga City", "Toledo City", "Bogo City"];
-
-mysqli_close($conn);
 ?>
 
 <!DOCTYPE html>
@@ -82,314 +107,197 @@ mysqli_close($conn);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Product - ArtSell</title>
+    <title>Add Product - ArtiSell</title>
+    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { 
-            background-color: #f9f9f9; 
-            color: #333; 
-            font-family: 'Open Sans', sans-serif; 
-        }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 0 20px; 
-        }
-        header { 
-            background: #fff; 
-            padding: 15px 0; 
-            border-bottom: 1px solid #eee; 
-        }
-        .header-inner { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            height: 60px;
-        }
-        .logo a { 
-            color: #ff6b00; 
-            text-decoration: none; 
-            font-size: 24px; 
-            font-weight: bold; 
-            display: flex;
-            align-items: center;
-            height: 100%;
-        }
-        .logo span {
-            color: #333;
-        }
-        nav ul { 
-            display: flex; 
-            list-style: none; 
-            align-items: center;
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-        nav ul li { 
-            margin-left: 30px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-        }
-        nav ul li a { 
-            color: #333; 
-            text-decoration: none; 
-            font-weight: 500;
-            padding: 8px 0;
-            display: flex;
-            align-items: center;
-            position: relative;
-            transition: color 0.3s ease;
-        }
-        nav ul li a:hover {
-            color: #ff6b00;
-        }
-        nav ul li a.active {
-            color: #ff6b00;
-        }
-        nav ul li a.active:after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background-color: #ff6b00;
-        }
-        h1 { 
-            font-size: 24px; 
-            font-weight: 600; 
-            margin-bottom: 20px; 
-            color: #333; 
-        }
-        .form-container { 
-            padding: 30px 0; 
-            display: flex; 
-            justify-content: center; 
-        }
-        .shipping-form { 
-            flex: 2; 
-            background: #fff; 
-            padding: 20px; 
-            border-radius: 6px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            max-width: 600px; 
-        }
-        .form-group { 
-            margin-bottom: 15px; 
-        }
-        .form-group label { 
-            display: block; 
-            margin-bottom: 5px; 
-            font-weight: 500; 
-        }
-        .form-group input, 
-        .form-group textarea,
-        .form-group select { 
-            width: 100%; 
-            padding: 8px; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
-            box-sizing: border-box; 
-        }
-        .form-group select {
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
             background-color: white;
-            height: 38px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
         }
-        .form-group textarea { 
-            height: 100px; 
-            resize: vertical; 
+        
+        .form-group {
+            margin-bottom: 1.5rem;
         }
-        .place-order-btn { 
-            width: 100%; 
-            padding: 12px; 
-            background: #ff6b00; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            transition: background 0.3s ease; 
-            font-weight: 500; 
-        }
-        .place-order-btn:hover { 
-            background: #e65c00; 
-        }
-        .message { 
-            margin-bottom: 20px; 
-            padding: 10px; 
-            border-radius: 4px; 
-            text-align: center; 
-            background: #f8d7da; 
-            color: #721c24; 
-        }
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 10px;
-            }
-            .header-inner {
-                flex-direction: column;
-                height: auto;
-                padding: 15px 0;
-            }
-            nav ul {
-                flex-wrap: wrap;
-                justify-content: center;
-                margin-top: 15px;
-            }
-            nav ul li {
-                margin: 0 15px;
-                padding: 5px 0;
-            }
-            .shipping-form {
-                padding: 15px;
-            }
-        }
-        /* Profile dropdown styling */
-        .profile-dropdown {
-            position: relative;
-            cursor: pointer;
-            height: 100%;
-            display: flex;
-            align-items: center;
-        }
-        .profile-dropdown > a {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .dropdown-content {
-            position: absolute;
-            right: 0;
-            top: 100%;
-            background: #fff;
-            border: 1px solid #eaeaea;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border-radius: 4px;
-            min-width: 150px;
-            z-index: 1000;
-            margin-top: 8px;
-            display: none;
-        }
-        .dropdown-content a {
+        
+        .form-label {
             display: block;
-            padding: 12px 15px;
-            color: #333;
-            text-decoration: none;
-            border-bottom: 1px solid #f1f1f1;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
-        .dropdown-content a:last-child {
-            border-bottom: none;
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
         }
-        .dropdown-content a:hover {
-            background-color: #f9f9f9;
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
         }
-        .profile-pic {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
+        
+        textarea.form-control {
+            min-height: 150px;
+        }
+        
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: var(--radius-md);
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .image-preview-text {
+            color: var(--neutral-500);
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container header-inner">
-            <div class="logo"><a href="index.php">Art<span>Sell</span></a></div>
-            <nav>
-                <ul>
-                    <li><a href="shop.php">Shop</a></li>
-                    <li><a href="add_product.php">Add Product</a></li>
-                    <li class="profile-dropdown">
-                        <a href="profile.php">
-                            <?php echo htmlspecialchars($_SESSION['username']); ?>
-                            <?php if (isset($_SESSION['profile_picture']) && !empty($_SESSION['profile_picture'])): ?>
-                                <img src="<?php echo htmlspecialchars($_SESSION['profile_picture']); ?>" alt="Profile" class="profile-pic">
-                            <?php else: ?>
-                                <img src="images/default-profile.jpg" alt="Profile" class="profile-pic">
-                            <?php endif; ?>
-                        </a>
-                        <div class="dropdown-content">
-                            <a href="settings.php">Settings</a>
-                            <a href="logout.php">Logout</a>
-                        </div>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
+    <?php include 'components/navbar.php'; ?>
+    
     <div class="container">
         <div class="form-container">
-            <div class="shipping-form">
-                <h1>Add New Product</h1>
-                <?php if (!empty($message)): ?>
-                    <div class="message"><?php echo htmlspecialchars($message); ?></div>
-                <?php endif; ?>
-                <form method="POST" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label>Name:</label>
-                        <input type="text" name="name" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>" required>
+            <h1 class="text-center mb-4">Add New Product</h1>
+            
+            <?php echo $message; ?>
+            
+            <form action="" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name" class="form-label">Product Name *</label>
+                    <input type="text" id="name" name="name" class="form-control" required value="<?php echo isset($name) ? htmlspecialchars($name) : ''; ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description" class="form-label">Description *</label>
+                    <textarea id="description" name="description" class="form-control" required><?php echo isset($description) ? htmlspecialchars($description) : ''; ?></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="price" class="form-label">Price (₱) *</label>
+                    <input type="number" id="price" name="price" class="form-control" step="0.01" min="0" required value="<?php echo isset($price) ? $price : ''; ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="category" class="form-label">Category *</label>
+                    <select id="category" name="category" class="form-control" required>
+                        <option value="">Select Category</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo $cat; ?>" <?php echo (isset($category) && $category === $cat) ? 'selected' : ''; ?>>
+                                <?php echo ucfirst(str_replace('-', ' ', $cat)); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="city" class="form-label">City *</label>
+                    <select id="city" name="city" class="form-control" required>
+                        <option value="">Select City</option>
+                        <?php foreach ($valid_cities as $city_option): ?>
+                            <option value="<?php echo $city_option; ?>" <?php echo (isset($city) && $city === $city_option) ? 'selected' : ''; ?>>
+                                <?php echo $city_option; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="stock" class="form-label">Stock Quantity *</label>
+                    <input type="number" id="stock" name="stock" class="form-control" min="0" required value="<?php echo isset($stock) ? $stock : '10'; ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Product Image</label>
+                    <div class="image-preview" id="imagePreview">
+                        <span class="image-preview-text">Image Preview</span>
                     </div>
-                    <div class="form-group">
-                        <label>Description:</label>
-                        <textarea name="description" required><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Price:</label>
-                        <input type="number" step="0.01" name="price" value="<?php echo isset($_POST['price']) ? htmlspecialchars($_POST['price']) : ''; ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Category:</label>
-                        <select name="category" required>
-                            <option value="" disabled <?php echo !isset($_POST['category']) ? 'selected' : ''; ?>>Select Category</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo (isset($_POST['category']) && $_POST['category'] === $cat) ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>City:</label>
-                        <select name="city" required>
-                            <option value="" disabled <?php echo !isset($_POST['city']) ? 'selected' : ''; ?>>Select City</option>
-                            <?php foreach ($cities as $cty): ?>
-                                <option value="<?php echo htmlspecialchars($cty); ?>" <?php echo (isset($_POST['city']) && $_POST['city'] === $cty) ? 'selected' : ''; ?>><?php echo htmlspecialchars($cty); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Stock:</label>
-                        <input type="number" min="0" name="stock" value="<?php echo isset($_POST['stock']) ? htmlspecialchars($_POST['stock']) : '0'; ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Image:</label>
-                        <input type="file" name="image" accept="image/*" required>
-                    </div>
-                    <button type="submit" class="place-order-btn">Add Product</button>
-                </form>
-            </div>
+                    <input type="file" id="image" name="image" class="form-control" accept="image/*" onchange="previewImage(this)">
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> Add Product
+                    </button>
+                    <a href="dashboard.php" class="btn btn-outline ml-3">Cancel</a>
+                </div>
+            </form>
         </div>
     </div>
-
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <a href="index.php" class="footer-logo">ArtiSell</a>
+                    <p>Add your artisan products to our marketplace.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date('Y'); ?> ArtiSell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
     <script>
-        // Add this at the end of your body tag
-        document.addEventListener('DOMContentLoaded', function() {
-            const profileDropdown = document.querySelector('.profile-dropdown');
-            const dropdownContent = document.querySelector('.dropdown-content');
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
             
-            profileDropdown.addEventListener('click', function(e) {
-                if (e.target.closest('a').getAttribute('href') === 'profile.php') {
-                    e.preventDefault();
-                    dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
-                }
-            });
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.profile-dropdown')) {
-                    dropdownContent.style.display = 'none';
-                }
-            });
-        });
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    preview.appendChild(img);
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                const text = document.createElement('span');
+                text.className = 'image-preview-text';
+                text.textContent = 'Image Preview';
+                preview.appendChild(text);
+            }
+        }
     </script>
 </body>
 </html>

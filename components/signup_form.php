@@ -78,14 +78,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
     
     // Check if there are no errors
     if (empty($usernameError) && empty($emailError) && empty($passwordError) && empty($confirmPasswordError)) {
+        // Get the selected role (default to customer if not set)
+        $role = isset($_POST['role']) && $_POST['role'] === 'vendor' ? 'vendor' : 'customer';
+        
         // Prepare an insert statement
-        $sql = "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')";
+        $sql = "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)";
         if ($stmt = mysqli_prepare($conn, $sql)) {
             // Hash the password
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             
             // Bind parameters
-            mysqli_stmt_bind_param($stmt, "sss", $username, $email, $hashedPassword);
+            mysqli_stmt_bind_param($stmt, "ssss", $username, $email, $hashedPassword, $role);
             
             // Attempt to execute
             if (mysqli_stmt_execute($stmt)) {
@@ -146,6 +149,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
                 </button>
             </div>
             <span class="error"><?php echo $confirmPasswordError; ?></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Account Type</label>
+            <div class="role-selection">
+                <label>
+                    <input type="radio" name="role" value="customer" checked> Customer
+                </label>
+                <label>
+                    <input type="radio" name="role" value="vendor"> Vendor
+                </label>
+            </div>
         </div>
 
         <div class="form-group terms">

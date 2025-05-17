@@ -3,14 +3,17 @@ session_start();
 
 // Check if user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    $response = [
-        'success' => false,
-        'message' => 'User not logged in',
-        'redirect' => 'login.php'
-    ];
+    // Store the product information in the session for after login
+    if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
+        // Store the pending cart addition
+        $_SESSION['pending_cart_add'] = [
+            'product_id' => intval($_POST['product_id']),
+            'redirect' => isset($_POST['redirect']) ? $_POST['redirect'] : 'shop.php'
+        ];
+    }
     
-    header('Content-Type: application/json');
-    echo json_encode($response);
+    // Redirect to login page
+    header("Location: login.php");
     exit;
 }
 

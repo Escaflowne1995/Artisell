@@ -8,8 +8,6 @@ session_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About ArtiSell - Cebu's Cultural Marketplace</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/modern.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,97 +24,7 @@ session_start();
             padding: 0;
         }
         
-        /* Header and Navigation */
-        .header {
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 15px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-        }
-        
-        .header-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 25px;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .nav-link {
-            color: #333;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        .nav-link:hover, .nav-link.active {
-            color: #2E8B57;
-        }
-        
-        .nav-link.active {
-            position: relative;
-        }
-        
-        .nav-link.active::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background-color: #2E8B57;
-        }
-        
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .header-right a {
-            color: #333;
-            text-decoration: none;
-        }
-        
-        .header-right a.login {
-            background-color: #2E8B57;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        
-        .header-right a.login:hover {
-            background-color: #236b42;
-        }
-        
-        .profile-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 16px;
-            font-weight: 500;
-        }
-        
+        /* Basic button styles */
         .btn {
             padding: 8px 20px;
             border-radius: 4px;
@@ -124,6 +32,7 @@ session_start();
             font-weight: 500;
             text-decoration: none;
             transition: all 0.3s ease;
+            display: inline-block;
         }
         
         .btn-outline {
@@ -134,12 +43,18 @@ session_start();
         
         .btn-primary {
             background-color: #2E8B57;
-            color: white !important;
+            color: white;
         }
         
-        .btn-sm {
-            padding: 6px 15px;
-            font-size: 14px;
+        .btn-white {
+            background-color: white;
+            color: #2E8B57;
+        }
+        
+        .btn-outline.btn-white {
+            border: 1px solid white;
+            color: white;
+            background: transparent;
         }
         
         .text-green {
@@ -157,7 +72,7 @@ session_start();
             text-align: center;
             padding: 100px 0;
             margin-bottom: 50px;
-            margin-top: 60px;
+            margin-top: 0; /* Remove the space at the top */
         }
         
         .about-hero h1 {
@@ -349,9 +264,9 @@ session_start();
         .cta-section {
             background: #6E6E6E;
             color: white;
-            padding: 60px 0;
+            padding: 50px 0;
             text-align: center;
-            margin: 50px 0;
+            margin: 0;
         }
         
         .cta-content {
@@ -361,24 +276,34 @@ session_start();
         
         .cta-content h2 {
             font-size: 28px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .cta-content p {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             opacity: 0.9;
         }
         
         .cta-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
+            margin-top: 20px;
         }
         
-        .btn:hover {
+        .btn-seller {
+            background-color: #2E8B57;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: none;
+        }
+        
+        .btn-seller:hover {
+            background-color: #246e45;
             transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         
         /* Profile dropdown */
@@ -387,9 +312,15 @@ session_start();
             display: inline-block;
         }
         
+        .profile-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
         .profile-pic {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             object-fit: cover;
         }
@@ -398,26 +329,28 @@ session_start();
             display: none;
             position: absolute;
             right: 0;
-            background-color: white;
+            background-color: #fff;
             min-width: 160px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
             z-index: 1;
-            border-radius: 4px;
-        }
-        
-        .dropdown-content a {
-            padding: 12px 16px;
-            display: block;
-            text-decoration: none;
-            color: #333;
-        }
-        
-        .dropdown-content a:hover {
-            background-color: #f5f5f5;
         }
         
         .profile-dropdown:hover .dropdown-content {
             display: block;
+        }
+        
+        .dropdown-item {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #e8f5e9;
+            color: #2E8B57;
         }
         
         /* Responsive */
@@ -437,75 +370,12 @@ session_start();
             .stats-container {
                 flex-direction: column;
             }
-            
-            .header-inner {
-                flex-direction: column;
-                gap: 15px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="main-container">
-        <header class="header">
-            <div class="container header-inner">
-                <a href="index.php" class="logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
-                
-                <nav>
-                    <ul class="nav-links">
-                        <li><a href="index.php" class="nav-link">Home</a></li>
-                        <li><a href="shop.php" class="nav-link">Shop</a></li>
-                        <li><a href="cities.php" class="nav-link">Cities</a></li>
-                        <li><a href="about.php" class="nav-link active">About</a></li>
-                    </ul>
-                </nav>
-                
-                <div class="header-right">
-                    <a href="cart.php" class="nav-link">
-                        <i class="fas fa-shopping-cart"></i>
-                        <?php
-                        $cart_count = 0;
-                        if (isset($_SESSION['cart'])) {
-                            foreach ($_SESSION['cart'] as $item) {
-                                $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
-                            }
-                        }
-                        if ($cart_count > 0) {
-                            echo "<span>($cart_count)</span>";
-                        }
-                        ?>
-                    </a>
-                    
-                    <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
-                        <div class="profile-dropdown">
-                            <a href="#" class="profile-link">
-                                <span><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                                <i class="fas fa-chevron-down"></i>
-                            </a>
-                            <div class="dropdown-content">
-                                <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
-                                    <a href="vendor_products.php" class="dropdown-item">
-                                        <i class="fas fa-box"></i> My Products
-                                    </a>
-                                <?php endif; ?>
-                                <a href="profile.php" class="dropdown-item">
-                                    <i class="fas fa-user"></i> Profile
-                                </a>
-                                <a href="settings.php" class="dropdown-item">
-                                    <i class="fas fa-cog"></i> Settings
-                                </a>
-                                <a href="logout.php" class="dropdown-item">
-                                    <i class="fas fa-sign-out-alt"></i> Logout
-                                </a>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <a href="login.php" class="btn btn-outline btn-sm">Login</a>
-                        <a href="signup.php" class="btn btn-primary btn-sm">Sign Up</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </header>
+        <?php include 'components/navbar.php'; ?>
 
         <main class="main-content">
             <!-- Hero Section -->
@@ -522,7 +392,7 @@ session_start();
                     <div class="two-column">
                         <div class="column-text">
                             <h2>Our Story</h2>
-                            <p>ArtiSell was born out of a deep appreciation for the rich cultural heritage of Cebu and a desire to support local artisans who keep traditional crafts alive. Founded in 2023, our platform serves as a bridge between skilled craftspeople and customers who value authentic, handcrafted products.</p>
+                            <p>ArtiSell was born out of a deep appreciation for the rich cultural heritage of Cebu and a desire to support local artisans who keep traditional crafts alive. Founded in 2025, our platform serves as a bridge between skilled craftspeople and customers who value authentic, handcrafted products.</p>
                             <p>What started as a small initiative to showcase local crafts at community markets has evolved into a comprehensive online marketplace, connecting artisans from across Cebu with customers from all over the Philippines and beyond.</p>
                             <p>Today, ArtiSell is home to hundreds of vendors offering a diverse range of products - from traditional woven baskets and handcrafted jewelry to local delicacies that represent the unique flavors of Cebu.</p>
                         </div>
@@ -607,7 +477,7 @@ session_start();
                                 <img src="image/team-1.jpg" alt="Maria Santos">
                             </div>
                             <div class="team-info">
-                                <h3 class="team-name">Maria Santos</h3>
+                                <h3 class="team-name">Mike Cortez</h3>
                                 <div class="team-role">Founder & CEO</div>
                                 <p class="team-bio">A Cebu native with a background in cultural anthropology, Maria founded ArtiSell to help preserve traditional crafts she grew up seeing.</p>
                             </div>
@@ -617,7 +487,7 @@ session_start();
                                 <img src="image/team-2.jpg" alt="Juan Reyes">
                             </div>
                             <div class="team-info">
-                                <h3 class="team-name">Juan Reyes</h3>
+                                <h3 class="team-name">Daisy Gondao</h3>
                                 <div class="team-role">Head of Artisan Relations</div>
                                 <p class="team-bio">With deep roots in rural Cebu communities, Juan works directly with artisans to bring their products to the platform.</p>
                             </div>
@@ -627,7 +497,7 @@ session_start();
                                 <img src="image/team-3.jpg" alt="Elena Cruz">
                             </div>
                             <div class="team-info">
-                                <h3 class="team-name">Elena Cruz</h3>
+                                <h3 class="team-name">Janneth Traya</h3>
                                 <div class="team-role">Creative Director</div>
                                 <p class="team-bio">A designer with expertise in traditional Filipino aesthetics, Elena ensures ArtiSell presents local crafts in their best light.</p>
                             </div>
@@ -637,9 +507,9 @@ session_start();
                                 <img src="image/team-4.jpg" alt="Miguel Lim">
                             </div>
                             <div class="team-info">
-                                <h3 class="team-name">Miguel Lim</h3>
+                                <h3 class="team-name">San And Guko</h3>
                                 <div class="team-role">Tech Lead</div>
-                                <p class="team-bio">Miguel combines his passion for technology with his love for Filipino culture to create a seamless platform experience.</p>
+                                <p class="team-bio">San And Guko combines his passion for technology with his love for Filipino culture to create a seamless platform experience.</p>
                             </div>
                         </div>
                     </div>
@@ -650,16 +520,15 @@ session_start();
             <section class="cta-section">
                 <div class="container">
                     <div class="cta-content">
-                        <h2>Join the ArtiSell Community</h2>
-                        <p>Whether you're an artisan looking to share your craft or a customer seeking authentic Cebuano products, ArtiSell welcomes you to be part of our growing community dedicated to preserving cultural heritage through sustainable commerce.</p>
+                        <h2>Join Our Artisan Community</h2>
+                        <p>Are you a local artisan looking to reach more customers? Partner with ArtiSell and showcase your crafts to a wider audience.</p>
                         <div class="cta-buttons">
-                            <a href="signup.php" class="btn btn-white">Sign Up Now</a>
-                            <a href="shop.php" class="btn btn-outline">Explore Products</a>
+                            <a href="seller-signup.php" class="btn-seller">Become a Seller</a>
                         </div>
                     </div>
                 </div>
             </section>
-            
+
             <!-- Footer -->
             <?php include 'components/footer.php'; ?>
         </main>

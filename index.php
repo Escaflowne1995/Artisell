@@ -220,65 +220,7 @@ session_start(); // Start the session to access session variables
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="container header-inner">
-            <a href="index.php" class="logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
-            
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="index.php" class="nav-link active">Home</a></li>
-                    <li><a href="shop.php" class="nav-link">Shop</a></li>
-                    <li><a href="cities.php" class="nav-link">Cities</a></li>
-                    <li><a href="about.php" class="nav-link">About</a></li>
-                </ul>
-            </nav>
-            
-            <div class="header-right">
-                <a href="cart.php" class="nav-link">
-                    <i class="fas fa-shopping-cart"></i>
-                    <?php
-                    $cart_count = 0;
-                    if (isset($_SESSION['cart'])) {
-                        foreach ($_SESSION['cart'] as $item) {
-                            $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
-                        }
-                    }
-                    if ($cart_count > 0) {
-                        echo "<span>($cart_count)</span>";
-                    }
-                    ?>
-                </a>
-                
-                <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
-                    <div class="profile-dropdown">
-                        <a href="#" class="profile-link">
-                            <span><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                            <i class="fas fa-chevron-down"></i>
-                        </a>
-                        <div class="dropdown-content">
-                            <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
-                                <a href="vendor_products.php" class="dropdown-item">
-                                    <i class="fas fa-box"></i> My Products
-                                </a>
-                            <?php endif; ?>
-                            <a href="profile.php" class="dropdown-item">
-                                <i class="fas fa-user"></i> Profile
-                            </a>
-                            <a href="settings.php" class="dropdown-item">
-                                <i class="fas fa-cog"></i> Settings
-                            </a>
-                            <a href="logout.php" class="dropdown-item">
-                                <i class="fas fa-sign-out-alt"></i> Logout
-                            </a>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <a href="login.php" class="btn btn-outline btn-sm">Login</a>
-                    <a href="signup.php" class="btn btn-primary btn-sm">Sign Up</a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </header>
+        <?php include 'components/navbar.php'; ?>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -497,7 +439,7 @@ session_start(); // Start the session to access session variables
                     <div class="testimonial-author">
                         <img src="images/avatar-2.jpg" alt="John Reyes" class="author-avatar">
                         <div class="author-info">
-                            <h4>John Reyes</h4>
+                            <h4>Choox tv</h4>
                             <p>Davao City, Philippines</p>
                         </div>
                     </div>

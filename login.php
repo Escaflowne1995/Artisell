@@ -135,7 +135,7 @@ if (!isset($_SESSION['csrf_token'])) {
 </head>
 <body>
     <div class="main-container">
-        <?php include 'components/navbar.php'; ?>
+        <?php include 'components/navbar_auth.php'; ?>
         
         <main class="main-content">
             <!-- Login Form -->

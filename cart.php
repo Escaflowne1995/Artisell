@@ -69,6 +69,9 @@ foreach ($_SESSION['cart'] as $item) {
     $total += $price * $item['quantity'];
 }
 
+// Array to store stock information for JavaScript
+$stock_info = [];
+
 // Before displaying the cart items, check for out-of-stock products and update them
 if (!empty($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $product_id => $item) {
@@ -91,6 +94,12 @@ if (!empty($_SESSION['cart'])) {
             mysqli_stmt_bind_param($update_stmt, "ii", $default_stock, $product_id);
             mysqli_stmt_execute($update_stmt);
             mysqli_stmt_close($update_stmt);
+            
+            // Set the stock value for JavaScript
+            $stock_info[$product_id] = $default_stock;
+        } else {
+            // Store the stock value for JavaScript
+            $stock_info[$product_id] = $stock_data['stock'];
         }
         
         mysqli_stmt_close($stock_stmt);
@@ -109,6 +118,71 @@ if (!empty($_SESSION['cart'])) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: translateY(-20px);
+            transition: transform 0.3s;
+        }
+        
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-message {
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        
+        .modal-btn-cancel {
+            background-color: #e5e7eb;
+            color: #111827;
+        }
+        
+        .modal-btn-confirm {
+            background-color: #ef4444;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -204,12 +278,9 @@ if (!empty($_SESSION['cart'])) {
                                     <form method="post" action="update_cart.php" class="d-flex align-items-center">
                                         <div class="quantity-control">
                                             <button type="button" class="quantity-btn" onclick="decrementQuantity(<?php echo $product_id; ?>)">-</button>
-                                            <input type="number" name="quantity[<?php echo $product_id; ?>]" value="<?php echo $item['quantity']; ?>" min="1" class="quantity-input" id="quantity-<?php echo $product_id; ?>">
+                                            <input type="number" name="quantity[<?php echo $product_id; ?>]" value="<?php echo $item['quantity']; ?>" min="1" class="quantity-input" id="quantity-<?php echo $product_id; ?>" data-stock="<?php echo $stock_info[$product_id]; ?>">
                                             <button type="button" class="quantity-btn" onclick="incrementQuantity(<?php echo $product_id; ?>)">+</button>
                                         </div>
-                                        <button type="submit" name="update" class="btn btn-sm btn-outline ml-2">
-                                            <i class="fas fa-sync-alt"></i>
-                                        </button>
                                     </form>
                                 </td>
                                 <td class="fw-bold text-primary">₱<?php echo number_format($item['price'] * $item['quantity'], 2); ?></td>
@@ -238,7 +309,7 @@ if (!empty($_SESSION['cart'])) {
                     <h2 class="cart-summary-title">Cart Summary</h2>
                     <div class="cart-total">
                         <span>Total:</span>
-                        <span class="text-primary">₱<?php echo number_format($total, 2); ?></span>
+                        <span class="text-primary" id="cart-total-display">₱<?php echo number_format($total, 2); ?></span>
                     </div>
                     <a href="checkout.php" class="checkout-btn">
                         Proceed to Checkout <i class="fas fa-arrow-right ml-2"></i>
@@ -298,17 +369,207 @@ if (!empty($_SESSION['cart'])) {
         </div>
     </footer>
 
+    <!-- Modal for confirmation -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-container">
+            <div class="modal-title">Confirm Removal</div>
+            <div class="modal-message">Do you want to remove this product?</div>
+            <div class="modal-buttons">
+                <button class="btn modal-btn-cancel" id="modalCancel">No</button>
+                <button class="btn modal-btn-confirm" id="modalConfirm">Yes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stock limit modal -->
+    <div class="modal-overlay" id="stockLimitModal">
+        <div class="modal-container">
+            <div class="modal-title">Stock Limit Reached</div>
+            <div class="modal-message">Sorry, you cannot add more of this product. Stock limit reached.</div>
+            <div class="modal-buttons">
+                <button class="btn modal-btn-confirm" id="stockLimitOk">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Stock information from PHP
+        const productStock = <?php echo json_encode($stock_info); ?>;
+        
+        // Product ID to remove - used by the modal
+        let productToRemove = null;
+        
+        // Modal elements
+        const modal = document.getElementById('confirmModal');
+        const confirmBtn = document.getElementById('modalConfirm');
+        const cancelBtn = document.getElementById('modalCancel');
+        
+        // Stock limit modal elements
+        const stockLimitModal = document.getElementById('stockLimitModal');
+        const stockLimitOkBtn = document.getElementById('stockLimitOk');
+        
+        // Show modal function
+        function showModal(productId) {
+            productToRemove = productId;
+            modal.classList.add('active');
+        }
+        
+        // Hide modal function
+        function hideModal() {
+            modal.classList.remove('active');
+            productToRemove = null;
+        }
+        
+        // Show stock limit modal
+        function showStockLimitModal() {
+            stockLimitModal.classList.add('active');
+        }
+        
+        // Hide stock limit modal
+        function hideStockLimitModal() {
+            stockLimitModal.classList.remove('active');
+        }
+        
+        // Modal event listeners
+        confirmBtn.addEventListener('click', function() {
+            if (productToRemove !== null) {
+                removeProduct(productToRemove);
+            }
+            hideModal();
+        });
+        
+        cancelBtn.addEventListener('click', function() {
+            // Reset quantity to 1
+            if (productToRemove !== null) {
+                const input = document.getElementById('quantity-' + productToRemove);
+                if (input) {
+                    input.value = 1;
+                    updateCartItem(productToRemove);
+                }
+            }
+            hideModal();
+        });
+        
+        // Stock limit modal event listener
+        stockLimitOkBtn.addEventListener('click', function() {
+            hideStockLimitModal();
+        });
+        
+        // Close modal if clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cancelBtn.click();
+            }
+        });
+        
+        stockLimitModal.addEventListener('click', function(e) {
+            if (e.target === stockLimitModal) {
+                hideStockLimitModal();
+            }
+        });
+        
+        function removeProduct(productId) {
+            // Create and submit the remove form
+            const removeForm = document.createElement('form');
+            removeForm.method = 'post';
+            removeForm.action = 'cart.php';
+            
+            const productIdInput = document.createElement('input');
+            productIdInput.type = 'hidden';
+            productIdInput.name = 'product_id';
+            productIdInput.value = productId;
+            
+            const removeItemInput = document.createElement('input');
+            removeItemInput.type = 'hidden';
+            removeItemInput.name = 'remove_item';
+            removeItemInput.value = '1';
+            
+            removeForm.appendChild(productIdInput);
+            removeForm.appendChild(removeItemInput);
+            document.body.appendChild(removeForm);
+            removeForm.submit();
+        }
+
         function incrementQuantity(productId) {
             const input = document.getElementById('quantity-' + productId);
-            input.value = parseInt(input.value) + 1;
+            const currentValue = parseInt(input.value);
+            const stockLimit = productStock[productId];
+            
+            // Check if current quantity is already at stock limit
+            if (currentValue >= stockLimit) {
+                showStockLimitModal();
+                return;
+            }
+            
+            input.value = currentValue + 1;
+            
+            // Auto-update the cart when plus button is clicked
+            updateCartItem(productId);
         }
         
         function decrementQuantity(productId) {
             const input = document.getElementById('quantity-' + productId);
-            if (parseInt(input.value) > 1) {
-                input.value = parseInt(input.value) - 1;
+            const newValue = parseInt(input.value) - 1;
+            
+            if (newValue === 0) {
+                // Show custom modal instead of browser confirm
+                showModal(productId);
+            } else if (newValue > 0) {
+                input.value = newValue;
+                // Auto-update the cart
+                updateCartItem(productId);
             }
+        }
+        
+        function updateCartItem(productId) {
+            const input = document.getElementById('quantity-' + productId);
+            const quantity = parseInt(input.value);
+            
+            // Create and send XMLHttpRequest to update cart
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'update_cart.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        // Parse the JSON response
+                        const response = JSON.parse(xhr.responseText);
+                        
+                        if (response.success) {
+                            // If stock limit was reached, update the input value and show the modal
+                            if (response.stockLimitReached) {
+                                // Get quantity from the response (it will be adjusted to the max allowed)
+                                const availableQuantity = parseInt(input.value);
+                                
+                                // Update product stock data
+                                productStock[productId] = availableQuantity;
+                                
+                                // Show the stock limit modal
+                                showStockLimitModal();
+                            }
+                            
+                            // Update item total
+                            const priceElement = input.closest('tr').querySelector('td:nth-child(3)');
+                            const priceText = priceElement.textContent.replace('₱', '').trim();
+                            const price = parseFloat(priceText);
+                            const totalElement = input.closest('tr').querySelector('td:nth-child(5)');
+                            totalElement.textContent = '₱' + (price * quantity).toFixed(2);
+                            
+                            // Update cart total
+                            document.getElementById('cart-total-display').textContent = '₱' + response.total;
+                            
+                            // Update cart count in header if it exists
+                            const cartCountElement = document.querySelector('.fa-shopping-cart + span');
+                            if (cartCountElement) {
+                                cartCountElement.textContent = '(' + response.cartCount + ')';
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                    }
+                }
+            };
+            xhr.send('quantity[' + productId + ']=' + quantity + '&update=Update');
         }
     </script>
 </body>

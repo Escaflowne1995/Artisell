@@ -307,7 +307,7 @@ if (isset($_GET['error'])) {
         }
 
         /* Header Styles */
-        header {
+        .header {
             background: white;
             padding: 15px 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -322,7 +322,7 @@ if (isset($_GET['error'])) {
             align-items: center;
         }
 
-        .logo a {
+        .logo {
             text-decoration: none;
             font-size: 24px;
             font-weight: 700;
@@ -333,7 +333,7 @@ if (isset($_GET['error'])) {
         nav {
             flex: 1;
             display: flex;
-            justify-content: flex-end;
+            justify-content: center;
         }
 
         .nav-links {
@@ -345,10 +345,10 @@ if (isset($_GET['error'])) {
         }
 
         .nav-links li {
-            margin-left: 25px;
+            margin: 0 15px;
         }
 
-        .nav-links li a {
+        .nav-link {
             color: var(--dark);
             text-decoration: none;
             font-weight: 500;
@@ -358,13 +358,20 @@ if (isset($_GET['error'])) {
             font-size: 15px;
         }
 
-        .nav-links li a:hover {
+        .nav-link:hover, .nav-link.active {
             color: var(--primary);
         }
 
+        /* Header right section */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Profile dropdown */
         .profile-dropdown {
             position: relative;
-            margin-left: auto;
         }
 
         .profile-dropdown:hover .dropdown-content {
@@ -385,9 +392,10 @@ if (isset($_GET['error'])) {
             transition: var(--transition);
             display: none;
             overflow: hidden;
+            z-index: 1001;
         }
 
-        .dropdown-content a {
+        .dropdown-content .dropdown-item {
             display: block;
             padding: 12px 20px;
             color: var(--dark);
@@ -396,11 +404,11 @@ if (isset($_GET['error'])) {
             border-bottom: 1px solid var(--gray-light);
         }
 
-        .dropdown-content a:last-child {
+        .dropdown-content .dropdown-item:last-child {
             border-bottom: none;
         }
 
-        .dropdown-content a:hover {
+        .dropdown-content .dropdown-item:hover {
             background: var(--gray-light);
         }
         
@@ -409,14 +417,61 @@ if (isset($_GET['error'])) {
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--dark);
+            text-decoration: none;
         }
 
-        .profile-pic {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary);
+        /* Button styles */
+        .btn {
+            display: inline-block;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 8px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-outline {
+            color: var(--primary);
+            background-color: transparent;
+            border-color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            color: white;
+            background-color: var(--primary);
+        }
+
+        .btn-primary {
+            color: white;
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .text-blue {
+            color: #0066cc;
+        }
+        
+        .text-green {
+            color: #008a39;
         }
         
         /* Checkout Container */
@@ -717,30 +772,62 @@ if (isset($_GET['error'])) {
 </head>
 <body>
     <!-- Header -->
-    <header>
+    <header class="header">
         <div class="container header-inner">
-            <div class="logo"><a href="index.php"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a></div>
+            <a href="index.php" class="logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
+            
             <nav>
                 <ul class="nav-links">
-                    <li><a href="index.php"><i class="fas fa-home"></i> Home</a></li>
-                    <li><a href="shop.php"><i class="fas fa-store"></i> Shop</a></li>
-                    <li><a href="cart.php"><i class="fas fa-shopping-cart"></i> (<?php echo count($_SESSION['cart']); ?>)</a></li>
-                    <li class="profile-dropdown">
-                        <a href="profile.php" class="profile-link">
-                            <?php echo htmlspecialchars($_SESSION['username']); ?>
-                            <?php if (!empty($_SESSION['profile_picture'])): ?>
-                                <img src="<?php echo htmlspecialchars($_SESSION['profile_picture']); ?>" alt="Profile" class="profile-pic">
-                            <?php else: ?>
-                                <img src="images/default-profile.jpg" alt="Profile" class="profile-pic">
-                            <?php endif; ?>
-                        </a>
-                        <div class="dropdown-content">
-                            <a href="profileA.php"><i class="fas fa-user-cog"></i> Settings</a>
-                            <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                        </div>
-                    </li>
+                    <li><a href="index.php" class="nav-link">Home</a></li>
+                    <li><a href="shop.php" class="nav-link">Shop</a></li>
+                    <li><a href="cities.php" class="nav-link">Cities</a></li>
                 </ul>
             </nav>
+            
+            <div class="header-right">
+                <a href="cart.php" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <?php
+                    $cart_count = 0;
+                    if (isset($_SESSION['cart'])) {
+                        foreach ($_SESSION['cart'] as $item) {
+                            $cart_count += isset($item['quantity']) ? $item['quantity'] : 1;
+                        }
+                    }
+                    if ($cart_count > 0) {
+                        echo "<span>($cart_count)</span>";
+                    }
+                    ?>
+                </a>
+                
+                <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                    <div class="profile-dropdown">
+                        <a href="#" class="profile-link">
+                            <span><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-content">
+                            <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
+                                <a href="vendor_products.php" class="dropdown-item">
+                                    <i class="fas fa-box"></i> My Products
+                                </a>
+                            <?php endif; ?>
+                            <a href="profile.php" class="dropdown-item">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="settings.php" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <a href="logout.php" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <a href="login.php" class="btn btn-outline btn-sm">Login</a>
+                    <a href="signup.php" class="btn btn-primary btn-sm">Sign Up</a>
+                <?php endif; ?>
+            </div>
         </div>
     </header>
 
