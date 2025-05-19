@@ -37,14 +37,96 @@ if ($role === 'customer') {
 // Fetch vendor products if user is a vendor
 $products = [];
 if ($role === 'vendor') {
-    $sql = "SELECT * FROM products WHERE vendor_id = ? ORDER BY created_at DESC";
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "i", $user_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    // First get the vendor_id from vendors table
+    $vendorId = null;
+    $vendor_sql = "SELECT id FROM vendors WHERE user_id = ?";
+    $vendor_stmt = mysqli_prepare($conn, $vendor_sql);
+    mysqli_stmt_bind_param($vendor_stmt, "i", $user_id);
+    mysqli_stmt_execute($vendor_stmt);
+    $vendor_result = mysqli_stmt_get_result($vendor_stmt);
     
-    while ($row = mysqli_fetch_assoc($result)) {
-        $products[] = $row;
+    if ($row = mysqli_fetch_assoc($vendor_result)) {
+        $vendorId = $row['id'];
+        
+        // Now fetch the products using the correct vendor_id
+        $sql = "SELECT * FROM products WHERE vendor_id = ? ORDER BY created_at DESC";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $vendorId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        while ($row = mysqli_fetch_assoc($result)) {
+            $products[] = $row;
+        }
+    }
+}
+
+// Handle delete product request
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_product'])) {
+    // Generate CSRF token if it doesn't exist
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    
+    // Validate product_id
+    if (!isset($_POST['product_id']) || !is_numeric($_POST['product_id'])) {
+        $error = "Invalid product ID";
+    } else {
+        $product_id = (int)$_POST['product_id'];
+        
+        // Get the vendor_id
+        $vendorId = null;
+        $vendor_sql = "SELECT id FROM vendors WHERE user_id = ?";
+        $vendor_stmt = mysqli_prepare($conn, $vendor_sql);
+        mysqli_stmt_bind_param($vendor_stmt, "i", $user_id);
+        mysqli_stmt_execute($vendor_stmt);
+        $vendor_result = mysqli_stmt_get_result($vendor_stmt);
+        
+        if ($row = mysqli_fetch_assoc($vendor_result)) {
+            $vendorId = $row['id'];
+            
+            // Fetch product to ensure it belongs to the vendor and get image path
+            $sql = "SELECT * FROM products WHERE id = ? AND vendor_id = ?";
+            $stmt = mysqli_prepare($conn, $sql);
+            
+            mysqli_stmt_bind_param($stmt, "ii", $product_id, $vendorId);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            
+            if ($result && $product = mysqli_fetch_assoc($result)) {
+                // Delete the image file if it exists
+                if (!empty($product['image']) && file_exists($product['image'])) {
+                    unlink($product['image']);
+                }
+                
+                // Delete from database
+                $sql = "DELETE FROM products WHERE id = ? AND vendor_id = ?";
+                $stmt = mysqli_prepare($conn, $sql);
+                mysqli_stmt_bind_param($stmt, "ii", $product_id, $vendorId);
+                
+                if (mysqli_stmt_execute($stmt)) {
+                    $success_message = "Product deleted successfully";
+                    
+                    // Refresh the products list after deletion
+                    $products = [];
+                    $sql = "SELECT * FROM products WHERE vendor_id = ? ORDER BY created_at DESC";
+                    $stmt = mysqli_prepare($conn, $sql);
+                    mysqli_stmt_bind_param($stmt, "i", $vendorId);
+                    mysqli_stmt_execute($stmt);
+                    $result = mysqli_stmt_get_result($stmt);
+                    
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $products[] = $row;
+                    }
+                } else {
+                    $error_message = "Error deleting product: " . mysqli_error($conn);
+                }
+            } else {
+                $error_message = "Product not found or you don't have permission to delete it";
+            }
+        } else {
+            $error_message = "Vendor record not found";
+        }
     }
 }
 ?>
@@ -248,6 +330,87 @@ if ($role === 'vendor') {
                 overflow-x: auto;
             }
         }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .product-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 450px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-title {
+            margin-top: 0;
+            color: var(--neutral-800);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-delete {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: var(--radius-md);
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -394,6 +557,15 @@ if ($role === 'vendor') {
         <?php if ($role === 'vendor'): ?>
             <div id="products-tab" class="tab-content">
                 <h2 class="section-title">My Products</h2>
+                
+                <?php if (!empty($success_message)): ?>
+                    <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+                <?php endif; ?>
+                
+                <?php if (!empty($error_message)): ?>
+                    <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
+                <?php endif; ?>
+                
                 <?php if (!empty($products)): ?>
                     <div class="product-grid">
                         <?php foreach ($products as $product): ?>
@@ -404,9 +576,10 @@ if ($role === 'vendor') {
                                 <div class="card-body">
                                     <h3 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h3>
                                     <p class="card-price">₱<?php echo number_format($product['price'], 2); ?></p>
-                                    <div class="d-flex justify-content-between mt-3">
+                                    <div class="product-actions">
                                         <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="btn btn-secondary btn-sm">Edit</a>
                                         <a href="shop.php?id=<?php echo $product['id']; ?>" class="btn btn-primary btn-sm">View</a>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(<?php echo $product['id']; ?>, '<?php echo htmlspecialchars(addslashes($product['name'])); ?>')">Delete</button>
                                     </div>
                                 </div>
                             </div>
@@ -424,6 +597,24 @@ if ($role === 'vendor') {
 
     <!-- Footer -->
     <?php include 'components/footer.php'; ?>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Confirm Deletion</h3>
+            <p id="deleteConfirmText">Are you sure you want to delete this product?</p>
+            
+            <form id="deleteForm" method="POST">
+                <input type="hidden" name="product_id" id="deleteProductId">
+                <input type="hidden" name="delete_product" value="1">
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-delete">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         // Tab Functionality
@@ -446,6 +637,29 @@ if ($role === 'vendor') {
                 document.getElementById(`${tabId}-tab`).classList.add('active');
             });
         });
+        
+        // Delete confirmation modal
+        const modal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        const deleteProductId = document.getElementById('deleteProductId');
+        const deleteConfirmText = document.getElementById('deleteConfirmText');
+        
+        function confirmDelete(productId, productName) {
+            deleteProductId.value = productId;
+            deleteConfirmText.textContent = `Are you sure you want to delete "${productName}"?`;
+            modal.style.display = 'block';
+        }
+        
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+        
+        // Close modal when clicking outside the content
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
     </script>
 </body>
 </html>

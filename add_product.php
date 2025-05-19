@@ -2,8 +2,8 @@
 session_start();
 require 'db_connection.php';
 
-// Check if user is logged in and is an artisan or admin
-if (!isset($_SESSION['user_id']) || (!isset($_SESSION['is_admin']) && !isset($_SESSION['is_artisan']))) {
+// Check if user is logged in and is a vendor
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || !isset($_SESSION['role']) || $_SESSION['role'] !== 'vendor') {
     header("Location: login.php");
     exit();
 }
@@ -80,23 +80,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // If no errors, insert into database
         if (empty($message)) {
-            $artisan_id = isset($_SESSION['is_admin']) ? 1 : $_SESSION['user_id']; // Default to admin if admin is adding
-            
-            $sql = "INSERT INTO products (name, description, price, category, city, stock, image, artisan_id) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            // Get the correct vendor_id from database
+            $vendorId = null;
+            $sql = "SELECT id FROM vendors WHERE user_id = ?";
             $stmt = mysqli_prepare($conn, $sql);
-            mysqli_stmt_bind_param($stmt, "ssdssisd", $name, $description, $price, $category, $city, $stock, $image_path, $artisan_id);
-            
-            if (mysqli_stmt_execute($stmt)) {
-                $message = '<div class="alert alert-success">Product added successfully!</div>';
-                // Clear form data
-                $name = $description = $category = $city = $image_path = '';
-                $price = $stock = 0;
-            } else {
-                $message = '<div class="alert alert-danger">Failed to add product: ' . mysqli_error($conn) . '</div>';
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "i", $_SESSION['id']);
+                mysqli_stmt_execute($stmt);
+                mysqli_stmt_store_result($stmt);
+                
+                if (mysqli_stmt_num_rows($stmt) > 0) {
+                    mysqli_stmt_bind_result($stmt, $vendorId);
+                    mysqli_stmt_fetch($stmt);
+                } else {
+                    // Create a vendor record if it doesn't exist
+                    $insertVendorSql = "INSERT INTO vendors (user_id, vendor_name) VALUES (?, ?)";
+                    $insertStmt = mysqli_prepare($conn, $insertVendorSql);
+                    if ($insertStmt) {
+                        // Use username as vendor_name initially
+                        $vendorName = $_SESSION['username'];
+                        mysqli_stmt_bind_param($insertStmt, "is", $_SESSION['id'], $vendorName);
+                        
+                        if (mysqli_stmt_execute($insertStmt)) {
+                            $vendorId = mysqli_insert_id($conn);
+                        } else {
+                            $message = '<div class="alert alert-danger">Error creating vendor record: ' . mysqli_stmt_error($insertStmt) . '</div>';
+                        }
+                        mysqli_stmt_close($insertStmt);
+                    }
+                }
+                mysqli_stmt_close($stmt);
             }
             
-            mysqli_stmt_close($stmt);
+            if ($vendorId === null) {
+                $message = '<div class="alert alert-danger">Error: Could not determine your vendor ID.</div>';
+            } else {
+                $sql = "INSERT INTO products (name, description, price, category, city, stock, image, vendor_id) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = mysqli_prepare($conn, $sql);
+                mysqli_stmt_bind_param($stmt, "ssdssisi", $name, $description, $price, $category, $city, $stock, $image_path, $vendorId);
+                
+                if (mysqli_stmt_execute($stmt)) {
+                    $message = '<div class="alert alert-success">Product added successfully!</div>';
+                    // Clear form data
+                    $name = $description = $category = $city = $image_path = '';
+                    $price = $stock = 0;
+                } else {
+                    $message = '<div class="alert alert-danger">Failed to add product: ' . mysqli_error($conn) . '</div>';
+                }
+                
+                mysqli_stmt_close($stmt);
+            }
         }
     }
 }

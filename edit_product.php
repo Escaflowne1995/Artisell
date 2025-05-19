@@ -54,6 +54,37 @@ if (!$product) {
     exit;
 }
 
+// Define available cities in Cebu province
+$valid_cities = [
+    'Cebu City',
+    'Mandaue',
+    'Lapu-Lapu',
+    'Carcar',
+    'Talisay',
+    'Danao',
+    'Toledo',
+    'Bogo',
+    'Naga',
+    'Minglanilla',
+    'Moalboal',
+    'Santander',
+    'Aloguinsan',
+    'Alcoy',
+    'Dumanjug',
+    'Catmon',
+    'Borbon',
+    'Alcantara'
+];
+
+// Define product categories
+$categories = [
+    'jewelry',
+    'home-decor',
+    'textiles',
+    'food',
+    'crafts'
+];
+
 // Handle form submission
 $message = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -65,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stock = intval($_POST["stock"] ?? 0);
 
     if (empty($name) || empty($description) || $price <= 0 || empty($category) || empty($city) || $stock < 0) {
-        $message = "All fields are required, price must be greater than 0, and stock cannot be negative.";
+        $message = '<div class="alert alert-danger">Please fill all required fields correctly.</div>';
     } else {
         $target_file = $product['image']; // Default to existing image
         if (isset($_FILES["image"]) && $_FILES["image"]["error"] != UPLOAD_ERR_NO_FILE) {
@@ -79,11 +110,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
 
             if (!in_array($imageFileType, $allowed_types)) {
-                $message = "Only JPG, JPEG, PNG, and GIF files are allowed.";
+                $message = '<div class="alert alert-danger">Only JPG, JPEG, PNG, and GIF files are allowed.</div>';
             } elseif ($_FILES["image"]["size"] > 5000000) {
-                $message = "Image file is too large. Maximum size is 5MB.";
+                $message = '<div class="alert alert-danger">Image file is too large. Maximum size is 5MB.</div>';
             } elseif (!move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-                $message = "Error uploading image: " . $_FILES["image"]["error"];
+                $message = '<div class="alert alert-danger">Error uploading image: ' . $_FILES["image"]["error"] . '</div>';
             } else {
                 // Delete old image if new one is uploaded
                 if (file_exists($product['image']) && $product['image'] !== $target_file) {
@@ -98,10 +129,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = mysqli_prepare($conn, $sql);
             mysqli_stmt_bind_param($stmt, "ssdsssiis", $name, $description, $price, $category, $target_file, $city, $stock, $product_id, $vendorId);
             if (mysqli_stmt_execute($stmt)) {
-                header("Location: vendor_products.php");
-                exit;
+                $message = '<div class="alert alert-success">Product updated successfully!</div>';
             } else {
-                $message = "Error updating product: " . mysqli_stmt_error($stmt);
+                $message = '<div class="alert alert-danger">Error updating product: ' . mysqli_stmt_error($stmt) . '</div>';
             }
             mysqli_stmt_close($stmt);
         }
@@ -117,168 +147,195 @@ mysqli_close($conn);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Product - ArtiSell</title>
+    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { 
-            background-color: #f9f9f9; 
-            color: #333; 
-            font-family: 'Open Sans', sans-serif; 
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
         }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 0 20px; 
+        
+        .form-group {
+            margin-bottom: 1.5rem;
         }
-        header { 
-            background: #fff; 
-            padding: 15px 0; 
-            border-bottom: 1px solid #eee; 
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
-        .header-inner { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
         }
-        .logo a { 
-            color: #ff6b00; 
-            text-decoration: none; 
-            font-size: 20px; 
-            font-weight: bold; 
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
         }
-        nav ul { 
-            display: flex; 
-            list-style: none; 
+        
+        textarea.form-control {
+            min-height: 150px;
         }
-        nav ul li { 
-            margin-left: 25px; 
+        
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: var(--radius-md);
         }
-        nav ul li a { 
-            color: #333; 
-            text-decoration: none; 
-            font-weight: 500; 
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
-        h1 { 
-            font-size: 24px; 
-            font-weight: 600; 
-            margin-bottom: 20px; 
-            color: #333; 
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
-        .form-container { 
-            padding: 30px 0; 
-            display: flex; 
-            justify-content: center; 
+        
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
         }
-        .shipping-form { 
-            flex: 2; 
-            background: #fff; 
-            padding: 20px; 
-            border-radius: 6px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            max-width: 600px; 
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
-        .form-group { 
-            margin-bottom: 15px; 
-        }
-        .form-group label { 
-            display: block; 
-            margin-bottom: 5px; 
-            font-weight: 500; 
-        }
-        .form-group input, 
-        .form-group textarea { 
-            width: 100%; 
-            padding: 8px; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
-            box-sizing: border-box; 
-        }
-        .form-group textarea { 
-            height: 100px; 
-            resize: vertical; 
-        }
-        .place-order-btn { 
-            width: 100%; 
-            padding: 12px; 
-            background: #ff6b00; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            transition: background 0.3s ease; 
-            font-weight: 500; 
-        }
-        .place-order-btn:hover { 
-            background: #e65c00; 
-        }
-        .message { 
-            margin-bottom: 20px; 
-            padding: 10px; 
-            border-radius: 4px; 
-            text-align: center; 
-            background: #f8d7da; 
-            color: #721c24; 
+        
+        .image-preview-text {
+            color: var(--neutral-500);
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container header-inner">
-            <div class="logo"><a href="#">Art<span style="color: #333;">Sell</span></a></div>
-            <nav>
-                <ul>
-                    <li><a href="index.php">Home</a></li>
-                    <li><a href="shop.php">Shop</a></li>
-                    <li><a href="add_product.php">Add Product</a></li>
-                    <li><a href="vendor_products.php">My Products</a></li>
-                    <li><a href="logout.php">Logout</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
+    <?php include 'components/navbar.php'; ?>
+    
     <div class="container">
         <div class="form-container">
-            <div class="shipping-form">
-                <h1>Edit Product</h1>
-                <?php if (!empty($message)): ?>
-                    <div class="message"><?php echo htmlspecialchars($message); ?></div>
-                <?php endif; ?>
-                <form method="POST" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label>Name:</label>
-                        <input type="text" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required>
+            <h1 class="text-center mb-4">Edit Product</h1>
+            
+            <?php echo $message; ?>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name" class="form-label">Product Name *</label>
+                    <input type="text" id="name" name="name" class="form-control" required value="<?php echo htmlspecialchars($product['name']); ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description" class="form-label">Description *</label>
+                    <textarea id="description" name="description" class="form-control" required><?php echo htmlspecialchars($product['description']); ?></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="price" class="form-label">Price (₱) *</label>
+                    <input type="number" id="price" name="price" class="form-control" step="0.01" min="0" required value="<?php echo htmlspecialchars($product['price']); ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="category" class="form-label">Category *</label>
+                    <select id="category" name="category" class="form-control" required>
+                        <option value="">Select Category</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo $cat; ?>" <?php echo ($product['category'] === $cat) ? 'selected' : ''; ?>>
+                                <?php echo ucfirst(str_replace('-', ' ', $cat)); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="city" class="form-label">City *</label>
+                    <select id="city" name="city" class="form-control" required>
+                        <option value="">Select City</option>
+                        <?php foreach ($valid_cities as $city_option): ?>
+                            <option value="<?php echo $city_option; ?>" <?php echo ($product['city'] === $city_option) ? 'selected' : ''; ?>>
+                                <?php echo $city_option; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="stock" class="form-label">Stock Quantity *</label>
+                    <input type="number" id="stock" name="stock" class="form-control" min="0" required value="<?php echo isset($product['stock']) ? htmlspecialchars($product['stock']) : '0'; ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Current Image</label>
+                    <div class="image-preview">
+                        <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                     </div>
-                    <div class="form-group">
-                        <label>Description:</label>
-                        <textarea name="description" required><?php echo htmlspecialchars($product['description']); ?></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Price:</label>
-                        <input type="number" step="0.01" name="price" value="<?php echo htmlspecialchars($product['price']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Category:</label>
-                        <input type="text" name="category" value="<?php echo htmlspecialchars($product['category']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>City:</label>
-                        <input type="text" name="city" value="<?php echo htmlspecialchars($product['city']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Stock:</label>
-                        <input type="number" min="0" name="stock" value="<?php echo isset($product['stock']) ? htmlspecialchars($product['stock']) : '0'; ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Current Image:</label>
-                        <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="Current Image" style="max-width: 100px; border-radius: 4px;">
-                    </div>
-                    <div class="form-group">
-                        <label>Upload New Image (optional):</label>
-                        <input type="file" name="image" accept="image/*">
-                    </div>
-                    <button type="submit" class="place-order-btn">Update Product</button>
-                </form>
-            </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="image" class="form-label">Upload New Image (optional)</label>
+                    <input type="file" id="image" name="image" class="form-control" accept="image/*" onchange="previewImage(this)">
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Product
+                    </button>
+                    <a href="vendor_products.php" class="btn btn-outline ml-3">Cancel</a>
+                </div>
+            </form>
         </div>
     </div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <a href="index.php" class="footer-logo">ArtiSell</a>
+                    <p>Edit your artisan products in our marketplace.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date('Y'); ?> ArtiSell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        function previewImage(input) {
+            const preview = document.querySelector('.image-preview');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    preview.appendChild(img);
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 </body>
 </html>

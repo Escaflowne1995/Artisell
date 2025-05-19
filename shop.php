@@ -306,6 +306,16 @@ foreach ($paginated_products as $key => $product) {
         .text-green {
             color: #008a39;
         }
+        
+        /* Section heading styles */
+        .section-heading {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--space-4);
+            padding-bottom: var(--space-2);
+            border-bottom: 2px solid var(--primary);
+            color: var(--neutral-900);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -357,6 +367,22 @@ foreach ($paginated_products as $key => $product) {
             </div>
             
             <div class="products-section">
+                <?php 
+                // Add dynamic heading based on selected filters
+                if (empty($category) && empty($city)) {
+                    echo '<h2 class="section-heading">All Products</h2>';
+                } else if (!empty($category) && empty($city)) {
+                    $category_display = ucwords(str_replace('-', ' ', $category));
+                    echo '<h2 class="section-heading">' . $category_display . ' Products</h2>';
+                } else if (empty($category) && !empty($city)) {
+                    echo '<h2 class="section-heading">Products from ' . htmlspecialchars($city) . '</h2>';
+                } else {
+                    // Both category and city are selected
+                    $category_display = ucwords(str_replace('-', ' ', $category));
+                    echo '<h2 class="section-heading">' . $category_display . ' Products from ' . htmlspecialchars($city) . '</h2>';
+                }
+                ?>
+                
                 <div class="product-grid">
                     <?php if (empty($paginated_products)): ?>
                         <div class="card p-5 text-center" style="grid-column: 1 / -1;">

@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <header class="header">
     <div class="container header-inner auth-header">
-        <a href="index.php" class="logo auth-logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
+        <a href="index.php" class="logo auth-logo"><span class="logo-arti">Arti</span><span class="logo-sell">Sell</span></a>
         
         <div class="header-right">
             <?php if (basename($_SERVER['PHP_SELF']) === 'login.php'): ?>
@@ -23,12 +23,14 @@ if (session_status() === PHP_SESSION_NONE) {
 </header>
 
 <style>
-    .text-green {
+    .logo-arti {
         color: #008a39;
+        font-weight: 700;
     }
     
-    .text-blue {
+    .logo-sell {
         color: #0066cc;
+        font-weight: 700;
     }
     
     .auth-header {
@@ -43,6 +45,7 @@ if (session_status() === PHP_SESSION_NONE) {
         font-size: 28px;
         font-weight: 700;
         letter-spacing: -0.5px;
+        text-decoration: none;
     }
     
     .auth-btn {

@@ -15,11 +15,6 @@ if (session_status() === PHP_SESSION_NONE) {
                 <li><a href="shop.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'shop.php' ? 'active' : ''; ?>">Shop</a></li>
                 <li><a href="cities.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'cities.php' ? 'active' : ''; ?>">Cities</a></li>
                 <li><a href="about.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'about.php' ? 'active' : ''; ?>">About</a></li>
-                
-                <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
-                    <li><a href="add_product.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'add_product.php' ? 'active' : ''; ?>">Add Product</a></li>
-                    <li><a href="vendor_products.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'vendor_products.php' ? 'active' : ''; ?>">My Products</a></li>
-                <?php endif; ?>
             </ul>
         </nav>
         
@@ -48,6 +43,9 @@ if (session_status() === PHP_SESSION_NONE) {
                     </a>
                     <div class="dropdown-content">
                         <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === 'vendor'): ?>
+                            <a href="add_product.php" class="dropdown-item">
+                                <i class="fas fa-plus"></i> Add Product
+                            </a>
                             <a href="vendor_products.php" class="dropdown-item">
                                 <i class="fas fa-box"></i> My Products
                             </a>

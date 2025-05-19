@@ -155,242 +155,165 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Settings - ArtSell</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Account Settings - ArtiSell</title>
+    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { 
-            background-color: #f9f9f9; 
-            color: #333; 
-            font-family: 'Open Sans', sans-serif; 
-        }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 0 20px; 
-        }
-        header { 
-            background: #fff; 
-            padding: 15px 0; 
-            border-bottom: 1px solid #eee; 
-        }
-        .header-inner { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .logo a { 
-            color: #ff6b00; 
-            text-decoration: none; 
-            font-size: 20px; 
-            font-weight: bold; 
-        }
-        nav ul { 
-            display: flex; 
-            list-style: none; 
-        }
-        nav ul li { 
-            margin-left: 25px; 
-        }
-        nav ul li a { 
-            color: #333; 
-            text-decoration: none; 
-            font-weight: 500; 
-        }
-        .profile-dropdown { 
-            position: relative; 
-        }
-        .profile-dropdown:hover .dropdown-content { 
-            display: block; 
-        }
-        .dropdown-content { 
-            position: absolute; 
-            right: 0; 
-            background: #fff; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            border-radius: 4px; 
-            min-width: 120px; 
-        }
-        .dropdown-content a { 
-            display: block; 
-            padding: 10px 15px; 
-            color: #333; 
-            text-decoration: none; 
-        }
-        .dropdown-content a:hover { 
-            background: #f5f5f5; 
-        }
         .settings-container {
-            padding: 30px 0;
+            padding: 2rem 0;
         }
-        h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-        }
+        
         .settings-wrapper {
             display: flex;
             gap: 30px;
+            margin-top: 2rem;
         }
+        
         .settings-sidebar {
             flex: 1;
-            background: #fff;
-            padding: 20px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 250px;
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 1.5rem;
+            max-width: 280px;
             height: fit-content;
         }
+        
         .profile-preview {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--neutral-200);
         }
+        
         .profile-pic-large {
             width: 120px;
             height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 10px;
+            margin-bottom: 1rem;
+            border: 3px solid var(--neutral-200);
         }
+        
         .username-display {
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 0.5rem;
+            color: var(--neutral-800);
         }
+        
         .email-display {
-            font-size: 14px;
-            color: #666;
+            font-size: 0.875rem;
+            color: var(--neutral-600);
         }
+        
         .settings-menu {
             list-style: none;
+            margin: 0;
+            padding: 0;
         }
+        
         .settings-menu li {
-            margin-bottom: 10px;
+            margin-bottom: 0.5rem;
         }
+        
         .settings-menu a {
-            display: block;
-            padding: 8px;
-            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.75rem 1rem;
+            color: var(--neutral-700);
             text-decoration: none;
-            border-radius: 4px;
-            transition: background 0.3s ease;
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
-        .settings-menu a:hover, .settings-menu a.active {
-            background: #f5f5f5;
-            color: #ff6b00;
+        
+        .settings-menu a:hover, 
+        .settings-menu a.active {
+            background-color: var(--primary-50);
+            color: var(--primary);
         }
+        
+        .settings-menu a i {
+            min-width: 20px;
+            text-align: center;
+        }
+        
         .settings-content {
             flex: 3;
         }
+        
         .settings-card {
-            background: #fff;
-            padding: 25px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            margin-bottom: 2rem;
         }
+        
         .settings-card h2 {
-            font-size: 18px;
+            font-size: 1.25rem;
             font-weight: 600;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--neutral-200);
+            color: var(--neutral-800);
         }
+        
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
+        
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
             font-weight: 500;
+            color: var(--neutral-700);
         }
-        .form-group input[type="text"],
-        .form-group input[type="email"],
-        .form-group input[type="password"] {
+        
+        .form-control {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 0.75rem;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
+            transition: border-color 0.3s ease;
         }
-        .form-group input[type="file"] {
-            padding: 8px 0;
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.2);
         }
-        .button-primary {
-            background: #ff6b00;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background 0.3s ease;
+        
+        .form-hint {
+            font-size: 0.875rem;
+            color: var(--neutral-600);
+            margin-top: 0.5rem;
         }
-        .button-primary:hover {
-            background: #e65c00;
-        }
-        .alert {
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .profile-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .profile-pic {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
+        
+        @media (max-width: 768px) {
+            .settings-wrapper {
+                flex-direction: column;
+            }
+            
+            .settings-sidebar {
+                max-width: 100%;
+                order: 2;
+            }
+            
+            .settings-content {
+                order: 1;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container header-inner">
-            <div class="logo"><a href="#">Art<span style="color: #333;">Sell</span></a></div>
-            <nav>
-                <ul>
-                    <li><a href="index.php">Home</a></li>
-                    <li><a href="shop.php">Shop</a></li>
-                    <li><a href="cart.php"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
-                    </svg>(<?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>)</a></li>
-                    <li class="profile-dropdown">
-                        <a href="profile.php" class="profile-link">
-                            <?php echo htmlspecialchars($_SESSION['username']); ?>
-                            <?php if (!empty($_SESSION['profile_picture'])): ?>
-                                <img src="<?php echo htmlspecialchars($_SESSION['profile_picture']); ?>" alt="Profile" class="profile-pic">
-                            <?php else: ?>
-                                <img src="images/default-profile.jpg" alt="Profile" class="profile-pic">
-                            <?php endif; ?>
-                        </a>
-                        <div class="dropdown-content">
-                            <a href="settings.php">Settings</a>
-                            <a href="logout.php">Logout</a>
-                        </div>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <?php include 'components/navbar.php'; ?>
 
     <div class="container settings-container">
-        <h1>Account Settings</h1>
+        <h1 class="text-center mb-4">Account Settings</h1>
         
         <!-- Display messages -->
         <?php if (!empty($message)): ?>
@@ -411,9 +334,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
                 </div>
                 
                 <ul class="settings-menu">
-                    <li><a href="#profile" class="active">Profile Information</a></li>
-                    <li><a href="#password">Change Password</a></li>
-                    <li><a href="profile.php">Back to Profile</a></li>
+                    <li><a href="#profile" class="active"><i class="fas fa-user"></i> Profile Information</a></li>
+                    <li><a href="#password"><i class="fas fa-lock"></i> Change Password</a></li>
+                    <li><a href="profile.php"><i class="fas fa-arrow-left"></i> Back to Profile</a></li>
                 </ul>
             </div>
             
@@ -425,21 +348,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="username">Username</label>
-                            <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($username); ?>" required>
+                            <input type="text" id="username" name="username" class="form-control" value="<?php echo htmlspecialchars($username); ?>" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" required>
+                            <input type="email" id="email" name="email" class="form-control" value="<?php echo htmlspecialchars($email); ?>" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="profile_picture">Profile Picture</label>
-                            <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
-                            <p style="font-size: 12px; color: #666; margin-top: 5px;">Accepted formats: JPG, JPEG, PNG, GIF (Max: 5MB)</p>
+                            <input type="file" id="profile_picture" name="profile_picture" class="form-control" accept="image/*">
+                            <p class="form-hint">Accepted formats: JPG, JPEG, PNG, GIF (Max: 5MB)</p>
                         </div>
                         
-                        <button type="submit" name="update_profile" class="button-primary">Update Profile</button>
+                        <button type="submit" name="update_profile" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Profile
+                        </button>
                     </form>
                 </div>
                 
@@ -449,29 +374,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
                         <div class="form-group">
                             <label for="current_password">Current Password</label>
-                            <input type="password" id="current_password" name="current_password" required>
+                            <input type="password" id="current_password" name="current_password" class="form-control" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="new_password">New Password</label>
-                            <input type="password" id="new_password" name="new_password" required>
-                            <p style="font-size: 12px; color: #666; margin-top: 5px;">Password must be at least 6 characters long</p>
+                            <input type="password" id="new_password" name="new_password" class="form-control" required>
+                            <p class="form-hint">Password must be at least 6 characters long</p>
                         </div>
                         
                         <div class="form-group">
                             <label for="confirm_password">Confirm New Password</label>
-                            <input type="password" id="confirm_password" name="confirm_password" required>
+                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
                         </div>
                         
-                        <button type="submit" name="change_password" class="button-primary">Change Password</button>
+                        <button type="submit" name="change_password" class="btn btn-primary">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <?php include 'components/footer.php'; ?>
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <a href="index.php" class="footer-logo">ArtiSell</a>
+                    <p>Manage your account settings and preferences.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date('Y'); ?> ArtiSell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
         // Smooth scroll to sections

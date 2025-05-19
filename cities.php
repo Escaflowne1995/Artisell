@@ -91,7 +91,7 @@ $cities = array_unique(array_map('ucwords', $cities));
 sort($cities);
 
 // Remove specific cities that should not be displayed
-$cities_to_remove = ['Bisagasa', 'Cebu'];
+$cities_to_remove = ['Bisagasa', 'BISAGASA', 'Cebu', 'Anim Accusantium Ex', 'Sit Officia Omnis Et'];
 $cities = array_filter($cities, function($city) use ($cities_to_remove) {
     return !in_array(ucwords($city), $cities_to_remove);
 });

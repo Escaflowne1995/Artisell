@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 10, 2025 at 07:15 AM
+-- Generation Time: May 19, 2025 at 08:15 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,7 +40,9 @@ CREATE TABLE `cart` (
 
 INSERT INTO `cart` (`id`, `user_id`, `product_id`, `quantity`) VALUES
 (6, 2, 4, 1),
-(11, 2, 1, 1);
+(11, 2, 1, 1),
+(12, 5, 4, 1),
+(13, 5, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -190,7 +192,8 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `created_at`
 (1, 'customer', 'customer@gmail.com', '$2y$10$cQOZKMk1zJGmU81.l/roaOaxzjnbjhcey44CewVnJ2jUbBIfS9z5a', 'customer', '2025-03-15 11:41:44', 'images/default-profile.jpg'),
 (2, 'vendor', 'vendor@gmail.com', '$2y$10$75IfGrYHRTwmWXCBTyQyNe0zfe228OrHtsT2a8EJvbGpzch6h25t2', 'vendor', '2025-03-19 12:42:01', 'https://cdn-images.dzcdn.net/images/cover/83843448ffbeed9acb8c52d1365b0c4d/0x1900-000000-80-0-0.jpg'),
 (3, 'Admin', 'admin@gmail.com', '$2y$10$d08bs5N.mbettz82Z5FbCeVstV98oxZA6oyN0un7qPhpZiDavqRZ.', 'admin', '2025-04-02 13:52:17', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhvCCckDla7UC8gQ0FBOfUp1H7n9Y0hqeI4Q&s'),
-(4, 'vendor1', 'vendor1@gmail.com', '$2y$10$7W6wZP29J10SFGWPzxEmcOtPFiyZZKTxJ/j6qhhVpR7yVwY/HLeiS', 'vendor', '2025-04-03 14:19:54', 'https://media.istockphoto.com/id/1206907529/photo/burrow-with-the-view-from-the-hole-towards-the-sky-as-a-special-symbol-for-planting-mouse.jpg?s=612x612&w=0&k=20&c=bDIcTOPGqo13A23qrMBgClLVnDnXnbL7mWV3XYKbIv0=');
+(4, 'vendor1', 'vendor1@gmail.com', '$2y$10$7W6wZP29J10SFGWPzxEmcOtPFiyZZKTxJ/j6qhhVpR7yVwY/HLeiS', 'vendor', '2025-04-03 14:19:54', 'https://media.istockphoto.com/id/1206907529/photo/burrow-with-the-view-from-the-hole-towards-the-sky-as-a-special-symbol-for-planting-mouse.jpg?s=612x612&w=0&k=20&c=bDIcTOPGqo13A23qrMBgClLVnDnXnbL7mWV3XYKbIv0='),
+(5, 'Pable', 'Pable@gmail.com', '$2y$10$WaqSwBW/dq1T70Xgg/B6dupMU/GcHaJI5x7yO419iBrd8lgDtXbHq', 'customer', '2025-05-19 04:45:38', 'images/default-profile.jpg');
 
 -- --------------------------------------------------------
 
@@ -204,6 +207,14 @@ CREATE TABLE `vendors` (
   `vendor_name` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `vendors`
+--
+
+INSERT INTO `vendors` (`id`, `user_id`, `vendor_name`, `created_at`) VALUES
+(3, 2, 'vendor', '2025-05-19 04:22:34'),
+(4, 4, 'vendor1', '2025-05-19 04:22:34');
 
 --
 -- Indexes for dumped tables
@@ -262,7 +273,7 @@ ALTER TABLE `vendors`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -286,13 +297,13 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `vendors`
 --
 ALTER TABLE `vendors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
@@ -317,19 +328,6 @@ ALTER TABLE `orders`
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `products`
---
-ALTER TABLE `products`
-  ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `vendors`
---
-ALTER TABLE `vendors`
-  ADD CONSTRAINT `vendors_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
