@@ -172,123 +172,100 @@ mysqli_stmt_close($stmt);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Orders - ArtSell</title>
+    <title>Manage Orders - ArtiSell</title>
+    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background-color: #f9f9f9; 
-            color: #333; 
-            font-family: 'Open Sans', sans-serif; 
-        }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 0 20px; 
-        }
-        header { 
-            background: #fff; 
-            padding: 15px 0; 
-            border-bottom: 1px solid #eee; 
-        }
-        .header-inner { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .logo a { 
-            color: #ff6b00; 
-            text-decoration: none; 
-            font-size: 20px; 
-            font-weight: bold; 
-        }
-        nav ul { 
-            display: flex; 
-            list-style: none; 
-            margin: 0;
-            padding: 0;
-        }
-        nav ul li { 
-            margin-left: 25px; 
-        }
-        nav ul li a { 
-            color: #333; 
-            text-decoration: none; 
-            font-weight: 500; 
-        }
-        h1 { 
-            font-size: 24px; 
-            font-weight: 600; 
-            margin: 30px 0; 
-            color: #333; 
-        }
         .orders-container {
             background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: var(--space-5);
+            margin-bottom: var(--space-6);
         }
+        
         table {
             width: 100%;
             border-collapse: collapse;
         }
+        
         th, td {
-            padding: 12px 15px;
+            padding: var(--space-3);
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--neutral-200);
         }
+        
         th {
             font-weight: 600;
-            color: #555;
+            color: var(--neutral-700);
         }
+        
         tr:hover {
-            background-color: #f9f9f9;
+            background-color: var(--neutral-100);
         }
+        
         .status {
             display: inline-block;
-            padding: 5px 10px;
+            padding: var(--space-1) var(--space-2);
             border-radius: 20px;
-            font-size: 12px;
+            font-size: var(--font-size-sm);
             font-weight: 600;
         }
+        
         .status-Pending { background: #fff4de; color: #ffa940; }
         .status-Processing { background: #e6f7ff; color: #1890ff; }
         .status-Shipped { background: #f6ffed; color: #52c41a; }
         .status-Delivered { background: #d9f7be; color: #389e0d; }
         .status-Cancelled { background: #fff1f0; color: #ff4d4f; }
         .status-Returned { background: #f9f0ff; color: #722ed1; }
+        
         .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: var(--space-2);
         }
+        
         .action-btn {
             border: none;
-            border-radius: 4px;
-            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            padding: var(--space-2) var(--space-3);
             cursor: pointer;
             font-weight: 500;
             color: white;
         }
-        .view-btn { background: #3b5998; }
-        .view-btn:hover { background: #2a4373; }
+        
+        .view-btn { 
+            background: var(--primary-600);
+        }
+        
+        .view-btn:hover { 
+            background: var(--primary-700);
+        }
+        
         .message {
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 4px;
+            padding: var(--space-3);
+            margin-bottom: var(--space-5);
+            border-radius: var(--radius-md);
         }
+        
         .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background-color: var(--success-100);
+            color: var(--success-700);
+            border: 1px solid var(--success-200);
         }
+        
         .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background-color: var(--danger-100);
+            color: var(--danger-700);
+            border: 1px solid var(--danger-200);
         }
+        
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
@@ -296,64 +273,72 @@ mysqli_stmt_close($stmt);
             overflow: auto;
             background-color: rgba(0,0,0,0.5);
         }
+        
         .modal-content {
             position: relative;
             background-color: #fff;
             margin: 10% auto;
-            padding: 20px;
-            border-radius: 5px;
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
             width: 400px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: var(--shadow-lg);
         }
+        
         .close-btn {
             position: absolute;
-            right: 15px;
-            top: 10px;
-            font-size: 24px;
+            right: var(--space-4);
+            top: var(--space-3);
+            font-size: var(--font-size-xl);
             font-weight: bold;
             cursor: pointer;
         }
+        
         .status-select {
             width: 100%;
-            padding: 8px;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: var(--space-2);
+            margin: var(--space-4) 0;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
         }
+        
         .update-btn {
             width: 100%;
-            padding: 10px;
-            background: #ff6b00;
+            padding: var(--space-3);
+            background: var(--primary-600);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: var(--radius-md);
             cursor: pointer;
         }
+        
         .update-btn:hover {
-            background: #e65c00;
+            background: var(--primary-700);
+        }
+        
+        .page-title {
+            font-size: var(--font-size-2xl);
+            margin: var(--space-6) 0 var(--space-4) 0;
+            color: var(--neutral-800);
+        }
+        
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+                gap: var(--space-1);
+            }
+            
+            .action-btn {
+                padding: var(--space-1) var(--space-2);
+                font-size: var(--font-size-sm);
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container header-inner">
-            <div class="logo"><a href="#">Art<span style="color: #333;">Sell</span></a></div>
-            <nav>
-                <ul>
-                    <li><a href="index.php">Home</a></li>
-                    <li><a href="shop.php">Shop</a></li>
-                    <?php if ($_SESSION['role'] === 'vendor'): ?>
-                        <li><a href="add_product.php">Add Product</a></li>
-                        <li><a href="vendor_products.php">My Products</a></li>
-                    <?php endif; ?>
-                    <li><a href="logout.php">Logout</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <?php include 'components/navbar.php'; ?>
 
     <div class="container">
-        <h1>Manage Orders</h1>
+        <h1 class="page-title">Manage Orders</h1>
         
         <?php if(!empty($message)): ?>
             <div class="message success"><?php echo htmlspecialchars($message); ?></div>
@@ -385,8 +370,12 @@ mysqli_stmt_close($stmt);
                                 <td>₱<?php echo number_format($order['total'], 2); ?></td>
                                 <td><span class="status status-<?php echo htmlspecialchars($order['status']); ?>"><?php echo htmlspecialchars($order['status']); ?></span></td>
                                 <td class="action-buttons">
-                                    <a href="view_order.php?id=<?php echo $order['id']; ?>" class="action-btn view-btn">View Details</a>
-                                    <button class="action-btn view-btn" onclick="openStatusModal(<?php echo $order['id']; ?>, '<?php echo $order['status']; ?>')">Update Status</button>
+                                    <a href="view_order.php?id=<?php echo $order['id']; ?>" class="action-btn view-btn">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
+                                    <button class="action-btn view-btn" onclick="openStatusModal(<?php echo $order['id']; ?>, '<?php echo $order['status']; ?>')">
+                                        <i class="fas fa-edit"></i> Update Status
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -420,6 +409,56 @@ mysqli_stmt_close($stmt);
             </form>
         </div>
     </div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <a href="index.php" class="footer-logo"><span class="text-green">Arti</span><span class="text-blue">Sell</span></a>
+                    <p>Connecting artisans with customers who appreciate authentic local crafts and delicacies.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="shop.php">Products</a></li>
+                        <li><a href="cities.php">Cities</a></li>
+                        <li><a href="about.php">About Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping & Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Main Street, Cebu City, Philippines</li>
+                        <li><i class="fas fa-phone"></i> +63 (32) 123-4567</li>
+                        <li><i class="fas fa-envelope"></i> info@artisell.com</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date("Y"); ?> ArtiSell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
     
     <script>
         // Modal functionality
