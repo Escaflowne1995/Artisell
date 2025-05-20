@@ -13,13 +13,32 @@ if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true && !empty($_S
     mysqli_stmt_execute($clear_stmt);
     mysqli_stmt_close($clear_stmt);
     
-    // Then insert current cart items
+    // Then insert current cart items, but only if the product exists
     foreach ($_SESSION['cart'] as $product_id => $item) {
-        $insert_sql = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
-        $insert_stmt = mysqli_prepare($conn, $insert_sql);
-        mysqli_stmt_bind_param($insert_stmt, "iii", $user_id, $product_id, $item['quantity']);
-        mysqli_stmt_execute($insert_stmt);
-        mysqli_stmt_close($insert_stmt);
+        // Check if the product exists first
+        $check_product_sql = "SELECT 1 FROM products WHERE id = ? LIMIT 1";
+        $check_product_stmt = mysqli_prepare($conn, $check_product_sql);
+        mysqli_stmt_bind_param($check_product_stmt, "i", $product_id);
+        mysqli_stmt_execute($check_product_stmt);
+        mysqli_stmt_store_result($check_product_stmt);
+        
+        // Only insert if the product exists
+        if (mysqli_stmt_num_rows($check_product_stmt) > 0) {
+            $insert_sql = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
+            $insert_stmt = mysqli_prepare($conn, $insert_sql);
+            mysqli_stmt_bind_param($insert_stmt, "iii", $user_id, $product_id, $item['quantity']);
+            
+            // Use try-catch to handle potential foreign key constraint errors
+            try {
+                mysqli_stmt_execute($insert_stmt);
+            } catch (Exception $e) {
+                // Log error or simply ignore, since we're logging out anyway
+            }
+            
+            mysqli_stmt_close($insert_stmt);
+        }
+        
+        mysqli_stmt_close($check_product_stmt);
     }
     
     // Set a cookie to indicate this user just logged out
