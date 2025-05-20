@@ -4,11 +4,16 @@ session_start();
 // Check if user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     // Store the product information in the session for after login
-    if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
+    // Check both POST and GET requests for product_id and quantity
+    $product_id = isset($_POST['product_id']) ? $_POST['product_id'] : (isset($_GET['product_id']) ? $_GET['product_id'] : null);
+    $quantity = isset($_POST['quantity']) ? $_POST['quantity'] : (isset($_GET['quantity']) ? $_GET['quantity'] : null);
+    
+    if ($product_id && $quantity) {
         // Store the pending cart addition
         $_SESSION['pending_cart_add'] = [
-            'product_id' => intval($_POST['product_id']),
-            'redirect' => isset($_POST['redirect']) ? $_POST['redirect'] : 'shop.php'
+            'product_id' => intval($product_id),
+            'quantity' => intval($quantity),
+            'redirect' => isset($_POST['redirect']) ? $_POST['redirect'] : (isset($_GET['redirect']) ? $_GET['redirect'] : 'shop.php')
         ];
     }
     
@@ -20,11 +25,12 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 // Include database connection
 include 'db_connection.php';
 
-// Check if POST data is provided
-if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
-    $product_id = intval($_POST['product_id']);
-    $quantity = intval($_POST['quantity']);
-    
+// Check if form data is provided (either POST or GET)
+$product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : (isset($_GET['product_id']) ? intval($_GET['product_id']) : 0);
+$quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : (isset($_GET['quantity']) ? intval($_GET['quantity']) : 0);
+
+// Check if data exists
+if ($product_id > 0 && $quantity > 0) {
     // Basic validation
     if ($product_id <= 0 || $quantity <= 0) {
         $response = [
@@ -83,31 +89,23 @@ if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
             ];
         }
         
-        // Check if redirect parameter is set
+        // Get redirect URL from either POST or GET
+        $redirect_url = 'shop.php'; // Default
+        
         if (isset($_POST['redirect']) && !empty($_POST['redirect'])) {
             $redirect_url = $_POST['redirect'];
-            
-            // Preserve query parameters when redirecting back to shop.php
-            if ($redirect_url === 'shop.php' && isset($_POST['current_url'])) {
-                $redirect_url = $_POST['current_url'];
-            }
-            
-            // Redirect to the specified page
-            header("Location: " . $redirect_url);
-            exit;
-        } else {
-            // Default redirect back to shop page if no redirect specified
-            header("Location: shop.php");
-            exit;
+        } else if (isset($_GET['redirect']) && !empty($_GET['redirect'])) {
+            $redirect_url = $_GET['redirect'];
         }
         
-        // Prepare success response
-        $response = [
-            'success' => true,
-            'message' => 'Product added to cart',
-            'cart_count' => count($_SESSION['cart']),
-            'product_name' => $product['name']
-        ];
+        // Preserve query parameters when redirecting back to shop.php
+        if ($redirect_url === 'shop.php' && isset($_POST['current_url'])) {
+            $redirect_url = $_POST['current_url'];
+        }
+        
+        // Redirect to the specified page
+        header("Location: " . $redirect_url);
+        exit;
         
     } else {
         // Product not found
@@ -115,6 +113,10 @@ if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
             'success' => false,
             'message' => 'Product not found'
         ];
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
     }
     
     // Close the database connection
@@ -126,11 +128,9 @@ if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
         'success' => false,
         'message' => 'Product ID and quantity are required'
     ];
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
 }
-
-// Set content type to JSON
-header('Content-Type: application/json');
-
-// Output the response
-echo json_encode($response);
 ?> 

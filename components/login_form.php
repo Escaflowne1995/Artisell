@@ -5,6 +5,16 @@ $email = $password = "";
 $redirectAfterLogin = false;
 $redirectUrl = '';
 
+// Check for product parameters in the URL (when coming from product page)
+if (isset($_GET['product_id']) && isset($_GET['quantity'])) {
+    // Store the pending cart addition
+    $_SESSION['pending_cart_add'] = [
+        'product_id' => intval($_GET['product_id']),
+        'quantity' => intval($_GET['quantity']),
+        'redirect' => isset($_GET['redirect']) ? $_GET['redirect'] : 'shop.php'
+    ];
+}
+
 // Process the form when submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     // Check for CSRF token
@@ -136,7 +146,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
                                     unset($_SESSION['pending_cart_add']);
                                     
                                     // Redirect to add_to_cart.php with the pending product
-                                    $redirectUrl = "add_to_cart.php?product_id=" . $pendingAdd['product_id'] . "&redirect=" . urlencode($pendingAdd['redirect']);
+                                    $redirectUrl = "add_to_cart.php?product_id=" . $pendingAdd['product_id'];
+                                    
+                                    // Add quantity parameter if it exists
+                                    if (isset($pendingAdd['quantity'])) {
+                                        $redirectUrl .= "&quantity=" . $pendingAdd['quantity'];
+                                    }
+                                    
+                                    // Add redirect parameter if it exists
+                                    if (isset($pendingAdd['redirect'])) {
+                                        $redirectUrl .= "&redirect=" . urlencode($pendingAdd['redirect']);
+                                    }
                                 }
                                 
                                 // Handle direct redirect from query parameter

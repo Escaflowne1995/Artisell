@@ -19,7 +19,7 @@ $sort_by = isset($_GET['sort']) ? $_GET['sort'] : 'order_date';
 $sort_order = isset($_GET['order']) ? $_GET['order'] : 'DESC';
 
 // Prepare base SQL query with more details
-$sql = "SELECT o.id, o.order_date, o.status, o.total_amount, o.shipping_address,
+$sql = "SELECT o.id, o.created_at, o.status, o.total_amount, o.shipping_address,
                o.payment_method, 
                u.username, u.email,
                GROUP_CONCAT(p.name SEPARATOR ', ') as products,
@@ -50,11 +50,11 @@ if (!empty($search_query)) {
 }
 
 if (!empty($date_from)) {
-    $where_conditions[] = "DATE(o.order_date) >= '" . mysqli_real_escape_string($conn, $date_from) . "'";
+    $where_conditions[] = "DATE(o.created_at) >= '" . mysqli_real_escape_string($conn, $date_from) . "'";
 }
 
 if (!empty($date_to)) {
-    $where_conditions[] = "DATE(o.order_date) <= '" . mysqli_real_escape_string($conn, $date_to) . "'";
+    $where_conditions[] = "DATE(o.created_at) <= '" . mysqli_real_escape_string($conn, $date_to) . "'";
 }
 
 if (!empty($where_conditions)) {
@@ -65,8 +65,8 @@ if (!empty($where_conditions)) {
 $sql .= " GROUP BY o.id";
 
 // Add sorting
-$valid_sort_columns = ['order_date', 'total_amount', 'status', 'username'];
-$sort_by = in_array($sort_by, $valid_sort_columns) ? $sort_by : 'order_date';
+$valid_sort_columns = ['created_at', 'total_amount', 'status', 'username'];
+$sort_by = in_array($sort_by, $valid_sort_columns) ? $sort_by : 'created_at';
 $sort_order = $sort_order === 'ASC' ? 'ASC' : 'DESC';
 $sql .= " ORDER BY $sort_by $sort_order";
 
@@ -353,6 +353,13 @@ $paid_count = mysqli_fetch_assoc($paid_result)['count'];
         .btn-primary:hover {
             background-color: var(--primary-dark);
         }
+        
+        .current-date {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -360,6 +367,7 @@ $paid_count = mysqli_fetch_assoc($paid_result)['count'];
         <main class="main-content">
             <div class="page-header">
                 <h1>Advanced Orders Management</h1>
+                <div class="current-date" id="current-date">Current Date: </div>
                 <div class="header-actions">
                     <a href="index.php" class="btn btn-secondary">Back to Dashboard</a>
                     <button onclick="exportOrders()" class="btn btn-secondary">Export to CSV</button>
@@ -473,9 +481,9 @@ $paid_count = mysqli_fetch_assoc($paid_result)['count'];
                                 </a>
                             </th>
                             <th>
-                                <a href="?sort=order_date&order=<?php echo $sort_by == 'order_date' && $sort_order == 'ASC' ? 'DESC' : 'ASC'; ?>"
-                                   class="sort-link <?php echo $sort_by == 'order_date' ? 'active' . ($sort_order == 'ASC' ? ' asc' : '') : ''; ?>">
-                                    Date
+                                <a href="?sort=created_at&order=<?php echo $sort_by == 'created_at' && $sort_order == 'ASC' ? 'DESC' : 'ASC'; ?>"
+                                   class="sort-link <?php echo $sort_by == 'created_at' ? 'active' . ($sort_order == 'ASC' ? ' asc' : '') : ''; ?>">
+                                    Due Date
                                 </a>
                             </th>
                             <th>
@@ -505,7 +513,11 @@ $paid_count = mysqli_fetch_assoc($paid_result)['count'];
                                             <div class="text-muted"><?php echo htmlspecialchars($order['email']); ?></div>
                                         </div>
                                     </td>
-                                    <td><?php echo date('M d, Y', strtotime($order['order_date'])); ?></td>
+                                    <td><?php 
+                                        // Fix date display issue by ensuring valid timestamp
+                                        $order_date = !empty($order['created_at']) ? strtotime($order['created_at']) : 0;
+                                        echo ($order_date > 0) ? date('M d, Y', $order_date) : 'N/A'; 
+                                    ?></td>
                                     <td>₱<?php echo number_format($order['total_amount'], 2); ?></td>
                                     <td>
                                         <span class="status-badge <?php echo strtolower($order['status']); ?>">
@@ -541,7 +553,6 @@ $paid_count = mysqli_fetch_assoc($paid_result)['count'];
                                     <td>
                                         <div class="action-buttons">
                                             <button onclick="viewOrder(<?php echo $order['id']; ?>)" class="btn btn-sm btn-primary">View</button>
-                                            <button onclick="restoreOrder(<?php echo $order['id']; ?>)" class="btn btn-sm btn-primary">Restore</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -563,11 +574,16 @@ $paid_count = mysqli_fetch_assoc($paid_result)['count'];
             window.location.href = `view_order.php?id=${orderId}`;
         }
         
-        function restoreOrder(orderId) {
-            if (confirm('Are you sure you want to restore this order to pending status?')) {
-                window.location.href = `update_order_status.php?id=${orderId}&status=pending`;
-            }
+        // Update real-time date
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('current-date').innerHTML = 'Current Date: ' + now.toLocaleDateString('en-US', options);
         }
+        
+        // Initialize and update the date every second
+        updateCurrentDate();
+        setInterval(updateCurrentDate, 1000);
     </script>
 </body>
 </html> 

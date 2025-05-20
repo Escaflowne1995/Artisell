@@ -213,6 +213,41 @@ $stock = isset($product['stock']) ? (int)$product['stock'] : 0;
             cursor: pointer;
         }
         
+        /* Login Modal */
+        #loginModal .modal-dialog {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        #loginModal .modal-content {
+            background-color: white;
+            padding: var(--space-4);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+        
+        #loginModal .modal-header {
+            border-bottom: 1px solid var(--neutral-200);
+            padding-bottom: var(--space-3);
+            margin-bottom: var(--space-3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #loginModal .modal-header .close {
+            position: static;
+            color: var(--neutral-500);
+            font-size: 24px;
+        }
+        
+        #loginModal .modal-footer {
+            display: flex;
+            gap: var(--space-3);
+            margin-top: var(--space-4);
+        }
+        
         @media (max-width: 768px) {
             .product-layout {
                 grid-template-columns: 1fr;
@@ -324,8 +359,9 @@ $stock = isset($product['stock']) ? (int)$product['stock'] : 0;
                     <?php endif; ?>
                 </div>
                 
-                <form action="add_to_cart.php" method="POST">
+                <form <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>action="add_to_cart.php" method="POST"<?php else: ?>id="cart-form"<?php endif; ?>>
                     <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
+                    <input type="hidden" name="redirect" value="product-details.php?id=<?php echo $product_id; ?>">
                     
                     <div class="d-flex align-items-center mb-4">
                         <span class="quantity-label">Quantity:</span>
@@ -337,9 +373,21 @@ $stock = isset($product['stock']) ? (int)$product['stock'] : 0;
                     </div>
                     
                     <div class="action-buttons">
-                        <button type="submit" name="add_to_cart" class="btn btn-primary action-btn" <?php echo $stock <= 0 ? 'disabled' : ''; ?>>
-                            <i class="fas fa-cart-plus"></i> Add to Cart
-                        </button>
+                        <?php if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                            <button type="submit" name="add_to_cart" class="btn btn-primary action-btn" <?php echo $stock <= 0 ? 'disabled' : ''; ?>>
+                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            </button>
+                        <?php else: ?>
+                            <?php if ($stock > 0): ?>
+                                <button type="button" onclick="requireLogin()" class="btn btn-primary action-btn">
+                                    <i class="fas fa-cart-plus"></i> Add to Cart
+                                </button>
+                            <?php else: ?>
+                                <button type="button" class="btn btn-primary action-btn" disabled>
+                                    <i class="fas fa-cart-plus"></i> Out of Stock
+                                </button>
+                            <?php endif; ?>
+                        <?php endif; ?>
                         
                         <a href="shop.php" class="btn btn-outline action-btn">
                             <i class="fas fa-arrow-left"></i> Back to Shop
@@ -409,6 +457,25 @@ $stock = isset($product['stock']) ? (int)$product['stock'] : 0;
         </div>
     </main>
     
+    <!-- Login Required Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Login Required</h4>
+                    <span class="close" onclick="closeLoginModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>You need to be logged in to add items to your cart.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="login.php?redirect=product-details.php?id=<?php echo $product_id; ?>" class="btn btn-primary">Login Now</a>
+                    <a href="signup.php" class="btn btn-outline">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Image Modal -->
     <div id="imageModal" class="modal">
         <span class="close" onclick="closeModal()">&times;</span>
@@ -476,6 +543,24 @@ $stock = isset($product['stock']) ? (int)$product['stock'] : 0;
         
         function closeModal() {
             document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        // Login Modal functions
+        function requireLogin() {
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'flex';
+            
+            // Prepare the login link with product details
+            const productId = <?php echo $product_id; ?>;
+            const quantity = document.getElementById('quantity').value;
+            const loginLink = document.querySelector('#loginModal .modal-footer a.btn-primary');
+            
+            // Update login link to include product information
+            loginLink.href = `login.php?product_id=${productId}&quantity=${quantity}&redirect=product-details.php?id=${productId}`;
+        }
+        
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
         }
         
         // Quantity control
