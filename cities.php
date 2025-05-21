@@ -285,7 +285,7 @@ $defaultImageData = 'https://via.placeholder.com/400x300/f0f0f0/555555?text=' . 
                             <div class="city-info">
                                 <h3 class="city-name"><?php echo htmlspecialchars($city); ?></h3>
                                 <p class="city-description"><?php echo htmlspecialchars($description); ?></p>
-                                <a href="shop.php?city=<?php echo urlencode($city); ?>" class="city-button">Explore Artisan Products</a>
+                                <a href="shop.php?city=<?php echo urlencode($city); ?>" class="city-button">Explore Products Here</a>
                             </div>
                         </div>
                     <?php } ?>
