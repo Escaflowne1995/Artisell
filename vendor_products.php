@@ -126,7 +126,15 @@ if ($vendorId !== null) {
     $total_pages = ceil($total_products / $items_per_page);
 
     // Fetch products with pagination
-    $sql = "SELECT * FROM products WHERE vendor_id = ? ORDER BY id DESC LIMIT ? OFFSET ?";
+    $sql = "SELECT p.*, 
+            (SELECT COUNT(DISTINCT oi.order_id) 
+             FROM order_items oi 
+             JOIN orders o ON oi.order_id = o.id 
+             WHERE oi.product_id = p.id) as order_count
+            FROM products p 
+            WHERE p.vendor_id = ? 
+            ORDER BY p.id DESC 
+            LIMIT ? OFFSET ?";
     $stmt = mysqli_prepare($conn, $sql);
     mysqli_stmt_bind_param($stmt, "iii", $vendorId, $items_per_page, $offset);
     mysqli_stmt_execute($stmt);
@@ -138,6 +146,54 @@ if ($vendorId !== null) {
         }
     }
 }
+
+// Handle ajax request for product orders
+if (isset($_GET['fetch_orders']) && isset($_GET['product_id']) && is_numeric($_GET['product_id'])) {
+    // Reconnect to the database since we closed it earlier
+    require 'db_connection.php';
+    
+    $product_id = (int)$_GET['product_id'];
+    
+    // Verify that the product belongs to the vendor
+    $check_sql = "SELECT id FROM products WHERE id = ? AND vendor_id = ?";
+    $check_stmt = mysqli_prepare($conn, $check_sql);
+    mysqli_stmt_bind_param($check_stmt, "ii", $product_id, $vendorId);
+    mysqli_stmt_execute($check_stmt);
+    mysqli_stmt_store_result($check_stmt);
+    
+    if (mysqli_stmt_num_rows($check_stmt) == 0) {
+        // Product doesn't belong to this vendor
+        echo json_encode(['error' => 'Product not found or you don\'t have permission to view its orders']);
+        exit;
+    }
+    
+    // Fetch order information
+    $orders_sql = "SELECT o.id as order_id, o.created_at, o.status, oi.quantity, oi.price,
+                  u.username, u.email
+                  FROM order_items oi
+                  JOIN orders o ON oi.order_id = o.id
+                  JOIN users u ON o.user_id = u.id
+                  WHERE oi.product_id = ?
+                  ORDER BY o.created_at DESC";
+    
+    $orders_stmt = mysqli_prepare($conn, $orders_sql);
+    mysqli_stmt_bind_param($orders_stmt, "i", $product_id);
+    mysqli_stmt_execute($orders_stmt);
+    $orders_result = mysqli_stmt_get_result($orders_stmt);
+    
+    $orders = [];
+    while ($order = mysqli_fetch_assoc($orders_result)) {
+        $orders[] = $order;
+    }
+    
+    // Return JSON response
+    header('Content-Type: application/json');
+    echo json_encode(['orders' => $orders]);
+    
+    mysqli_close($conn);
+    exit;
+}
+
 mysqli_close($conn);
 ?>
 
@@ -267,13 +323,26 @@ mysqli_close($conn);
             background-color: #dc3545;
         }
         
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .order-count {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
         .action-buttons {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
         }
         
-        .edit-btn, .delete-btn {
+        .edit-btn, .delete-btn, .view-orders-btn {
             padding: 8px;
             border: none;
             border-radius: var(--radius-md);
@@ -306,21 +375,30 @@ mysqli_close($conn);
             background-color: var(--danger-dark);
         }
         
+        .view-orders-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .view-orders-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
         .alert {
             padding: 1rem;
-            margin-bottom: 1.5rem;
-            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            border-radius: 0.3rem;
         }
         
         .alert-success {
-            background-color: #d4edda;
             color: #155724;
+            background-color: #d4edda;
             border: 1px solid #c3e6cb;
         }
         
         .alert-danger {
-            background-color: #f8d7da;
             color: #721c24;
+            background-color: #f8d7da;
             border: 1px solid #f5c6cb;
         }
         
@@ -385,60 +463,112 @@ mysqli_close($conn);
             top: 0;
             width: 100%;
             height: 100%;
+            overflow: auto;
             background-color: rgba(0,0,0,0.5);
         }
         
         .modal-content {
-            background-color: #fff;
-            margin: 15% auto;
-            padding: 2rem;
-            width: 90%;
-            max-width: 450px;
-            border-radius: var(--radius-lg);
             position: relative;
-            box-shadow: var(--shadow-lg);
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .orders-modal-content {
+            width: 80%;
+            max-width: 900px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
         }
         
         .modal-title {
             margin-top: 0;
-            color: var(--neutral-800);
-            font-size: 1.5rem;
+            color: var(--primary);
         }
         
         .modal-actions {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-            margin-top: 1.5rem;
+            margin-top: 20px;
+        }
+        
+        .btn-cancel, .btn-confirm {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
         
         .btn-cancel {
-            background-color: var(--neutral-500);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .btn-cancel:hover {
-            background-color: var(--neutral-600);
+            background-color: #f8f9fa;
+            color: #212529;
         }
         
         .btn-confirm {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: background-color 0.3s;
+            background-color: #dc3545;
+            color: #fff;
         }
         
-        .btn-confirm:hover {
-            background-color: var(--danger-dark);
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+            color: var(--primary);
         }
+        
+        .error-message {
+            text-align: center;
+            padding: 20px;
+            color: var(--danger);
+        }
+        
+        .orders-container {
+            display: none;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .orders-table th, .orders-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .orders-table th {
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+        }
+        
+        .order-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .status-Pending { background: #fff4de; color: #ffa940; }
+        .status-Processing { background: #e6f7ff; color: #1890ff; }
+        .status-Shipped { background: #f6ffed; color: #52c41a; }
+        .status-Delivered { background: #d9f7be; color: #389e0d; }
+        .status-Cancelled { background: #fff1f0; color: #ff4d4f; }
+        .status-Returned { background: #f9f0ff; color: #722ed1; }
         
         @media (max-width: 768px) {
             .products-grid {
@@ -542,6 +672,16 @@ mysqli_close($conn);
                                     <span><?php echo htmlspecialchars($stockText); ?></span>
                                 </div>
                             </div>
+
+                            <div class="order-info">
+                                <div class="order-count">
+                                    <i class="fas fa-shopping-cart"></i> 
+                                    <?php 
+                                    $orderCount = isset($product['order_count']) ? (int)$product['order_count'] : 0;
+                                    echo $orderCount . ' ' . ($orderCount === 1 ? 'Order' : 'Orders'); 
+                                    ?>
+                                </div>
+                            </div>
                             
                             <div class="action-buttons">
                                 <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="edit-btn">
@@ -550,6 +690,11 @@ mysqli_close($conn);
                                 <button class="delete-btn" onclick="confirmDelete(<?php echo $product['id']; ?>, '<?php echo htmlspecialchars(addslashes($product['name'] ?? 'this product')); ?>')">
                                     <i class="fas fa-trash-alt"></i> Delete
                                 </button>
+                                <?php if ($orderCount > 0): ?>
+                                <button class="view-orders-btn" onclick="viewOrders(<?php echo $product['id']; ?>, '<?php echo htmlspecialchars(addslashes($product['name'] ?? 'Product')); ?>')">
+                                    <i class="fas fa-users"></i> View Orders
+                                </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -623,6 +768,45 @@ mysqli_close($conn);
         </div>
     </div>
     
+    <!-- Orders Modal -->
+    <div id="ordersModal" class="modal">
+        <div class="modal-content orders-modal-content">
+            <span class="close-modal" onclick="closeOrdersModal()">&times;</span>
+            <h3 class="modal-title">Customer Orders for <span id="productNameInModal"></span></h3>
+            
+            <div id="ordersLoading" class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Loading orders...
+            </div>
+            
+            <div id="ordersError" class="error-message" style="display: none;">
+                An error occurred while loading orders.
+            </div>
+            
+            <div id="ordersContainer" class="orders-container">
+                <table id="ordersTable" class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Email</th>
+                            <th>Date</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Order data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="noOrders" style="display: none;">
+                No orders found for this product.
+            </div>
+        </div>
+    </div>
+    
     <footer>
         <div class="container">
             <div class="footer-content">
@@ -639,7 +823,7 @@ mysqli_close($conn);
     
     <script>
         // Delete confirmation modal
-        const modal = document.getElementById('deleteModal');
+        const deleteModal = document.getElementById('deleteModal');
         const deleteForm = document.getElementById('deleteForm');
         const deleteProductId = document.getElementById('deleteProductId');
         const deleteConfirmText = document.getElementById('deleteConfirmText');
@@ -647,17 +831,101 @@ mysqli_close($conn);
         function confirmDelete(productId, productName) {
             deleteProductId.value = productId;
             deleteConfirmText.textContent = `Are you sure you want to delete "${productName}"?`;
-            modal.style.display = 'block';
+            deleteModal.style.display = 'block';
         }
         
         function closeModal() {
-            modal.style.display = 'none';
+            deleteModal.style.display = 'none';
+        }
+        
+        // Orders modal functionality
+        const ordersModal = document.getElementById('ordersModal');
+        const productNameInModal = document.getElementById('productNameInModal');
+        const ordersLoading = document.getElementById('ordersLoading');
+        const ordersError = document.getElementById('ordersError');
+        const ordersContainer = document.getElementById('ordersContainer');
+        const ordersTableBody = document.getElementById('ordersTableBody');
+        const noOrders = document.getElementById('noOrders');
+        
+        function viewOrders(productId, productName) {
+            // Set product name in modal
+            productNameInModal.textContent = productName;
+            
+            // Reset modal state
+            ordersLoading.style.display = 'block';
+            ordersError.style.display = 'none';
+            ordersContainer.style.display = 'none';
+            noOrders.style.display = 'none';
+            ordersTableBody.innerHTML = '';
+            
+            // Show modal
+            ordersModal.style.display = 'block';
+            
+            // Fetch orders data
+            fetch(`vendor_products.php?fetch_orders=1&product_id=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    ordersLoading.style.display = 'none';
+                    
+                    if (data.error) {
+                        ordersError.textContent = data.error;
+                        ordersError.style.display = 'block';
+                        return;
+                    }
+                    
+                    const orders = data.orders || [];
+                    
+                    if (orders.length === 0) {
+                        noOrders.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Populate orders table
+                    orders.forEach(order => {
+                        const row = document.createElement('tr');
+                        
+                        // Format date
+                        const orderDate = new Date(order.created_at);
+                        const formattedDate = orderDate.toLocaleDateString('en-US', {
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric'
+                        });
+                        
+                        row.innerHTML = `
+                            <td><a href="view_order.php?id=${order.order_id}">#${order.order_id}</a></td>
+                            <td>${order.username}</td>
+                            <td>${order.email}</td>
+                            <td>${formattedDate}</td>
+                            <td>${order.quantity}</td>
+                            <td>₱${parseFloat(order.price).toFixed(2)}</td>
+                            <td><span class="order-status status-${order.status}">${order.status}</span></td>
+                        `;
+                        
+                        ordersTableBody.appendChild(row);
+                    });
+                    
+                    ordersContainer.style.display = 'block';
+                })
+                .catch(error => {
+                    ordersLoading.style.display = 'none';
+                    ordersError.textContent = 'An error occurred while fetching order data.';
+                    ordersError.style.display = 'block';
+                    console.error('Error:', error);
+                });
+        }
+        
+        function closeOrdersModal() {
+            ordersModal.style.display = 'none';
         }
         
         // Close modal when clicking outside the content
         window.onclick = function(event) {
-            if (event.target === modal) {
+            if (event.target === deleteModal) {
                 closeModal();
+            }
+            if (event.target === ordersModal) {
+                closeOrdersModal();
             }
         }
     </script>

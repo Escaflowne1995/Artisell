@@ -137,7 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_status'])) {
 }
 
 // Get orders - if vendor, only show their orders
-$sql = "SELECT o.*, u.username 
+$sql = "SELECT o.*, u.username, u.email 
         FROM orders o 
         JOIN users u ON o.user_id = u.id ";
 
@@ -165,6 +165,27 @@ while ($row = mysqli_fetch_assoc($result)) {
     $orders[] = $row;
 }
 mysqli_stmt_close($stmt);
+
+// For vendors, get details about which of their products were purchased in each order
+$order_products = [];
+if ($_SESSION["role"] === 'vendor') {
+    foreach ($orders as $order) {
+        $products_sql = "SELECT oi.*, p.name as product_name, p.image
+                        FROM order_items oi 
+                        JOIN products p ON oi.product_id = p.id 
+                        WHERE oi.order_id = ? AND p.vendor_id = ?";
+        $products_stmt = mysqli_prepare($conn, $products_sql);
+        mysqli_stmt_bind_param($products_stmt, "ii", $order['id'], $_SESSION['id']);
+        mysqli_stmt_execute($products_stmt);
+        $products_result = mysqli_stmt_get_result($products_stmt);
+        
+        $order_products[$order['id']] = [];
+        while ($product = mysqli_fetch_assoc($products_result)) {
+            $order_products[$order['id']][] = $product;
+        }
+        mysqli_stmt_close($products_stmt);
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -332,6 +353,49 @@ mysqli_stmt_close($stmt);
                 font-size: var(--font-size-sm);
             }
         }
+        
+        /* Product display in order table */
+        .product-mini {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--space-2);
+        }
+        
+        .product-thumbnail {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            margin-right: var(--space-2);
+        }
+        
+        .quantity {
+            color: var(--neutral-600);
+            font-weight: 500;
+            margin-left: var(--space-1);
+        }
+        
+        .more-items {
+            font-size: var(--font-size-sm);
+            color: var(--primary-600);
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        /* Vendor specific styles */
+        .vendor-order-info {
+            margin-top: var(--space-4);
+            background: var(--neutral-100);
+            border-radius: var(--radius-md);
+            padding: var(--space-3);
+        }
+        
+        .vendor-order-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-3);
+            color: var(--primary-700);
+        }
     </style>
 </head>
 <body>
@@ -348,6 +412,13 @@ mysqli_stmt_close($stmt);
             <div class="message error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
         
+        <?php if($_SESSION["role"] === 'vendor'): ?>
+        <div class="vendor-order-info">
+            <h2 class="vendor-order-title">Your Product Orders</h2>
+            <p>Below is a list of all orders that include your products. You can see customer details and which of your products were purchased. Click "View Details" to see the complete order information.</p>
+        </div>
+        <?php endif; ?>
+        
         <div class="orders-container">
             <?php if (!empty($orders)): ?>
                 <table>
@@ -355,6 +426,10 @@ mysqli_stmt_close($stmt);
                         <tr>
                             <th>Order ID</th>
                             <th>Customer</th>
+                            <?php if($_SESSION["role"] === 'vendor'): ?>
+                            <th>Contact</th>
+                            <th>Products Ordered</th>
+                            <?php endif; ?>
                             <th>Date</th>
                             <th>Total</th>
                             <th>Status</th>
@@ -365,7 +440,38 @@ mysqli_stmt_close($stmt);
                         <?php foreach ($orders as $order): ?>
                             <tr>
                                 <td>#<?php echo htmlspecialchars($order['id']); ?></td>
-                                <td><?php echo htmlspecialchars($order['username']); ?></td>
+                                <td>
+                                    <?php if($_SESSION["role"] === 'vendor'): ?>
+                                        <strong><?php echo htmlspecialchars($order['username']); ?></strong>
+                                    <?php else: ?>
+                                        <?php echo htmlspecialchars($order['username']); ?>
+                                    <?php endif; ?>
+                                </td>
+                                <?php if($_SESSION["role"] === 'vendor'): ?>
+                                <td>
+                                    <i class="fas fa-envelope"></i> <?php echo htmlspecialchars($order['email']); ?>
+                                </td>
+                                <td>
+                                    <?php if(!empty($order_products[$order['id']])): ?>
+                                        <?php foreach ($order_products[$order['id']] as $index => $product): ?>
+                                            <?php if($index < 2): ?>
+                                                <div class="product-mini">
+                                                    <?php if(!empty($product['image'])): ?>
+                                                        <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>" class="product-thumbnail">
+                                                    <?php endif; ?>
+                                                    <?php echo htmlspecialchars($product['product_name']); ?> 
+                                                    <span class="quantity">×<?php echo $product['quantity']; ?></span>
+                                                </div>
+                                            <?php elseif($index == 2): ?>
+                                                <div class="more-items">+<?php echo (count($order_products[$order['id']]) - 2); ?> more</div>
+                                                <?php break; ?>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <em>No products found</em>
+                                    <?php endif; ?>
+                                </td>
+                                <?php endif; ?>
                                 <td><?php echo htmlspecialchars(date('M d, Y', strtotime($order['created_at']))); ?></td>
                                 <td>₱<?php echo number_format($order['total'], 2); ?></td>
                                 <td><span class="status status-<?php echo htmlspecialchars($order['status']); ?>"><?php echo htmlspecialchars($order['status']); ?></span></td>
