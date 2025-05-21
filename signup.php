@@ -153,21 +153,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <!-- Footer -->
         <?php include 'components/footer.php'; ?>
     </div>
-
-    <!-- JavaScript for password visibility toggle -->
-    <script>
-        function showPassword(inputId) {
-            const passwordInput = document.getElementById(inputId);
-            const button = passwordInput.nextElementSibling;
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                button.textContent = 'Hide';
-            } else {
-                passwordInput.type = 'password';
-                button.textContent = 'Show';
-            }
-        }
-    </script>
 </body>
 </html>

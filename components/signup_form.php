@@ -269,23 +269,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add click handlers after DOM is loaded
-    document.querySelectorAll('.show-password').forEach(function(button) {
-        button.addEventListener('click', function() {
-            var input = this.previousElementSibling;
-            if (input.type === 'password') {
-                input.type = 'text';
-                this.textContent = 'Hide';
-            } else {
-                input.type = 'password';
-                this.textContent = 'Show';
-            }
-        });
-    });
-});
-
-// Backup onclick handler
 function showPassword(inputId) {
     var input = document.getElementById(inputId);
     var button = input.nextElementSibling;
