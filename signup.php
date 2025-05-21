@@ -41,8 +41,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate password
     if (empty(trim($_POST["password"]))) {
         $passwordError = "Please enter your password.";
-    } elseif (strlen(trim($_POST["password"])) < 6) {
-        $passwordError = "Password must be at least 6 characters.";
     } else {
         $password = trim($_POST["password"]);
     }
@@ -158,14 +156,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <!-- JavaScript for password visibility toggle -->
     <script>
-        document.querySelectorAll('.show-password').forEach(button => {
-            button.addEventListener('click', function () {
-                const passwordInput = this.previousElementSibling;
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                // Optionally toggle the eye icon here if you have different icons for show/hide
-            });
-        });
+        function showPassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const button = passwordInput.nextElementSibling;
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                button.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                button.textContent = 'Show';
+            }
+        }
     </script>
 </body>
 </html>

@@ -57,13 +57,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
         }
     }
     
-    // Validate password
+    // Validate password only on form submission
     if (empty(trim($_POST["password"]))) {
         $passwordError = "Please enter a password.";
-    } elseif (strlen(trim($_POST["password"])) < 6) {
-        $passwordError = "Password must have at least 6 characters.";
     } else {
         $password = trim($_POST["password"]);
+        $errors = array();
+        
+        // Enhanced debug logging for password validation
+        error_log("Password validation started");
+        error_log("Raw password length: " . strlen($_POST["password"]));
+        error_log("Trimmed password length: " . strlen($password));
+        
+        // Check password length (8-12 characters)
+        $passwordLength = strlen($password);
+        error_log("Final password length for validation: " . $passwordLength);
+        
+        if ($passwordLength < 8 || $passwordLength > 12) {
+            error_log("Password length validation failed. Length: " . $passwordLength);
+            $errors[] = "Password must be between 8 and 12 characters";
+        } else {
+            error_log("Password length validation passed");
+        }
+        
+        // Check for at least one capital letter
+        if (!preg_match('/[A-Z]/', $password)) {
+            error_log("Capital letter validation failed");
+            $errors[] = "Password must contain at least one capital letter";
+        }
+        
+        // Check for at least one number
+        if (!preg_match('/[0-9]/', $password)) {
+            error_log("Number validation failed");
+            $errors[] = "Password must contain at least one number";
+        }
+        
+        // Check for at least one special character
+        if (!preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
+            error_log("Special character validation failed");
+            $errors[] = "Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>)";
+        }
+        
+        if (!empty($errors)) {
+            error_log("Password validation failed with errors: " . implode(", ", $errors));
+            $passwordError = implode("<br>", $errors);
+        } else {
+            error_log("Password validation passed all checks");
+        }
     }
     
     // Validate confirm password
@@ -129,26 +169,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
             <label for="password" class="form-label">Password</label>
             <div class="password-input">
                 <input id="password" name="password" type="password" class="form-input" placeholder="••••••••" required>
-                <button type="button" class="show-password">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
-                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-                    </svg>
-                </button>
+                <button type="button" class="show-password" onclick="showPassword('password')">Show</button>
             </div>
-            <span class="error"><?php echo $passwordError; ?></span>
+            <?php if (!empty($passwordError)): ?>
+                <span class="error"><?php echo $passwordError; ?></span>
+            <?php endif; ?>
         </div>
 
         <div class="form-group">
             <label for="confirm_password" class="form-label">Confirm Password</label>
             <div class="password-input">
                 <input id="confirm_password" name="confirm_password" type="password" class="form-input" placeholder="••••••••" required>
-                <button type="button" class="show-password">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
-                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-                    </svg>
-                </button>
+                <button type="button" class="show-password" onclick="showPassword('confirm_password')">Show</button>
             </div>
-            <span class="error"><?php echo $confirmPasswordError; ?></span>
+            <?php if (!empty($confirmPasswordError)): ?>
+                <span class="error"><?php echo $confirmPasswordError; ?></span>
+            <?php endif; ?>
         </div>
 
         <div class="form-group">
@@ -192,20 +228,74 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
     <p class="login-link">Already have an account? <a href="login.php">Sign in</a></p>
 </div>
 
+<style>
+    .error {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .password-input {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .show-password {
+        position: absolute;
+        right: 10px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px 10px;
+        color: #666;
+        z-index: 1;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 8px 35px 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #FF6B17;
+        box-shadow: 0 0 0 2px rgba(255, 107, 23, 0.2);
+    }
+</style>
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers after DOM is loaded
     document.querySelectorAll('.show-password').forEach(function(button) {
         button.addEventListener('click', function() {
-            const passwordInput = this.parentElement.querySelector('input');
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            
-            // Toggle the eye icon
-            const eyeIcon = this.querySelector('svg');
-            if (type === 'password') {
-                eyeIcon.innerHTML = '<path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>';
+            var input = this.previousElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.textContent = 'Hide';
             } else {
-                eyeIcon.innerHTML = '<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"/><path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/>';
+                input.type = 'password';
+                this.textContent = 'Show';
             }
         });
     });
+});
+
+// Backup onclick handler
+function showPassword(inputId) {
+    var input = document.getElementById(inputId);
+    var button = input.nextElementSibling;
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        button.textContent = 'Hide';
+    } else {
+        input.type = 'password';
+        button.textContent = 'Show';
+    }
+}
 </script> 
