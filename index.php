@@ -34,7 +34,7 @@ session_start(); // Start the session to access session variables
         .hero h1 {
             font-size: var(--font-size-4xl);
             margin-bottom: var(--space-4);
-            color: white;
+            color: var(--neutral-900);
         }
         
         .hero p {

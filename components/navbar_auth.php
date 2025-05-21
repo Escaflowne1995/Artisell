@@ -33,9 +33,9 @@ if (session_status() === PHP_SESSION_NONE) {
         font-weight: 700;
     }
     
-    .auth-header {
+    /* .auth-header {
         padding: 10px 0;
-    }
+    } */
     
     .auth-header .header-inner {
         justify-content: space-between;

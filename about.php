@@ -67,7 +67,7 @@ session_start();
         
         /* Hero Section */
         .about-hero {
-            background: #6E6E6E;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/cebu-panorama.jpg');
             color: white;
             text-align: center;
             padding: 100px 0;

@@ -119,7 +119,7 @@ $defaultImageData = 'https://via.placeholder.com/400x300/f0f0f0/555555?text=' . 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         .hero-cities {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('images/cebu-panorama.jpg');
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/cebu-panorama.jpg');
             background-size: cover;
             background-position: center;
             color: white;
@@ -131,7 +131,7 @@ $defaultImageData = 'https://via.placeholder.com/400x300/f0f0f0/555555?text=' . 
         .hero-title {
             font-size: var(--font-size-4xl);
             margin-bottom: var(--space-4);
-            color: white;
+            color: var(--neutral-900);
         }
         
         .search-container {
