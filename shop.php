@@ -113,6 +113,24 @@ foreach ($paginated_products as $key => $product) {
         
         mysqli_stmt_close($update_stmt);
     }
+    
+    // Add prices to products with empty or zero prices
+    if (!isset($product['price']) || $product['price'] <= 0) {
+        // Set a random price between 100-2000 pesos
+        $default_price = rand(100, 2000);
+        
+        // Update in the database
+        $update_price_sql = "UPDATE products SET price = ? WHERE id = ?";
+        $update_price_stmt = mysqli_prepare($conn, $update_price_sql);
+        mysqli_stmt_bind_param($update_price_stmt, "di", $default_price, $product['id']);
+        
+        if (mysqli_stmt_execute($update_price_stmt)) {
+            // Update in the current array
+            $paginated_products[$key]['price'] = $default_price;
+        }
+        
+        mysqli_stmt_close($update_price_stmt);
+    }
 }
 
 ?>
